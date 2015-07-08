@@ -25,9 +25,11 @@ class nbNet(nbNetBase):
 
     def accept2read(self, fd):
         '''获取socket，并使socket转换为read状态'''
-        conn = self.accept(fd)
-        if not conn == "retry":
-            self.setFd(conn)
+        conn_addr = self.accept(fd)
+        if not conn_addr == "retry":
+            conn = conn_addr[0]
+            addr = conn_addr[1]
+            self.setFd(conn, addr)
             self.epoll_sock.register(conn.fileno(), select.EPOLLIN)
             logs.dblog("***chang socket fd(%s) state to read***" % conn.fileno())
             self.conn_state[conn.fileno()].state = "read"
@@ -67,7 +69,8 @@ class nbNet(nbNetBase):
         elif write_ret == "writecomplete":
             sock_state = self.conn_state[fd]
             conn = sock_state.sock_obj
-            self.setFd(conn)
+            addr = sock_state.sock_addr
+            self.setFd(conn, addr)
             logs.dblog("***chang socket fd(%s) state to read***" % fd)
             self.conn_state[fd].state = "read"
             self.epoll_sock.modify(fd, select.EPOLLIN)

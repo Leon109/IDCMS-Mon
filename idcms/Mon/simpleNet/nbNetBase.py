@@ -53,7 +53,8 @@ class STATE(object):
         self.have_write = 0
         self.buff_read = ""
         self.buff_write = ""
-        self.seck_obj = ""
+        self.sock_obj = ""
+        self.sock_addr = ""
 
     def state_log(self):
         '''dbug显示每个f状态'''
@@ -63,11 +64,13 @@ class STATE(object):
                 '\n need_read:{need_read} \n need_write:{need_write}'
                 '\n have_read:{have_read}\n have_write:{have_write}'
                 '\n buff_read:{buff_read} \n buff_write:{buff_write}'
+                '\n sock_obj:{sock_obj} \n sock_addr:{sock_addr}'
             ) .format(
                 fd = self.sock_obj.fileno(), state = self.state,
                 need_read = self.need_read, need_write = self.need_write,
                 have_read = self.have_read, have_write = self.have_write,
                 buff_read = self.buff_read, buff_write = self.buff_write,
+                sock_obj = self.sock_obj, sock_addr = self.sock_addr
             )
             logs.dblog(msg)
 
@@ -93,7 +96,7 @@ class nbNetBase(object):
         self.epoll_sock.register(sock.fileno(), select.EPOLLIN)
         self.logic = logic
 
-    def setFd(self, sock):
+    def setFd(self, sock, addr=None):
         '''创建状态机初始化状态
         STATE() 是初始状态,具体参考STATE类
         conn_state 是一个自定义的字典，用于存取每个fd的状态
@@ -101,6 +104,7 @@ class nbNetBase(object):
         logs.dblog("setFD: crete init state")
         tmp_state = STATE()
         tmp_state.sock_obj = sock
+        tmp_state.sock_addr = addr
         self.conn_state[sock.fileno()] = tmp_state
         self.conn_state[sock.fileno()].state_log()
 
@@ -126,7 +130,7 @@ class nbNetBase(object):
             conn, addr = sock.accept()
             conn.setblocking(0)
             logs.dblog("accept: find new socket client fd(%s)" % conn.fileno())
-            return conn
+            return conn,addr[0]
         except socket.error as msg:
             if msg.errno in (11, 103):
                 return "retry"
