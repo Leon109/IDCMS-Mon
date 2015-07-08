@@ -8,7 +8,6 @@ from .forms import LoginForm
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        print  form.username.data
         flash('Looks like you have changed your name!')
         return render_template('auth/loading.html', form=form)
     return render_template('auth/loading.html', form=form)
