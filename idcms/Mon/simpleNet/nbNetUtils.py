@@ -9,7 +9,7 @@ def sendData(host, port, data, sock_l, single_host_retry=3):
     data  数据
     sock_l sock使用列表方式传入，这样的好处是可以判断socket是否为空
     而且加入sock使用列表传入经过函数处理后列表也会发生变化，不会是原来的状态
-    python 对简单的数据类型是用的引用，对高级的数据类型使的复制
+    python 字符串，数字和元组时不可变变量，字典和列表是可变变量
     In [5]: a = 1
     In [6]: def s(l):
     ...:     l +=1
@@ -55,7 +55,7 @@ def sendData_mh(host_l, data, sock_l, single_host_retry=3):
     sock_l = [some_socket] 
     sock_l sock使用列表方式传入，这样的好处是可以判断socket是否为空
     而且加入sock使用列表传入经过函数处理后列表也会发生变化，不会是原来的状态
-    python 对简单的数据类型是用的引用，对高级的数据类型使的复制,通过这一状态
+    python 字符串，数字和元组时不可变变量，字典和列表是可变变量,通过这一状态
     这样就能保证我门下次传入的socket还是跟上次一样的同一socket(以便保持常链接)
     (我们传入一个sock_l=[None],这个函数处理创建的socket就会在sock_l里面保留下来)
     In [5]: a = 1

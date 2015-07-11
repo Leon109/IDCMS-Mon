@@ -1,0 +1,18 @@
+# 监控文件判断过滤
+
+# 发送报警邮箱设置
+[sendmail]
+addr=
+users=
+password=
+
+# 接受报警邮箱地址
+[recvmail]
+addr= 
+
+# 报警触发值(这里的第一个=号是赋值的意思)
+# 举例说明
+# MemUsage=>1
+# 表示的是 MemUsage > 1 时发送报警
+[host_alarm]
+MemUsage=>1160
