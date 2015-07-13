@@ -87,6 +87,8 @@ class nbNet(nbNetBase):
             self.setFd(conn, addr)
             logs.dblog("***chang socket fd(%s) state to read***" % fd)
             self.conn_state[fd].state = "read"
+            # 在改为read状态后加入一个时间戳监控执行时间
+            self.conn_state[fd].read_stime = time.time()
             self.epoll_sock.modify(fd, select.EPOLLIN)
 
         elif write_ret == "closing":
@@ -110,4 +112,31 @@ if __name__ == "__main__":
     '''单进程启动'''
     sock = bind_socket("0.0.0.0", 9000)
     reverseD = nbNet(sock, logic)
-    reverseD.run()
+
+    import threading
+    class controlThread (threading.Thread):
+        '''使用多线程，一个线程运行nbnet，另一个监控fd状态是否超时'''
+        def __init__(self, name):
+            threading.Thread.__init__(self)
+            self.name = name
+        
+        def run(self):
+            if self.name == 'ctl_start':
+                self.ctl_start()
+            elif self.name == 'check':
+                self.check()
+
+        def ctl_start(self):
+            reverseD.run()
+    
+        def check(self):
+            reverseD.check_fd()
+
+    def startTh():
+        ctl = controlThread('ctl_start')
+        ctl.start()
+        check_fd = controlThread('check')
+        check_fd.start()
+        ctl.join()
+        check_fd.join()
+    startTh()

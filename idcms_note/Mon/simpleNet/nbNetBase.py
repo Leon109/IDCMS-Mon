@@ -65,6 +65,11 @@ class STATE(object):
         self.sock_obj = ""
         # 客户端连接IP 
         self.sock_addr = ""
+        # 以下使用check_fd时才有效
+        # 读取开始时间 
+        self.read_stime= None
+        # 默认read等待最大超时时间
+        self.read_itime= 30
 
     def state_log(self):
         '''dbug显示每个f状态'''
@@ -314,7 +319,7 @@ class nbNetBase(object):
 
     def run(self):
         '''运行程序
-          监听epoll是否有新链接过来
+        监听epoll是否有新连接过来
         '''
         while True:
             # epoll对象哪些套接字在最近一次查询后又有新的需要注册的事件到来，然后根据状态及状态进行执行
@@ -333,11 +338,21 @@ class nbNetBase(object):
                 self.state_machine(fd)
     
     def check_fd(self):
+        '''检查fd超时
+        如果read 指定时间呢没有读取到数据择关闭连接
+        '''
         while True:
-            for fd in self.conn_state:
-                task = self.conn_state[fd]
-                print task.state
-            time.sleep(1)
+            for fd in self.conn_state.keys():
+                sock_state = self.conn_state[fd]
+                # fd是read状态并且 read_time 是真的
+                # 判断该fd的epoll收到数据的等待时间是否超过间隔时间
+                if sock_state.state == "read" and sock_state.read_stime \
+                    and (time.time() - sock_state.read_stime) >= sock_state.read_itime:
+                    # 超过定时器时间关闭该fd
+                    sock_state.state = "closing"
+                    self.state_machine(fd)
+            # 超时检查时间
+            time.sleep(60)
 
 def fork_processes(num_processes, max_restarts=100):
     '''多进程启动

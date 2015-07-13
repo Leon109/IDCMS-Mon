@@ -105,7 +105,7 @@ if __name__ == "__main__":
     reverseD = nbNet(sock, logic)
     reverseD.run()
     '''
-
+    
     '''单进程启动'''
     sock = bind_socket("0.0.0.0", 9000)
     reverseD = nbNet(sock, logic)
