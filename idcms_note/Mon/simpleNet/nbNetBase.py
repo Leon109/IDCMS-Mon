@@ -8,6 +8,7 @@
 """
 import os
 import sys
+import time
 import errno
 import socket
 import select
@@ -330,6 +331,13 @@ class nbNetBase(object):
                     sock_state.state = "closing"
                 logs.dblog("epoll: use state_machine process fd(%s)" % fd)
                 self.state_machine(fd)
+    
+    def check_fd(self):
+        while True:
+            for fd in self.conn_state:
+                task = self.conn_state[fd]
+                print task.state
+            time.sleep(1)
 
 def fork_processes(num_processes, max_restarts=100):
     '''多进程启动
@@ -401,5 +409,3 @@ def fork_processes(num_processes, max_restarts=100):
             return new_id
     # 如果没有正常启动进程，子进程字典为空则退出进程
     sys.exit(0)
-
-
