@@ -20,7 +20,7 @@ passwd=
 # 日志名称
 logname=nbnet
 # Debug 开关
-debug=True
+debug=False
 # 日志是否打印到前台
 print=False
 # 日志保存分数
