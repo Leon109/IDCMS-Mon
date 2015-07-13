@@ -11,7 +11,9 @@ s.connect((HOST, PORT))
 
 cmd = sys.argv[1]
 data = "%010d%s"%(len(cmd), cmd)
-s.send(data * CNT)
+for i in xrange(CNT):
+    s.send(data)
+    time.sleep(50)
 
 for i in xrange(CNT):
     buf = s.recv(len(data))

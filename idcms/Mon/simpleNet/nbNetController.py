@@ -63,7 +63,7 @@ class nbNet(nbNetBase):
             write_ret = self.write(fd)
         except socket.error, msg:
             write_ret = "closing"
-
+        
         if write_ret == "writemore":
             pass
         elif write_ret == "writecomplete":
@@ -73,7 +73,9 @@ class nbNet(nbNetBase):
             self.setFd(conn, addr)
             logs.dblog("***chang socket fd(%s) state to read***" % fd)
             self.conn_state[fd].state = "read"
+            self.conn_state[fd].read_stime = time.time()
             self.epoll_sock.modify(fd, select.EPOLLIN)
+
         elif write_ret == "closing":
             self.conn_state[fd].state = 'closing'
             self.state_machine(fd)
@@ -91,8 +93,35 @@ if __name__ == "__main__":
     reverseD = nbNet(sock, logic)
     reverseD.run()
     '''
-    
+
     '''单进程启动'''
     sock = bind_socket("0.0.0.0", 9000)
     reverseD = nbNet(sock, logic)
-    reverseD.run()
+
+    import threading
+    class controlThread (threading.Thread):
+        '''使用多线程，一个线程运行nbnet，另一个监控fd状态是否超时'''
+        def __init__(self, name):
+            threading.Thread.__init__(self)
+            self.name = name
+        
+        def run(self):
+            if self.name == 'ctl_start':
+                self.ctl_start()
+            elif self.name == 'check':
+                self.check()
+
+        def ctl_start(self):
+            reverseD.run()
+    
+        def check(self):
+            reverseD.check_fd()
+
+    def startTh():
+        ctl = controlThread('ctl_start')
+        ctl.start()
+        check_fd = controlThread('check')
+        check_fd.start()
+        ctl.join()
+        check_fd.join()
+    startTh()

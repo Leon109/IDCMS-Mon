@@ -7,6 +7,7 @@
 """
 import os
 import sys
+import time
 import errno
 import socket
 import select
@@ -55,6 +56,8 @@ class STATE(object):
         self.buff_write = ""
         self.sock_obj = ""
         self.sock_addr = ""
+        self.read_stime= None
+        self.read_itime= 30
 
     def state_log(self):
         '''dbug显示每个f状态'''
@@ -229,7 +232,7 @@ class nbNetBase(object):
 
     def run(self):
         '''运行程序
-          监听epoll是否有新链接过来
+        监听epoll是否有新连接过来
         '''
         while True:
             epoll_list = self.epoll_sock.poll()
@@ -242,6 +245,19 @@ class nbNetBase(object):
                     sock_state.state = "closing"
                 logs.dblog("epoll: use state_machine process fd(%s)" % fd)
                 self.state_machine(fd)
+    
+    def check_fd(self):
+        '''检查fd超时
+        如果read 指定时间呢没有读取到数据择关闭连接
+        '''
+        while True:
+            for fd in self.conn_state.keys():
+                sock_state = self.conn_state[fd]
+                if sock_state.state == "read" and sock_state.read_stime \
+                    and (time.time() - sock_state.read_stime) >= sock_state.read_itime:
+                    sock_state.state = "closing"
+                    self.state_machine(fd)
+            time.sleep(60)
 
 def fork_processes(num_processes, max_restarts=100):
     '''多进程启动
@@ -290,5 +306,3 @@ def fork_processes(num_processes, max_restarts=100):
         if new_id is not None:
             return new_id
     sys.exit(0)
-
-

@@ -1,8 +1,7 @@
 #coding=utf-8
 from flask import render_template, redirect, request, url_for, flash
-from flask.ext.login import login_required
+from flask.ext.login import login_required, current_user
 from . import cmdb
-
 
 @cmdb.route('/', methods=['GET'])
 @login_required
@@ -12,5 +11,5 @@ def index():
 @cmdb.route('/cmdb', methods=['GET', 'POST'])
 @login_required
 def cmdb():
-    return "cmdb"
-
+    uname =  current_user.username
+    return render_template('cmdb/cmdb.html', uname=uname)
