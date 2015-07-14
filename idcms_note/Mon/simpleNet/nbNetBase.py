@@ -31,9 +31,10 @@ debug = logconf['debug']
 
 class DebugLog():
     '''debug日志模块会显示运行的文件和行数'''
-    def __init__(self, file_path):
+    def __init__(self, file_path, debug=True):
         self.file_path = file_path
-    
+        self.debug = debug
+
     def get_linenumber(self):
         '''获取函数运行在一行'''
         cf = currentframe()
@@ -41,12 +42,14 @@ class DebugLog():
 
     def dblog(self, msg):
         '''根据debug开关纪录日志'''
-        msg = self.get_linenumber() + msg 
-        logger.debug(msg)
+        if self.debug:
+            msg = self.get_linenumber() + msg 
+            logger.debug(msg)
 
 if debug == "True":
     logs = DebugLog(__file__)
-
+else:
+    logs = DebugLog(__file__, debug=False)
 
 class STATE(object):
     """状态机状态"""
@@ -308,7 +311,6 @@ class nbNetBase(object):
         '''关闭连接
         '''
         logs.dblog("close: close fd(%s)" % fd)
-        self.epoll_sock.unregister(fd)
         # 关闭sock
         sock = self.conn_state[fd].sock_obj
         sock.close()
