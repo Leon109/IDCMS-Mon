@@ -1,72 +1,42 @@
-#!/usr/bin/python
-import Queue
-import threading
-import time
-import json
-import urllib2
+#!/usr/bin/env python
+#coding=utf-8
+
 import socket
-import commands
-import pdb
-from moniItems import mon
+import threading
+from agent_utils import Command
 
-import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from simpleNet.nbNetFramework import sendData_mh
+def ctl_agent(addr, port, sock_l):
+    recv_timeout = 60
+    
+    def send_data(sock, data):
+        sock.sendall("%010d%s"%(len(data), data))
 
-trans_l = ['localhost:50000']
-
-class porterThread (threading.Thread):
-    def __init__(self, name, q, ql=None, interval=None):
-        threading.Thread.__init__(self)
-        self.name = name
-        self.q = q
-        #self.queueLock = ql
-        self.interval = interval
-        self.sock_l = [None]
-
-    def run(self):
-        #print "Starting %s"  % self.name
-        if self.name == 'collect':
-            self.put_data()
-        elif self.name == 'sendjson':
-            self.get_data()
-
-    def put_data(self):
-        m = mon()
-        atime=int(time.time())
-        while 1:
-            data = m.runAllGet()
-            #print data 
-            #self.queueLock.acquire()
-            self.q.put(data)
-            #self.queueLock.release()
-            btime=int(time.time())
-            #print '%s  %s' % (str(data), self.interval-((btime-atime)%30))
-            time.sleep(self.interval-((btime-atime)%self.interval))
+    while True:
+        try:
+            if socl_l[0] == None:
+                sock_l[0] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock_l[0].settimeout(5)
+                sock_l[0].connect((host, port))
+                sock_l[0].settimeout(None)
             
-    def get_data(self):
-        while 1:
-            print "get"
-            #self.queueLock.acquire()
-            if not self.q.empty():
-                data = self.q.get()
-                print data
-                #pdb.set_trace()
-                sendData_mh(self.sock_l, trans_l, json.dumps(data))
-            #self.queueLock.release()
-            time.sleep(self.interval)
+            check_recv = threading.Timer(recv_timeout, send_data(sock_l[0], "ping"))   
+            sock_l[0].settimeout(recv_timeout + 10)
+            count = sock_l[0].recv(10)
+            if not count:
+                raise  ValueError
+            count = int(count)
+            recv_data = sock_l[0].recv(count)
+            sock_l[0].settimeout(None)
+            check_recv.cancel()
 
-def startTh():
-    q1 = Queue.Queue(10)
-    ql1 = threading.Lock()
-    collect = porterThread('collect', q1, ql1, interval=3)
-    collect.start()
-    time.sleep(0.5)
-    sendjson = porterThread('sendjson', q1, ql1, interval=3)
-    sendjson.start()
-    q2 = Queue.Queue(10)
-    print  "start"
-    collect.join()
-    sendjson.join()
-if __name__ == "__main__":
-    startTh()
+            if recv_data == "pong":
+                pass
+            else:
+                cmd = recv_data["cmd"]
+                recv_teimout = int(recv_data['timeout'])
+                command = Command(cmd)
+                recode, data, error = command.run(timeout)
+                send_data(data)
+        except (socket.error, ValueError), msg:
+            sock_l[0].close()
+            sock_l[0] == None
