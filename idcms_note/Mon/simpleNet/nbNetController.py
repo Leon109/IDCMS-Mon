@@ -102,14 +102,7 @@ if __name__ == "__main__":
     '''反转测试'''
     def logic(in_data):
         return in_data[::-1]
-    '''多进程启动
-    sock = bind_socket("0.0.0.0", 9000)
-    fork_processes(0)
-    reverseD = nbNet(sock, logic)
-    reverseD.run()
-    '''
 
-    '''单进程启动'''
     sock = bind_socket("0.0.0.0", 9000)
     reverseD = nbNet(sock, logic)
 
