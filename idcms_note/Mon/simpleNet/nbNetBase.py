@@ -311,11 +311,12 @@ class nbNetBase(object):
         '''关闭连接
         '''
         logs.dblog("close: close fd(%s)" % fd)
+        '''取消epoll注册,一定要先取消epoll注册，在关闭连接
+        因为epoll运行过快，会发生socket关闭，epoll还没取消注册又收到信号的情况'''
+        self.epoll_sock.unregister(fd)
         # 关闭sock
         sock = self.conn_state[fd].sock_obj
         sock.close()
-        # 取消epoll注册
-        self.epoll_sock.unregister(fd)
         # 从链接字典中删除这个fd
         self.conn_state.pop(fd)
 
@@ -342,6 +343,7 @@ class nbNetBase(object):
     def check_fd(self):
         '''检查fd超时
         如果read 指定时间呢没有读取到数据择关闭连接
+        需要单独起一个线程进行监控
         '''
         while True:
             for fd in self.conn_state.keys():

@@ -3,65 +3,6 @@
 
 import socket
 
-# 使用socket像单台主机发送数据
-def sendData(host, port, data, sock_l, single_host_retry=3):
-    '''
-    host  连接接受数据的主机
-    port  接受数据的端口
-    data  数据
-    sock_l sock使用列表方式传入，这样的好处是可以判断socket是否为空
-    而且加入sock使用列表传入经过函数处理后列表也会发生变化，不会是原来的状态
-    python 字符串，数字和元组时不可变变量，字典和列表是可变变量
-    In [5]: a = 1
-    In [6]: def s(l):
-    ...:     l +=1
-    ...:     
-    In [7]: s(a)
-    In [8]: a
-    Out[8]: 1
-    In [9]: def x(l):
-    ...:     l[0] +=1
-    ...:     
-    In [10]: z = [a]
-    In [11]: x(z)
-    In [12]: z
-    Out[12]: [2]
-    single_host_retry 发送数据重试次数
-    '''
-    # 使用计数器数据重试发送失败重试次数
-    retry = 0 
-    while retry < single_host_retry:
-        try:
-            # 如国soket不存在建立一个socket链接
-            if sock_l[0] == None:
-                sock_l[0] = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-                # 设置阻塞模式下的超时时间，如果超时了会发出一个socket超时异常单位是秒
-                # 注意设置超时链接后socket会变成非阻塞模式，.settimeout(None)变回阻塞模式
-                sock_l[0].settimeout(5)
-                sock_l[0].connect((host, port))
-                sock_l[0].settimeout(None)
-            # 发送数据
-            sock_l[0].sendall("%010d%s"%(len(data), data)) 
-            # 接收数据前10个字节头获得接受数据大小
-            count = sock_l[0].recv(10)
-            # 如果接收失败发送异常
-            if not count:
-                raise Exception("socket,recv error", "recv no data")
-            # 统计数据大小
-            count = int(count)
-            # 根据统计的数据大小再次接受数据
-            buf = sock_l[0].recv(count)
-            # 如果数据最后两个字符是 OK 说明已经接受成功结束程序
-            if buf == "OK":
-                return True 
-            # 如果返回的不是OK,抛出一个socket错误进行重试
-            raise socket.error
-        # 发生异常关闭这个socket 重新进行连接
-        except:
-            sock_l[0].close()
-            sock_l[0] = None
-            retry += 1
-
 # 使用socket像多台主机发送数据
 def sendData_mh(host_l, data, sock_l, single_host_retry=3):
     """
@@ -132,3 +73,5 @@ def sendData_mh(host_l, data, sock_l, single_host_retry=3):
                 sock_l[0] = None
                 retry += 1
         return False
+
+
