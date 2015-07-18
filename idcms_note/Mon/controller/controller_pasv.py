@@ -10,7 +10,7 @@ sys.path.insert(0, workdir + "/../")
 
 from utils.config import config
 from utils.crypt import encrypt,decrypt
-from utils.sys_cmd import Command, get_iphostname
+from utils.syscmd import Command, get_iphostname
 from simpleNet.nbNetFramework import bind_socket, nbNet
 
 ctrl_conf = config('nbnet', 'controller')

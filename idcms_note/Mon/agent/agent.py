@@ -12,7 +12,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../")
 
 from utils.config import config
-from utils.sys_cmd import Command, get_iphostname
+from utils.syscmd import Command, get_iphostname
 from simpleNet.nbNetUtils import sendData_mh
 
 # 使用multiprocessing封装好的Pipe包

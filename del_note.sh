@@ -5,7 +5,7 @@
 function del_comment_file()
 {
     echo  'change file' $file
-    sed -i '2,${/^\s*#/d}' $file
+    sed -i '3,${/^\s*#/d}' $file
     
 } 
 
