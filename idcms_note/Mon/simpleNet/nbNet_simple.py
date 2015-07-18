@@ -265,12 +265,11 @@ class nbNet(object):
     def close(self, fd):
         '''关闭连接
         '''
+        # 取消epoll注册
         self.epoll_sock.unregister(fd)
         # 关闭sock
         sock = self.conn_state[fd].sock_obj
         sock.close()
-        # 取消epoll注册
-        self.epoll_sock.unregister(fd)
         # 从链接字典中删除这个fd
         self.conn_state.pop(fd)
 

@@ -41,10 +41,11 @@ class nbNetCtrl(nbNetBase):
         else:
             # 如果数据是个字典判断是执行命令吗
             if "cmd" in data:
-                recv_host = data['recv_host']
+                recv_host = sock_state.addr
+                cmd_host = data["host"]
                 for fd in self.conn_state.keys():
-                    recv_sock = self.conn_state[fd]
-                    if recv_.sock_addr = host:
+                    cmd_sock = self.conn_state[fd]
+                    if cmd_sock.addr = host:
                         response = data
                         break
             if 
