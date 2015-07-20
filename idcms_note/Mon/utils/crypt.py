@@ -4,15 +4,24 @@
 一个简单的对称加密
 支持16位字符串特殊符号key给字符串加密
 '''
+import os
+import sys
+import base64
 from Crypto import Random
 from Crypto.Cipher import AES 
-import base64
+
+workdir = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, workdir + "/../")
+
+from utils.config import config
+
+ctrl_conf = config('nbnet', 'controller')
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[0:-ord(s[-1])]
 # Key是一个加密密钥，加密和揭秘断同时使用这个密钥进行加密解密
-KEY = ":::@#$sfe1111111"
+KEY = ctrl_conf['secret_key']
 
 def encrypt(raw):
     raw = pad(raw)
@@ -29,4 +38,5 @@ def decrypt(enc):
 if __name__ == "__main__":
     data = "sdf"
     e =  encrypt(data)
+    print e
     print decrypt(e)

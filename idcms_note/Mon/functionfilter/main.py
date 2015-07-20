@@ -16,7 +16,7 @@ from utils.config import config
 from simpleNet.nbNetFramework import bind_socket, nbNet
 
 # ff配置文件
-ff_conf = config('nbnet', 'ff')
+ff_conf = config('nbnet', 'functionfilter')
 host_alarm = config('alarm', 'host_alarm') 
 
 # alarm 状态记录字典

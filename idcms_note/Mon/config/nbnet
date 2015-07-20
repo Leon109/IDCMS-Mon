@@ -35,7 +35,8 @@ addr=0.0.0.0
 # 监听端口
 port=9000
 
-[ff]
+# 监控配置端配置
+[functionfilter]
 # 监听的ip地址
 addr=0.0.0.0
 # 监听端口
@@ -59,3 +60,5 @@ addr=0.0.0.0
 port=9200
 # 默认执行命令超时时间
 timeout=30
+# 16位字符转对称加密迷药
+secret_key=x)4bjvvsrFUzw5wm
