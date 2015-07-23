@@ -14,6 +14,7 @@ def index():
 @login_required
 def cmdb():
     uname =  current_user.username
+    titles  = {'path':'/cmdb', 'title':'IDCMS-CMDB'}
     #form = LoginForm()
     #if form.validate_on_submit():
     #    user = User.query.filter_by(username=form.username.data).first()
@@ -22,4 +23,4 @@ def cmdb():
     #        return redirect(request.args.get('next') or url_for('main.index'))
     #    flash('Invalid username or password.')
     #return render_template('auth/loading.html', form=form)
-    return render_template('cmdb/cmdb.html', uname=uname)
+    return render_template('cmdb/cmdb.html', uname=uname, titles=titles)

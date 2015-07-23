@@ -13,7 +13,7 @@ login_manager.session_protection = 'strong'
 # 登陆页
 login_manager.login_view = 'auth.login'
 # 访问页面登录提示
-login_manager.login_message = u'请先登录'
+login_manager.login_message = None #u'请先登录'
 
 def create_app(config_name):
     app = Flask(__name__)
