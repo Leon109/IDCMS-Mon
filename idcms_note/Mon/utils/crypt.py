@@ -36,7 +36,7 @@ def decrypt(enc):
     return unpad(cipher.decrypt(enc[16:]))
 
 if __name__ == "__main__":
-    data = "sdf"
+    data = "ddf"
     e =  encrypt(data)
     print e
     print decrypt(e)
