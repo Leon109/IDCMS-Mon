@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(64))
 
     @property
     def password(self):
@@ -25,11 +26,13 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+
 @login_manager.user_loader
 def load_user(user_id):
     '''这是个回调函数接收(理论上该方法放在任何一个被导入的模块中都可以，
     @login_manager.user_loader会将这个方法注册到程序中去，类似蓝本通过
-    __init__ 导入,放在models，方便管理)
+    __init__ 导入,放在models，因为使用数据库的程序都会使用这个模块，保证
+    这个方法会先运行下)
     以Unicode字符串形式表示的用户标识符，如果能找到用户，这个函数必须返
     回用户对象；否则应该返回None
     user_id 就是用User模型表里的id,通过id确定用户是否存在

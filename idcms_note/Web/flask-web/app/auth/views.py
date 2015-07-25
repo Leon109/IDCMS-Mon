@@ -2,7 +2,7 @@
 
 import copy
 from flask import render_template, redirect, request, url_for, flash
-from flask.ext.login import login_user, logout_user, login_required, current_user
+from flask.ext.login import login_user, logout_user, login_required
 from . import auth
 from .forms import LoginForm, ChangePasswordForm
 from ..models import User
@@ -27,7 +27,6 @@ def login():
                 flash(form.errors[key][0])
     return render_template('auth/loading.html', form=form)
 
-
 @auth.route('/logout', methods=['GET'])
 @login_required
 def logout():
@@ -37,24 +36,20 @@ def logout():
     flash(u'你以退出') 
     return redirect(url_for('auth.login'))
 
-
 @auth.route('/setting',  methods=['GET', 'POST'])
 @login_required
 def setting():
     '''用户设置'''
-    uname =  current_user.username
-    titles  = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
+    titles = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
     passwd_form = ChangePasswordForm()
     # 初始模版中的class等
     int_idclass = {
-        'adduser':['active', 'content'],
-        'passwd':['', 'content hide']
+        'adduser':['', 'content hide'],
+        'passwd':['active', 'content ']
     } 
-    idclass =  copy.deepcopy(int_idclass)
-    if request.method=="POST":
-        idclass =  copy.deepcopy(int_idclass)
-        idclass['adduser'] = ['', 'contebt hide']
-
+    idclass = copy.deepcopy(int_idclass)
+    if request.method == "POST":
+        idclass = copy.deepcopy(int_idclass)
         # 如果是更改密码
         if request.form['action'] == 'passwd':
             idclass['passwd'] = ['active', 'content']
@@ -65,9 +60,8 @@ def setting():
                     flash(passwd_form.errors[key][0])
                     
     return render_template(
-            'auth/setting.html', 
-            uname=uname, 
-            titles=titles, 
+            'auth/setting.html',
             passwd_form=passwd_form,
+            titles=titles, 
             idclass = idclass
             )
