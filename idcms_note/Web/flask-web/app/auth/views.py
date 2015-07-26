@@ -2,9 +2,10 @@
 
 import copy
 from flask import render_template, redirect, request, url_for, flash
-from flask.ext.login import login_user, logout_user, login_required
+from flask.ext.login import login_user, logout_user, login_required, current_user
 from . import auth
-from .forms import LoginForm, ChangePasswordForm
+from .. import db
+from .forms import LoginForm, ChangePasswordForm, RegistrationForm
 from ..models import User
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -36,15 +37,17 @@ def logout():
     flash(u'你以退出') 
     return redirect(url_for('auth.login'))
 
+
 @auth.route('/setting',  methods=['GET', 'POST'])
 @login_required
 def setting():
     '''用户设置'''
     titles = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
     passwd_form = ChangePasswordForm()
+    register_form = RegistrationForm()
     # 初始模版中的class等
     int_idclass = {
-        'adduser':['', 'content hide'],
+        'register':['', 'content hide'],
         'passwd':['active', 'content ']
     } 
     idclass = copy.deepcopy(int_idclass)
@@ -52,16 +55,33 @@ def setting():
         idclass = copy.deepcopy(int_idclass)
         # 如果是更改密码
         if request.form['action'] == 'passwd':
-            idclass['passwd'] = ['active', 'content']
             if passwd_form.validate_on_submit():
-                flash(u'更改完成')
+                if current_user.verify_password(passwd_form.old_password.data):
+                    current_user.password = passwd_form.password.data
+                    db.session.add(current_user)
+                    flash(u'密码更改成功')
+                else:
+                    flash(u'旧密码错误')
             else:
                 for key in passwd_form.errors.keys():
                     flash(passwd_form.errors[key][0])
+        # 如果是注册用户
+        if request.form['action'] == 'register':
+            idclass['register'] = ['active', 'content']
+            idclass['passwd'] = ['', 'content hide']
+            if register_form.validate_on_submit():
+                user = User(username=register_form.username.data,
+                            password=register_form.password.data,
+                            role=register_form.role.data)
+                db.session.add(user) 
+                flash(u'用户添加成功')
+            else:
+                for key in register_form.errors.keys():
+                    flash(register_form.errors[key][0])
                     
     return render_template(
             'auth/setting.html',
             passwd_form=passwd_form,
+            register_form=register_form,
             titles=titles, 
-            idclass = idclass
-            )
+            idclass = idclass)

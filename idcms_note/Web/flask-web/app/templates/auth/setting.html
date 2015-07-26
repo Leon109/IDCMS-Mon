@@ -2,17 +2,49 @@
 {% block muen %}
   <div class="side">
     <ul class="nav nav-sidebar">
-        <li id="adduser" class="{{ idclass['adduser'][0] }}"><a>添加用户</a></li>
+        <li id="register" class="{{ idclass['register'][0] }}"><a>添加用户</a></li>
       <li><a>管理用户</a></li>
       <li id="passwd" class="{{ idclass['passwd'][0] }}"><a>修改密码</a></li>
     </ul>
   </div>
 {% endblock %}
 {% block content %}
-  <div id="adduser" class="{{ idclass['adduser'][1] }}">
+  <div id="register" class="{{ idclass['register'][1] }}">
       {# 使用Permission[current_user.role] 实现了类似 getattr(Permission, current_user.role) 的方法 #}
       {% if Permission[current_user.role] >=  Permission.ADMIN %}
         <h3 class="page-header">添加用户</h3>
+        <form class="form-horizontal" method="post" action="">
+          {{ register_form.hidden_tag() }}
+          <div class="form-group">
+            {{ register_form.username.label(class="col-sm-2 control-label")}}
+            <div class="col-sm-3">
+              {{ register_form.username(class="form-control")}}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ register_form.password.label(class="col-sm-2 control-label")}}
+            <div class="col-sm-3">
+              {{ register_form.password(class="form-control")}}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ register_form.password2.label(class="col-sm-2 control-label")}}
+            <div class="col-sm-3">
+              {{ register_form.password2(class="form-control")}}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ register_form.role.label(class="col-sm-2 control-label")}}
+            <div class="col-sm-3">
+              {{ register_form.role(class="form-control")}}
+            </div> 
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" name="action" value="register" class="btn btn-default">确认修改</button>
+            </div>
+          </div>
+        </form>
       {% else %}
         <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
       {% endif %}
