@@ -11,3 +11,8 @@ from ..utils.permission import Permission
 def inject_permissions():
     return dict(Permission=Permission)
 
+@auth.app_context_processor
+def injcet_work():
+    titles = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
+    thead = [ [0,u'用户名'],[0,u'权限']]
+    return dict(titles=titles, thead=thead)

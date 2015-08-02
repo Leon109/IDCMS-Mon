@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #coding=utf-8
 
-from app import create_app,db
+from app import create_app, db
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 

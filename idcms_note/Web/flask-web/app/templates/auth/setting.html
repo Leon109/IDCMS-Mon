@@ -1,10 +1,11 @@
 {% extends "navbase.html" %}
+{% import "macros.html" as macros %}
 {% block muen %}
   <div class="side">
     <ul class="nav nav-sidebar">
-        <li id="register" class="{{ idclass['register'][0] }}"><a>添加用户</a></li>
-      <li><a>管理用户</a></li>
-      <li id="passwd" class="{{ idclass['passwd'][0] }}"><a>修改密码</a></li>
+      <li id="passwd" class="{{ idclass['passwd'][0] }}"><a href="#">修改密码</a></li>
+      <li id="register" class="{{ idclass['register'][0] }}"><a href="#">添加用户</a></li>
+      <li id ="edituser" class="{{ idclass['edituser'][0] }}"><a href="#">管理用户</a></li>
     </ul>
   </div>
 {% endblock %}
@@ -13,35 +14,21 @@
       {# 使用Permission[current_user.role] 实现了类似 getattr(Permission, current_user.role) 的方法 #}
       {% if Permission[current_user.role] >=  Permission.ADMIN %}
         <h3 class="page-header">添加用户</h3>
-        <form class="form-horizontal" method="post" action="">
+        <form class="form-horizontal" method="post">
           {{ register_form.hidden_tag() }}
-          <div class="form-group">
-            {{ register_form.username.label(class="col-sm-2 control-label")}}
-            <div class="col-sm-3">
-              {{ register_form.username(class="form-control")}}
-            </div>
-          </div>
-          <div class="form-group">
-            {{ register_form.password.label(class="col-sm-2 control-label")}}
-            <div class="col-sm-3">
-              {{ register_form.password(class="form-control")}}
-            </div>
-          </div>
-          <div class="form-group">
-            {{ register_form.password2.label(class="col-sm-2 control-label")}}
-            <div class="col-sm-3">
-              {{ register_form.password2(class="form-control")}}
-            </div>
-          </div>
-          <div class="form-group">
-            {{ register_form.role.label(class="col-sm-2 control-label")}}
-            <div class="col-sm-3">
-              {{ register_form.role(class="form-control")}}
-            </div> 
-          </div>
+          {% for form in register_form %}
+            {% if form != register_form.csrf_token %}
+              <div class="form-group">
+                {{ form.label(class="col-sm-2 control-label") }}
+                <div class="col-sm-3">
+                  {{ form(class="form-control")}}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-              <button type="submit" name="action" value="register" class="btn btn-default">确认修改</button>
+              <button type="submit" name="action" value="register" class="btn btn-success">确认提交</button>
             </div>
           </div>
         </form>
@@ -51,32 +38,36 @@
   </div>
   <div id="passwd" class="{{ idclass['passwd'][1] }}">
     <h3 class="page-header">修改密码</h3>
-    <form class="form-horizontal" method="post" action="">
-      {{ passwd_form.hidden_tag() }}
-      <div class="form-group">
-        {{ passwd_form.old_password.label(class="col-sm-2 control-label")}}
-        <div class="col-sm-3">
-          {{ passwd_form.old_password(class="form-control")}}
-        </div>
-      </div>
-      <div class="form-group">
-        {{ passwd_form.password.label(class="col-sm-2 control-label")}}
-          <div class="col-sm-3">
-            {{ passwd_form.password(class="form-control")}}
-        </div>
-      </div>
-      <div class="form-group">
-        {{ passwd_form.password2.label(class="col-sm-2 control-label")}}
-          <div class="col-sm-3">
-            {{ passwd_form.password2(class="form-control")}}
-          </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" name="action" value="passwd" class="btn btn-default">确认修改</button>
-        </div>
-      </div>
-    </form>
+     <form class="form-horizontal" method="post">
+       {{ passwd_form.hidden_tag() }}
+       {% for form in passwd_form %}
+         {% if form != passwd_form.csrf_token %}
+           <div class="form-group">
+             {{ form.label(class="col-sm-2 control-label") }}
+             <div class="col-sm-3">
+               {{ form(class="form-control")}}
+             </div>
+           </div>
+         {% endif %}
+       {% endfor %}
+       <div class="form-group">
+         <div class="col-sm-offset-2 col-sm-10">
+           <button type="submit" name="action" value="passwd" class="btn btn-success">确认提交</button>
+         </div>
+       </div>
+     </form>
+  </div>
+  <div id="edituser" class="{{ idclass['edituser'][1] }}">
+  {% if Permission[current_user.role] >=  Permission.ADMIN %}
+    {{ macros.render_search(thead, search_value, items, Permission, current_user) }}
+    {% if items %}
+     <div class="pagination">
+    {{ macros.render_pagination(pagination, '.setting', search=search_value) }}
+    </div>
+    {% endif %}
+  {% else %}
+    <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
+  {% endif %}
   </div>
 {% endblock %}
 {% block js %}

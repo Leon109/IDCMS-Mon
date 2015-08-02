@@ -10,6 +10,7 @@
     <title>IDCMS</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dataTables.bootstrap.css') }}" rel="stylesheet">
     {% block head %}
     {% endblock %}  
   </head>
@@ -18,6 +19,8 @@
    {% endblock %}
    <script src="{{ url_for('static', filename='js/jquery-1.11.3.min.js')}}"></script>
    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+   <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+   <script src="{{ url_for('static', filename='js/dataTables.bootstrap.js') }}"></script>
    {% block js %}
    {% endblock %}
   </body>

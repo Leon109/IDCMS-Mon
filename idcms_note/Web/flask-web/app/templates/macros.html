@@ -1,0 +1,129 @@
+{% macro render_search(thead, search_value, items, Permission, current_user) %}
+<div class="container-fluid">
+    <div class="row" style='margin-top:20px' action="">
+      <div class="col-lg-5 col-md-offset-3" style="margin-right:10px">
+        <form class="form-horizontal">
+          <div class="input-group">
+              <input type="text" class="form-control" name="search" value="{{ search_value }}" placeholder="用户搜索" required autofocus>
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">搜索</button>
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>
+<div class="container-fluid">
+  <div class="row" style='margin-top:20px'>
+    <div>
+      选择查看项目:
+       {% for th in thead %}
+        <a class="toggle-vis" href='#' data-column="{{ th[0] }}">{{ th[1] }}</a>
+       {% endfor %}
+      </div>
+    <div class="col-lg-12">
+      <div class="panel panel-default" style='margin-top:20px;'>
+        <div class="panel-body">
+         <table id="search" class="table table-striped table-bordered display" cellspacing="0" width="100%" style='margin-top:20px;'>
+            <thead>
+              <tr>
+                {% for th in thead %}
+                    <th>{{ th[1] }}</th>
+                {% endfor %}
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+                 <tr>
+                  {%  for content in item.to_list() %}
+                    <td>{{ content }}</td>
+                  {% endfor %}
+                  {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
+                    <td>
+                      <div class="change">
+                      <button id="delete" type="button" class="btn btn-danger btn-xs"
+                      data-id={{ item.id }} data-toggle="modal" data-target=".bs-example-modal-sm">删除</button>
+                      <button id="setting" type="button" class="btn btn-info btn-xs" 
+                      data-id={{ item.id }} data-toggle="modal" data-target=".bs-example-modal-sm">修改</button>
+                    </div>
+                    </td>
+                   {% endif%}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--删除-->
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">删除</h4>
+      </div>
+      <div class="delete modal-body">
+        <p>删除后将无法恢复</p>
+        <form id="confirmdel" method="POST" action="/auth/setting/delete">
+         <input id="subdelete" type="hidden" name="id" >
+         <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-danger">确认删除</button>
+         </div>
+        </form>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!--提示-->
+<div class="modal fade" id='tipModal'>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">提示</h4>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endmacro %}
+
+{% macro render_pagination(pagination, endpoint) %}
+<ul class="pagination">
+  <li{% if not pagination.has_prev %} class="disabled"{% endif %}>
+    <a href="{% if pagination.has_prev %}{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}{% else %}#{% endif %}">
+      &laquo;
+    </a>
+  </li>
+  {% for p in pagination.iter_pages() %}
+    {% if p %}
+      {% if p == pagination.page %}
+      <li class="active">
+        <a href="{{ url_for(endpoint, page=p, **kwargs) }}">{{ p }}</a>
+      </li>
+      {% else %}
+      <li>
+        <a href="{{ url_for(endpoint, page=p, **kwargs) }}">{{ p }}</a>
+      </li>
+      {% endif %}
+    {% else %}
+      <li class="disabled"><a href="#">&hellip;</a></li>
+    {% endif %}
+  {% endfor %}
+  <li{% if not pagination.has_next %} class="disabled"{% endif %}>
+    <a href="{% if pagination.has_next %}{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}{% else %}#{% endif %}">
+        &raquo;
+    </a>
+  </li>
+</ul>
+{% endmacro %}

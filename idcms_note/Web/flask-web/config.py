@@ -5,7 +5,7 @@ from datetime import timedelta
 
 class Config(object):
     # CSRF是否开启
-    WTF_CSRF_ENABLED = True
+    WTF_CSRF_ENABLED = False  # True
     # 自动提交
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     # flask-login 记住登录时间
@@ -15,7 +15,7 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "mysql://root:""@127.0.0.1/nbnet"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:""@127.0.0.1/idcms"
 
 config = { 
     'default': DevelopmentConfig
