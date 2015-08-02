@@ -29,6 +29,7 @@ class User(UserMixin, db.Model):
     def to_list(self):
         return [
             self.username,
+            self.password_hash,
             self.role,
         ]
 
