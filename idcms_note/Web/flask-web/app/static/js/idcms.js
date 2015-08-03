@@ -1,43 +1,64 @@
+// 导航切换
 $(function(){
-    // 导航切换
     $('div.side li').click(function(){
         $(this).addClass('active').siblings('li').removeClass('active')
         var id = $(this).attr('id')
-        //alert(id)
-        //变量使用＋号
+        //变量组合使用＋号
         $('div#'+id).removeClass('hide')
         $('div.content').not('#'+id).addClass('hide')
-    })
+    });
 })
 
+// 删除修改函数
 $(function(){
+    var det
     // 定位删除项目
-    $('div.change button#delete').click(function(){
+    $('div.setting button#delete').click(function(){
         var id = $(this).attr('data-id')
         $('#subdelete').val(id);
     });
     // 定位修改项目
-    $('div.change button#setting').click(function(){
+    $('div.setting button#change').click(function(){
         var id = $(this).attr('data-id')
-        alert(id)
+        $('#subchange').val(id);
     });
     // 确定删除项目
-    $('#confirmdel').on('submit',function(e){
+    $('#confirmdeldelete').on('submit',function(e){
         e.preventDefault();
         var url = $(this).attr('action')
-        var del_data = $('#subdelete').val()
-        $.post(url, {id:del_data}, function(res){
-            if (res=='ok') {
+        var change_data = $('#subdelete').val()
+        $.post(url, {id:change_data}, function(res){
+            if (res=='OK'){
                 //alert('删除成功')
+                det = true
                 $('#tipModal').find('.modal-body').html('删除成功').end().modal('show')
             }else{
                 $('#tipModal').find('.modal-body').html(res).end().modal('show')
             }
         });
+    });
+    // 确认修改项目
+    $('#confirmdelchange').on('submit',function(e){
+        e.preventDefault();
+        var url = $(this).attr('action')
+        var change_id = $('#subchange').val()
+        var change_item = $('#subitem').val()
+        var change_value = $('#subvalue').val()
+        var sub = {id:change_id, item:change_item, value:change_value}
+        $.post(url, {id:change_id, item:change_item, value:change_value}, function(res){
+            if (res=='OK'){
+                det = true
+                $('#tipModal').find('.modal-body').html('修改成功').end().modal('show')
+            }else{
+                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+            }   
+        });  
+    });
     // 结果提示
     $('#tipModal button').click(function(){
-        location.reload(true)
-       });
+        if(det){
+            location.reload(true)
+        }
     });
 })
 

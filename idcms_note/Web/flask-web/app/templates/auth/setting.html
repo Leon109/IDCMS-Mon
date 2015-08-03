@@ -3,14 +3,14 @@
 {% block muen %}
   <div class="side">
     <ul class="nav nav-sidebar">
-      <li id="passwd" class="{{ idclass['passwd'][0] }}"><a href="#">修改密码</a></li>
-      <li id="register" class="{{ idclass['register'][0] }}"><a href="#">添加用户</a></li>
-      <li id ="edituser" class="{{ idclass['edituser'][0] }}"><a href="#">管理用户</a></li>
+      <li id="passwd" class="{{ sidebarclass['passwd'][0] }}"><a href="#">修改密码</a></li>
+      <li id="register" class="{{ sidebarclass['register'][0] }}"><a href="#">添加用户</a></li>
+      <li id ="edituser" class="{{ sidebarclass['edituser'][0] }}"><a href="#">管理用户</a></li>
     </ul>
   </div>
 {% endblock %}
 {% block content %}
-  <div id="register" class="{{ idclass['register'][1] }}">
+  <div id="register" class="{{ sidebarclass['register'][1] }}">
       {# 使用Permission[current_user.role] 实现了类似 getattr(Permission, current_user.role) 的方法 #}
       {% if Permission[current_user.role] >=  Permission.ADMIN %}
         <h3 class="page-header">添加用户</h3>
@@ -36,7 +36,7 @@
         <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
       {% endif %}
   </div>
-  <div id="passwd" class="{{ idclass['passwd'][1] }}">
+  <div id="passwd" class="{{ sidebarclass['passwd'][1] }}">
     <h3 class="page-header">修改密码</h3>
      <form class="form-horizontal" method="post">
        {{ passwd_form.hidden_tag() }}
@@ -57,7 +57,7 @@
        </div>
      </form>
   </div>
-  <div id="edituser" class="{{ idclass['edituser'][1] }}">
+  <div id="edituser" class="{{ sidebarclass['edituser'][1] }}">
   {% if Permission[current_user.role] >=  Permission.ADMIN %}
     {{ macros.render_search(thead, search_value, items, Permission, current_user) }}
     {% if items %}

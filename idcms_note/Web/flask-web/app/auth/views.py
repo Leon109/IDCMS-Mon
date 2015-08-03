@@ -3,20 +3,21 @@
 from flask import render_template, redirect, request, url_for, flash
 from flask.ext.login import login_user, logout_user, login_required, current_user
 
-from forms import LoginForm, ChangePasswordForm, RegistrationForm
 from . import auth
+from .forms import LoginForm, ChangePasswordForm, RegistrationForm
+from .customvalidator import CustomValidator
 from .. import db
 from ..models import User
 from ..utils.permission import Permission, permission_validation
 
-def int_idclass(id_class):
-    idclass = { 
+def init__sidebar(sidebar_class):
+    sidebarclass = { 
         'register':['', 'content hide'],
         'passwd':['', 'content hide'],
         'edituser':['', 'content hide']
     }   
-    idclass[id_class] = ['active', 'content ']
-    return idclass
+    sidebarclass[sidebar_class] = ['active', 'content ']
+    return sidebarclass
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,11 +49,11 @@ def setting():
     '''用户设置'''
     passwd_form = ChangePasswordForm()
     register_form = RegistrationForm()
-    idclass = int_idclass('passwd')
+    sidebarclass = init__sidebar('passwd')
     if request.method == "POST":
         # 更改密码
         if request.form['action'] == 'passwd':
-            idclass = int_idclass('passwd')
+            sidebarclass = init__sidebar('passwd')
             if passwd_form.validate_on_submit():
                 if current_user.verify_password(passwd_form.old_password.data):
                     current_user.password = passwd_form.password.data
@@ -65,7 +66,7 @@ def setting():
                     flash(passwd_form.errors[key][0])
         # 用户注册
         if request.form['action'] == 'register':
-            idclass = int_idclass('register')
+            sidebarclass = init__sidebar('register')
             if register_form.validate_on_submit():
                 user = User(username=register_form.username.data,
                     password=register_form.password.data,
@@ -81,7 +82,7 @@ def setting():
         if search:
             # 搜索
             page = int(request.args.get('page', 1))
-            idclass = int_idclass('edituser')
+            sidebarclass = init__sidebar('edituser')
             try:
                 option = {docm.split("==")[0]:docm.split("==")[1] for docm in search.split()}
                 if option:
@@ -90,13 +91,14 @@ def setting():
                         if key == option.keys()[0]:
                             res = User.query.filter(getattr(User,key).endswith(option[key]))
                         res = res.filter(getattr(User,key).endswith(option[key]))
-    
+            # 如果不是多重搜索
             except IndexError:
                 if search == "ALL":
                     res = User.query
                 else:
                     res = User.query.filter(User.username.endswith(search))
-            except (ValueError, AttributeError):
+            # 如果搜索的项目发生错误
+            except AttributeError:
                 res = None
             if res:
                 pagination = res.paginate(page, 100, False)
@@ -105,7 +107,7 @@ def setting():
                     'auth/setting.html',
                     passwd_form=passwd_form,
                     register_form=register_form,
-                    idclass=idclass,
+                    sidebarclass=sidebarclass,
                     pagination=pagination,
                     search_value=search,
                     items=items,
@@ -114,7 +116,7 @@ def setting():
         'auth/setting.html',
         passwd_form=passwd_form,
         register_form=register_form,
-        idclass=idclass,
+        sidebarclass=sidebarclass,
     )
 
 @auth.route('/setting/delete',  methods=['GET', 'POST'])
@@ -126,5 +128,23 @@ def delete():
     if user:
         db.session.delete(user)
         db.session.commit()
-        return "ok"
+        return "OK"
     return u"删除失败没有找到改用户"
+
+@auth.route('/setting/change',  methods=['GET', 'POST'])
+@login_required
+@permission_validation(Permission.ADMIN)
+def change():
+    change_id = int(request.form["id"])
+    item = request.form["item"]
+    value = request.form['value']
+    user = User.query.filter_by(id=change_id).first()
+    if user:
+        verify = CustomValidator(item,value)
+        res = verify.validata_return()
+        if res == "OK":
+            setattr(user, item, value) 
+            db.session.add(user)
+            return "OK"
+        return res
+    return u"更改失败没有找到改用户"
