@@ -66,6 +66,7 @@ $(function(){
 // DataTable
 $(document).ready(function() {
     var table = $('#search').DataTable( {
+        aLengthMenu:[50, 100],//每页显示数量
         language: {
             "sLengthMenu": "显示 _MENU_ 项结果",
             "sZeroRecords": "没有匹配结果",
@@ -81,7 +82,7 @@ $(document).ready(function() {
             }
         },
     } );
-
+        
     $('a.toggle-vis').on( 'click', function (e) {
         e.preventDefault();
  

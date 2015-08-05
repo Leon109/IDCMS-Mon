@@ -2,10 +2,11 @@
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
-from . import db, login_manager
+from app import db, login_manager
 
 class User(UserMixin, db.Model):
-    '''为了使用flask-login用户模型需要继承UserMixin'''
+    '''用户表
+    为了使用flask-login用户模型需要继承UserMixin'''
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
@@ -44,3 +45,28 @@ def load_user(user_id):
     user_id 就是用User模型表里的id,通过id确定用户是否存在
     '''
     return User.query.get(int(user_id))
+
+
+class Site(db.Model):
+    __tablename__ = 'site'
+    id = db.Column(db.Integer, primary_key=True)
+    site = db.Column(db.String(64), unique=True, index=True)
+    isp = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    address = db.Column(db.String(64))
+    contact = db.Column(db.String(64))
+    remark = db.Column(db.String(64))
+        
+
+    def __repr__(self):
+        return '<User %r>' % self.site
+
+    def to_list(self):
+        return [
+            self.site,
+            self.isp,
+            self.location,
+            self.address,
+            self.contact,
+            self.remark
+        ]  

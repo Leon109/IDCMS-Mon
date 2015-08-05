@@ -8,19 +8,19 @@ from ..models import User
 
 class LoginForm(Form):
     username = StringField(u'用户名', validators=[Required(message=u'用户名不能为空'), 
-        Length(1, 12, message=u'用户名最大为12个字符')])
+        Length(1, 12, message=u'用户名为1-12个字符')])
     password = PasswordField(u'密码',  validators=[Required(message=u'密码不能为空')])
     remember_me = BooleanField("rememberme")
 
 
 class RegistrationForm(Form):
     username = StringField(u'用户名', validators=[
-        Required(message=u'用户名不能为空'), Length(1, 12, message=u'用户名最大为12个字符')])
+        Required(message=u'用户名不能为空'), Length(1, 12, message=u'用户名为1-12个字符')])
     password = PasswordField(u'密码', validators=[
         Required(u'密码不能为空'), EqualTo('password2', message=u'两次输入的密码不一致')])
     password2 = PasswordField(u'确认密码', validators=[Required(u'确认密码不能为空')])
     role = SelectField(u'选择角色', choices=[('QUERY', u'查询'),
-        ('QUERY_COMMIT', u'查询提交'), ('AKTER',u'修改' ), ('AKTER_REPLY',u'修改处理'),
+        ('QUERY_COMMIT', u'查询提交'), ('ALTER',u'修改' ), ('ALTER_REPLY',u'修改处理'),
         ('ADMIN', u'管理员')])
     
     def validate_username(self, field):

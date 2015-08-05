@@ -47,12 +47,14 @@ def logout():
 @login_required
 def setting():
     '''用户设置'''
+    role_Permission = getattr(Permission, current_user.role)
     passwd_form = ChangePasswordForm()
     register_form = RegistrationForm()
     sidebarclass = init__sidebar('passwd')
     if request.method == "POST":
         # 更改密码
-        if request.form['action'] == 'passwd':
+        if request.form['action'] == 'passwd' and \
+                role_Permission >= Permission.ADMIN:
             sidebarclass = init__sidebar('passwd')
             if passwd_form.validate_on_submit():
                 if current_user.verify_password(passwd_form.old_password.data):
@@ -65,7 +67,8 @@ def setting():
                 for key in passwd_form.errors.keys():
                     flash(passwd_form.errors[key][0])
         # 用户注册
-        if request.form['action'] == 'register':
+        if request.form['action'] == 'register' and \
+                role_Permission >= Permission.ADMIN:
             sidebarclass = init__sidebar('register')
             if register_form.validate_on_submit():
                 user = User(username=register_form.username.data,
@@ -129,7 +132,7 @@ def delete():
         db.session.delete(user)
         db.session.commit()
         return "OK"
-    return u"删除失败没有找到改用户"
+    return u"删除失败没有找到该用户"
 
 @auth.route('/setting/change',  methods=['GET', 'POST'])
 @login_required
@@ -147,4 +150,4 @@ def change():
             db.session.add(user)
             return "OK"
         return res
-    return u"更改失败没有找到改用户"
+    return u"更改失败没有找到该用户"

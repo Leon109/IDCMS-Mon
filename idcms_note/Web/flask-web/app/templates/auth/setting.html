@@ -59,7 +59,7 @@
   </div>
   <div id="edituser" class="{{ sidebarclass['edituser'][1] }}">
   {% if Permission[current_user.role] >=  Permission.ADMIN %}
-    {{ macros.render_search(thead, search_value, items, Permission, current_user) }}
+    {{ macros.render_search(thead, search_value, items, Permission, current_user, del_page, change_page) }}
     {% if items %}
      <div class="pagination">
     {{ macros.render_pagination(pagination, '.setting', search=search_value) }}

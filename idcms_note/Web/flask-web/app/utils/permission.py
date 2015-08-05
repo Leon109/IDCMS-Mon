@@ -6,11 +6,13 @@ from ..models import User
 from flask.ext.login import current_user
 
 class Permission:
-    '''定义用户权限'''
+    '''定义用户权限
+    0 作为保留
+    '''
     # 查询全新
-    QUERY = 0 
+    QUERY = 1 
     # 查询和提交工单权限
-    QUERY_COMMIT = 1 
+    QUERY_COMMIT = 2
     # 修改权限
     AKTER = 10
     # 修改和回复权限
