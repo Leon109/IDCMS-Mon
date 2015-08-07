@@ -24,7 +24,9 @@ class RegistrationForm(Form):
         ('ADMIN', u'管理员')])
     
     def validate_username(self, field):
-        '''如果这么写，wtf会自动监测这个问题'''
+        '''如果这么写，wtf会自动监测这个问题
+        格式 alidate_ 加字段名
+        '''
         if User.query.filter_by(username=field.data).first():
             raise ValidationError(u'用户名已经存在')
 

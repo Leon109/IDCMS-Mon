@@ -4,6 +4,7 @@ cmdb = Blueprint('cmdb', __name__)
 
 from . import views
 from .site import views
+from .rack import views
 
 from ..utils.permission import Permission
 

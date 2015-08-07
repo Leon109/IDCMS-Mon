@@ -20,7 +20,7 @@ class CustomValidator():
             "site":self.validate_site,
         }
 
-    def validata_return(self):
+    def validate_return(self):
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:

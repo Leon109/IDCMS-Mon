@@ -28,11 +28,7 @@ class User(UserMixin, db.Model):
         return '<User %r>' % self.username
 
     def to_list(self):
-        return [
-            self.username,
-            self.password_hash,
-            self.role,
-        ]
+        return [self.username, self.password_hash, self.role]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -62,11 +58,27 @@ class Site(db.Model):
         return '<User %r>' % self.site
 
     def to_list(self):
-        return [
-            self.site,
-            self.isp,
-            self.location,
-            self.address,
-            self.contact,
-            self.remark
-        ]  
+        return [self.site,self.isp, self.location,
+            self.address, self.contact, self.remark] 
+
+class Rack(db.Model):
+    __tablename__ = 'rack'
+    id = db.Column(db.Integer, primary_key=True)
+    rack = db.Column(db.String(64), index=True)
+    site = db.Column(db.String(64), index=True)
+    count = db.Column(db.String(32))
+    power = db.Column(db.String(32))
+    client = db.Column(db.String(64))
+    c_time = db.Column(db.Date)
+    e_time = db.Column(db.Date)
+    remark = db.Column(db.String(64))
+    
+
+    def __repr__(self):
+        return '<User %r>' % self.rack
+
+    def to_list(self):
+        return [self.rack, self.site, self.count,
+            self.power, self.client, self.c_time,
+            self.e_time, self.remark]
+

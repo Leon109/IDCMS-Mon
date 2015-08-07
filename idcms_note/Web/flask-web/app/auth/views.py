@@ -9,6 +9,7 @@ from .customvalidator import CustomValidator
 from .. import db
 from ..models import User
 from ..utils.permission import Permission, permission_validation
+from ..utils.searchutils import search_res
 
 def init__sidebar(sidebar_class):
     sidebarclass = { 
@@ -86,40 +87,18 @@ def setting():
             # 搜索
             page = int(request.args.get('page', 1))
             sidebarclass = init__sidebar('edituser')
-            try:
-                option = {docm.split("==")[0]:docm.split("==")[1] for docm in search.split()}
-                if option:
-                    for key in option.keys():
-                        # 第一次进行初始查询，后面的开始从上一次的基础上进行过滤
-                        if key == option.keys()[0]:
-                            res = User.query.filter(getattr(User,key).endswith(option[key]))
-                        res = res.filter(getattr(User,key).endswith(option[key]))
-            # 如果不是多重搜索
-            except IndexError:
-                if search == "ALL":
-                    res = User.query
-                else:
-                    res = User.query.filter(User.username.endswith(search))
-            # 如果搜索的项目发生错误
-            except AttributeError:
-                res = None
+            res = search_res(User, 'username' , search)
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'auth/setting.html',
-                    passwd_form=passwd_form,
-                    register_form=register_form,
-                    sidebarclass=sidebarclass,
-                    pagination=pagination,
-                    search_value=search,
-                    items=items,
+                    'auth/setting.html',passwd_form=passwd_form, register_form=register_form,
+                    sidebarclass=sidebarclass, pagination=pagination, search_value=search,
+                    items=items
                 )
     return render_template(
-        'auth/setting.html',
-        passwd_form=passwd_form,
-        register_form=register_form,
-        sidebarclass=sidebarclass,
+        'auth/setting.html', passwd_form=passwd_form, register_form=register_form,
+        sidebarclass=sidebarclass
     )
 
 @auth.route('/setting/delete',  methods=['GET', 'POST'])
@@ -144,7 +123,7 @@ def change():
     user = User.query.filter_by(id=change_id).first()
     if user:
         verify = CustomValidator(item,value)
-        res = verify.validata_return()
+        res = verify.validate_return()
         if res == "OK":
             setattr(user, item, value) 
             db.session.add(user)

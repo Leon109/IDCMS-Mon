@@ -4,7 +4,7 @@ import os
 import sys
 
 from flask.ext.wtf import Form
-from wtforms import StringField, SelectField
+from wtforms import StringField
 from wtforms import ValidationError
 from wtforms.validators import Required, Length
 

@@ -13,21 +13,19 @@ class CustomValidator():
         self.value = value
         self.sm =  {
             "username":self.validate_username,
-            "password":self.validate_password,
             "role":self.validate_role
         }
 
-    def validata_return(self):
-        return self.sm[self.item](self.value)
+    def validate_return(self):
+        if self.sm.get(self.item, None):
+            return self.sm[self.item](self.value)
+        return "OK"
 
     def validate_username(self, value):
         if User.query.filter_by(username=value).first():
             return u'用户名已经存在'
         else:
             return "OK"
-
-    def validate_password(self, value):
-        return "OK"
 
     def validate_role(self, value):
         role_range = dir(Permission)
