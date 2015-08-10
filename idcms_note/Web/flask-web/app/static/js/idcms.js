@@ -65,8 +65,8 @@ $(function(){
 
 // DataTable
 $(document).ready(function() {
-    var table = $('#search').DataTable( {
-        aLengthMenu:[50, 100],//每页显示数量
+    var table_dict = { 
+        aLengthMenu:[50, 100],
         language: {
             "sLengthMenu": "显示 _MENU_ 项结果",
             "sZeroRecords": "没有匹配结果",
@@ -79,10 +79,24 @@ $(document).ready(function() {
                 "sPrevious": "上页",
                 "sNext": "下页",
                 "sLast": "末页"
-            }
+            }        
         },
-    } );
-        
+    };
+    var count = $("div.choose a").last().attr('data-column');
+    var defs = [];
+    if ( parseInt(count) >= 9){
+        for (var i=9; i< parseInt(count)+1; i++){
+            defs.push(i)
+        }
+        table_dict["columnDefs"] = [{
+            "targets": defs,
+            "visible": false,
+        }]
+    };
+    var table = $('#search').DataTable( 
+        table_dict
+    );
+    var count = $("div.choose a").last().attr('data-column');
     $('a.toggle-vis').on( 'click', function (e) {
         e.preventDefault();
  

@@ -14,8 +14,6 @@ def inject_permissions():
 @auth.app_context_processor
 def injcet_work():
     titles = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
-    # 列表显示 第一个是列，第二个是显示名称，第三个是对象的input name
-    thead = [[0, u'用户名','username'], [1,u'密码', 'password'], [2,u'权限', 'role']]
     del_page = '/auth/setting/delete'
     change_page= '/auth/setting/change'
-    return dict(titles=titles, thead=thead, del_page=del_page, change_page=change_page)
+    return dict(titles=titles, del_page=del_page, change_page=change_page)

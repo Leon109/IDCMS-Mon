@@ -11,6 +11,8 @@ from ..models import User
 from ..utils.permission import Permission, permission_validation
 from ..utils.searchutils import search_res
 
+thead = [[0, u'用户名','username'], [1,u'密码', 'password'], [2,u'权限', 'role']]
+
 def init__sidebar(sidebar_class):
     sidebarclass = { 
         'register':['', 'content hide'],
@@ -92,7 +94,7 @@ def setting():
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'auth/setting.html',passwd_form=passwd_form, register_form=register_form,
+                    'auth/setting.html', thead=thead, passwd_form=passwd_form, register_form=register_form,
                     sidebarclass=sidebarclass, pagination=pagination, search_value=search,
                     items=items
                 )

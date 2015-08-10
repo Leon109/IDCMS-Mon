@@ -14,7 +14,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app import db
-from app.models import Rack
+from app.models import Rack, Cabinet
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
 
@@ -22,10 +22,10 @@ from app.utils.searchutils import search_res
 titles = {'path':'/cmdb/rack', 'title':u'IDCMS-CMDB-机架'}
 thead = [
     [0, u'机柜','rack'], [1,u'机房', 'site'], [2,u'机架U数', 'count'],
-    [3, u'机架电流','power'], [4, u'机架用户', 'client'], [5, u'开通时间' ,'c_time'],
-    [6, u'到期时间' ,'e_time'],[7, u'备注' ,'remark']
+    [3, u'机架电流','power'], [4, u'销售代表', 'sales'], [5, u'机架用户', 'client'], 
+    [6, u'开通时间' ,'start_time'],[7, u'到期时间' ,'expire_time'],[8, u'备注' ,'remark']
 ]
-#url结尾字符
+# url结尾函数
 endpoint = '.rack'
 del_page = '/cmdb/rack/delete'
 change_page= '/cmdb/rack/change'
@@ -42,7 +42,7 @@ def init__sidebar(sidebar_class):
 @cmdb.route('/cmdb/rack',  methods=['GET', 'POST'])
 @login_required
 def rack():
-    '''机房设置'''
+    '''机架设置'''
     role_Permission = getattr(Permission, current_user.role)
     rack_form = RackForm()
     sidebarclass = init__sidebar('edititem')
@@ -55,9 +55,10 @@ def rack():
                 site=rack_form.site.data,
                 count=rack_form.count.data,
                 power=rack_form.power.data,
+                sales=rack_form.sales.data,
                 client=rack_form.client.data,
-                c_time=rack_form.c_time.data,
-                e_time=rack_form.e_time.data,
+                start_time=rack_form.start_time.data,
+                expire_time=rack_form.expire_time.data,
                 remark=rack_form.remark.data
             )
             db.session.add(rack)
@@ -95,6 +96,8 @@ def rack_delete():
     del_id = int(request.form["id"])
     rack = Rack.query.filter_by(id=del_id).first()
     if rack:
+        if Cabinet.query.filter_by(rack=rack.rack, site=rack.site).first():
+            return u'删除失败，还有设置使用这个机柜'
         db.session.delete(rack)
         db.session.commit()
         return "OK"
@@ -103,7 +106,7 @@ def rack_delete():
 @cmdb.route('/cmdb/rack/change',  methods=['GET', 'POST'])
 @login_required
 @permission_validation(Permission.ALTER_REPLY)
-def change():
+def reak_change():
     change_id = int(request.form["id"])
     item = request.form["item"]
     value = request.form['value']

@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from app import db, login_manager
 
+
 class User(UserMixin, db.Model):
     '''用户表
     为了使用flask-login用户模型需要继承UserMixin'''
@@ -52,14 +53,14 @@ class Site(db.Model):
     address = db.Column(db.String(64))
     contact = db.Column(db.String(64))
     remark = db.Column(db.String(64))
-        
 
     def __repr__(self):
-        return '<User %r>' % self.site
+        return '<Site %r>' % self.site
 
     def to_list(self):
         return [self.site,self.isp, self.location,
-            self.address, self.contact, self.remark] 
+                self.address, self.contact, self.remark] 
+
 
 class Rack(db.Model):
     __tablename__ = 'rack'
@@ -68,17 +69,88 @@ class Rack(db.Model):
     site = db.Column(db.String(64), index=True)
     count = db.Column(db.String(32))
     power = db.Column(db.String(32))
+    sales = db.Column(db.String(32))
     client = db.Column(db.String(64))
-    c_time = db.Column(db.Date)
-    e_time = db.Column(db.Date)
+    start_time = db.Column(db.Date)
+    expire_time = db.Column(db.Date)
     remark = db.Column(db.String(64))
     
-
     def __repr__(self):
-        return '<User %r>' % self.rack
+        return '<Rack %r>' % self.rack
 
     def to_list(self):
-        return [self.rack, self.site, self.count,
-            self.power, self.client, self.c_time,
-            self.e_time, self.remark]
+        return [self.rack, self.site, self.count, self.power, 
+                self.sales, self.client, self.start_time,
+                self.expire_time, self.remark]
 
+
+class IpSubnet(db.Model):
+    __tablename__ = 'ipsubnet'
+    id = db.Column(db.Integer, primary_key=True)
+    subnet = db.Column(db.String(64), unique=True, index=True)
+    start_ip = db.Column(db.String(64))
+    end_ip = db.Column(db.String(64))
+    netmask = db.Column(db.String(64))
+    site = db.Column(db.String(64))
+    sales = db.Column(db.String(32))
+    client = db.Column(db.String(64))
+    start_time = db.Column(db.Date)
+    expire_time = db.Column(db.Date)
+    remark = db.Column(db.String(64))
+    
+    def __repr__(self):
+        return '<IpSubnet %r>' % self.subnet
+
+    def to_list(self):
+        return [self.subnet, self.start_ip, self.end_ip,
+                self.netmask, self.site, self.sales, self.client,
+                self.start_time, self.expore_time, self.remark]
+
+
+class IpPool(db.Model):
+    __tablename__ = 'ippool'
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(64), unique=True, index=True)
+    netmask = db.Column(db.String(64))
+    gateway = db.Column(db.String(64))
+    subnet = db.Column(db.String(64))
+    site = db.Column(db.String(64))
+    client = db.Column(db.String(64))
+    remark = db.Column(db.String(64))
+    
+    def __repr__(self):
+        return '<IpPool %r>' % self.ip
+
+    def to_list(self):
+        return [self.ip, self.netmask, self.gateway,self.subnet, 
+                self.site, self.client, self.remark]
+
+class Cabinet(db.Model):
+    __tablename__ = 'cabinet'
+    id = db.Column(db.Integer, primary_key=True)
+    an = db.Column(db.String(64), unique=True, index=True)
+    wan_ip = db.Column(db.String(64), unique=True, index=True)
+    lan_ip = db.Column(db.String(64), index=True)
+    site = db.Column(db.String(64))
+    rack = db.Column(db.String(32))
+    seat = db.Column(db.String(32))
+    bandwidth = db.Column(db.String(32))
+    up_link = db.Column(db.String(32))
+    height = db.Column(db.String(32))
+    brand = db.Column(db.String(32))
+    model = db.Column(db.String(32))
+    sn = db.Column(db.String(64))
+    sales = db.Column(db.String(32))
+    client = db.Column(db.String(64))
+    start_time = db.Column(db.Date)
+    expire_time = db.Column(db.Date)
+    remark = db.Column(db.String(64))
+    
+    def __repr__(self):
+        return '<Cabinet %r>' % self.an
+
+    def to_list(self):
+        return [self.an, self.wan_ip, self.lan_ip,self.site, 
+                self.rack, self.seat, self.bandwidth, self.up_link,
+                self.height, self.brand, self.model, self.sn, self.sales,
+                self.client, self.start_time, self.expire_time,self.remark]

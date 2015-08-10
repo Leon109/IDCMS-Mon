@@ -15,12 +15,12 @@
 </div>
 <div class="container-fluid">
   <div class="row" style='margin-top:20px'>
-    <div>
-      选择查看项目:
-       {% for th in thead %}
-        <a class="toggle-vis" href='#' data-column="{{ th[0] }}">{{ th[1] }}</a>
-       {% endfor %}
-      </div>
+   <div class="choose">
+     选择查看项目:
+     {% for th in thead %}
+       <a class="toggle-vis" href='#' data-column="{{ th[0] }}">{{ th[1] }}</a>
+     {% endfor %}
+    </div>
     <div class="col-lg-12">
       <div class="panel panel-default" style='margin-top:20px;'>
         <div class="panel-body">
@@ -102,7 +102,7 @@
           </div>
           <div class="form-group">
             <label class="control-label">更改内容</label>
-            <input id="subvalue" class="form-control" type="text" name="value" required>
+            <input id="subvalue" class="form-control" type="text" name="value">
           </div>
          <input id="subchange" type="hidden" name="id" >
          <div class="modal-footer">

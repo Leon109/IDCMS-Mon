@@ -14,7 +14,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app import db
-from app.models import Site
+from app.models import Site, Rack
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
 
@@ -24,7 +24,7 @@ thead = [
     [0, u'机房','site'], [1,u'ISP', 'isp'], [2,u'地理位置', 'location'],
     [3, u'地址','address'], [4, u'联系方式', 'contact'], [5, u'备注' ,'remark']
 ]
-# url结尾字符
+# url分页地址函数
 endpoint = '.site'
 del_page = '/cmdb/site/delete'
 change_page= '/cmdb/site/change'
@@ -93,10 +93,12 @@ def site_delete():
     del_id = int(request.form["id"])
     site = Site.query.filter_by(id=del_id).first()
     if user:
+        if Rack.query.filter_by(site=site.site).first():
+            return u"删除失败 这个机房有机架在使用"
         db.session.delete(site)
         db.session.commit()
         return "OK"
-    return u"删除失败没有找到这个机房"
+    return u"删除失败 没有找到这个机房"
 
 @cmdb.route('/cmdb/site/change',  methods=['GET', 'POST'])
 @login_required

@@ -6,7 +6,7 @@ import sys
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import  Site
+from app.models import Site, Rack
 
 class CustomValidator():
     '''自定义检测
@@ -28,6 +28,8 @@ class CustomValidator():
 
     def validate_site(self, value):
         if Site.query.filter_by(site=value).first():
-            return u'机房已经存在,修改失败'
+            return u"更改失败 机房已经存在"
+        if Rack.query.filter_by(site=site.site).first():
+            return u"更改失败 这个机房有机架在使用"
         else:
             return "OK"
