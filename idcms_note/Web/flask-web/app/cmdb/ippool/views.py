@@ -20,7 +20,7 @@ from app.utils.searchutils import search_res
 from app.utils.record import record_sql
 
 # 初始化参数
-titles = {'path':'/cmdb/iprange', 'title':u'IDCMS-CMDB-IP子网管理'}
+titles = {'path':'/cmdb/ippool', 'title':u'IDCMS-CMDB-IP子网管理'}
 thead = [
     [0, u'IP','ip'], [1,u'子网掩码', 'netmask'], [2,u'网关地址', 'gateway'],
     [3, u'所属子网','subnet'], [4, u'所属机房', 'site'], [5, u'使用用户' ,'client'],

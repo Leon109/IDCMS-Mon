@@ -44,6 +44,36 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+class Sales(db.Model):
+    __tablename__ = 'sales'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    contact = db.Column(db.String(64))
+    email = db.Column(db.String(64))
+    remark = db.Column(db.String(64))
+    
+    def __repr__(self):
+        return '<Sales %r>' % self.username
+
+    def to_list(self):
+        return [self.username, self.contact, self.email, self.remark]
+
+
+class Client(db.Model):
+    __tablename__ = 'client'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    contact = db.Column(db.String(64))
+    email = db.Column(db.String(64))
+    remark = db.Column(db.String(64))   
+
+    def __repr__(self):
+        return '<Clinet %r>' % self.username
+
+    def to_list(self):
+        return [self.username, self.contact, self.email, self.remark]
+
+
 class Site(db.Model):
     __tablename__ = 'site'
     id = db.Column(db.Integer, primary_key=True)

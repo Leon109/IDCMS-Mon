@@ -25,7 +25,9 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            return "OK"
+            if self.item in ("remark") or self.value
+                return "OK"
+            return "这个项目不能为空"
 
     def validate_site(self, value):
         if Site.query.filter_by(site=value).first():

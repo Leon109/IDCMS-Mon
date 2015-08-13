@@ -33,7 +33,11 @@ class CustomValidator():
     def validate_return(self):
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
-        return "OK"
+        else:
+            if self.item in ("remark") or self.value
+                return "OK"
+            return "这个项目不能为空"
+
 
     def validate_rack(self,value):
         if Rack.query.filter_by(rack=value, site=self.change_rack.site).first():

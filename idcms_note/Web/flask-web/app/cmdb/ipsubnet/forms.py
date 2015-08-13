@@ -42,7 +42,15 @@ class IpSubnetForm(Form):
         if not Site.query.filter_by(site=field.data).first():
             raise ValidationError(u'添加失败，这个机房不存在')
 
-    def validate_exoire_time(self, field):
+    def validate_sales(self, field):
+        if not Sales.query.filter_by(username=field.data).first():
+            raise ValidationError(u'添加失败，这个销售不存在')
+
+    def validate_client(self, field):
+        if not Client.query.filter_by(username=field.data).first():
+            raise ValidationError(u'添加失败，这个客户不存在')
+
+    def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
         expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
         if expire_time < start_time:
