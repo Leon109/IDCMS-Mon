@@ -1,0 +1,21 @@
+{% extends "navbase.html" %}
+{% import "macros.html" as macros %}
+{% block muen %}
+  <div class="side">
+    <ul class="nav nav-sidebar">
+        <li id="edititem" class="active"><a href="#">操作记录</a></li>
+        <li><a href="/cmdb">返回导航</a><li>
+    </ul>
+  </div>
+{% endblock %}
+{% block content %}
+{{ macros.render_record(thead, search_value, items) }}
+ {% if items %}
+<div class="pagination">
+  {{ macros.render_pagination(pagination, endpoint, search=search_value) }}
+</div>
+{% endif %}
+{% endblock %}
+{% block js %}
+  <script src="{{ url_for('static', filename='js/idcms.js') }}"></script>
+{% endblock %}
