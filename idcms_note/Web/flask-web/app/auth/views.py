@@ -15,9 +15,9 @@ thead = [[0, u'用户名','username'], [1,u'密码', 'password'], [2,u'权限', 
 
 def init__sidebar(sidebar_class):
     sidebarclass = { 
-        'register':['', 'content hide'],
-        'passwd':['', 'content hide'],
-        'edituser':['', 'content hide']
+        'register':['', 'content hidden'],
+        'passwd':['', 'content hidden'],
+        'edituser':['', 'content hidden']
     }   
     sidebarclass[sidebar_class] = ['active', 'content ']
     return sidebarclass

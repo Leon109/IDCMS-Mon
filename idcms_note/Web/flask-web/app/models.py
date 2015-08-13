@@ -104,7 +104,7 @@ class IpSubnet(db.Model):
     def to_list(self):
         return [self.subnet, self.start_ip, self.end_ip,
                 self.netmask, self.site, self.sales, self.client,
-                self.start_time, self.expore_time, self.remark]
+                self.start_time, self.expire_time, self.remark]
 
 
 class IpPool(db.Model):
@@ -129,7 +129,7 @@ class Cabinet(db.Model):
     __tablename__ = 'cabinet'
     id = db.Column(db.Integer, primary_key=True)
     an = db.Column(db.String(64), unique=True, index=True)
-    wan_ip = db.Column(db.String(64), unique=True, index=True)
+    wan_ip = db.Column(db.String(64), index=True)
     lan_ip = db.Column(db.String(64), index=True)
     site = db.Column(db.String(64))
     rack = db.Column(db.String(32))
@@ -154,3 +154,21 @@ class Cabinet(db.Model):
                 self.rack, self.seat, self.bandwidth, self.up_link,
                 self.height, self.brand, self.model, self.sn, self.sales,
                 self.client, self.start_time, self.expire_time,self.remark]
+
+class Record(db.Model):
+    __tablename__ = 'record'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True)
+    status = db.Column(db.String(32))
+    table = db.Column(db.String(32))
+    table_id = db.Column(db.String(32))
+    item = db.Column(db.String(32))
+    value = db.Column(db.String(600))
+    date = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return '<Record %r>' % self.username
+   
+    def to_list(self):
+        return [self.username, self.status, self.table,
+                self.table_id, self.item, self.value, self.date]

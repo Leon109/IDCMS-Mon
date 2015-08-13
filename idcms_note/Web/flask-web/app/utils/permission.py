@@ -20,7 +20,6 @@ class Permission:
     # 管理员权限
     ADMIN = 99
 
-
 def permission_validation(level):
     '''权限验证装饰器
        level 是级别，int类型小于这个级别的将抛出403错误

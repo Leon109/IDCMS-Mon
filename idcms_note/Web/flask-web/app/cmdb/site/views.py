@@ -14,9 +14,10 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app import db
-from app.models import Site, Rack
+from app.models import Site, Rack, IpPool
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
+from app.utils.record import record_sql
 
 # 初始化参数
 titles = {'path':'/cmdb/site', 'title':u'IDCMS-CMDB-机房'}
@@ -32,8 +33,8 @@ change_page= '/cmdb/site/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hide', u'管理机房'],
-        'additem':['', 'content hide', u'添加机房']
+        'edititem':['', 'content hidden', u'管理机房'],
+        'additem':['', 'content hidden', u'添加机房']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -59,11 +60,19 @@ def site():
                 remark=site_form.remark.data
             )
             db.session.add(site)
+            db.session.commit()
+            value = (
+                "site:%s isp:%s location:%s address:%s"
+                "contact:%s remark:%s"
+            ) % (site.site, site.isp, site.location, 
+                 site.address, site.contact,site.remark)
+            record_sql(current_user.username, u"创建", u"机房",
+                       site.id, "site", value)
             flash(u'机房添加成功')
         else:
             for key in site_form.errors.keys():
                 flash(site_form.errors[key][0])
-
+        
     if request.method == "GET":
         search = request.args.get('search', '')
         if search:
@@ -92,9 +101,13 @@ def site():
 def site_delete():
     del_id = int(request.form["id"])
     site = Site.query.filter_by(id=del_id).first()
-    if user:
+    if site:
         if Rack.query.filter_by(site=site.site).first():
             return u"删除失败 这个机房有机架在使用"
+        if IpPool.query.filter_by(site=site.site).first():
+            return u"删除失败 这个机房有IP子网在使用"
+        record_sql(current_user.username, u"删除", u"机房",
+                   site.id, "site", site.site)
         db.session.delete(site)
         db.session.commit()
         return "OK"
@@ -106,14 +119,16 @@ def site_delete():
 def site_change():
     change_id = int(request.form["id"])
     item = request.form["item"]
-    value = request.form['value']
+    value = request.form["value"]
     site = Site.query.filter_by(id=change_id).first()
     if site:
-        verify = CustomValidator(item,value)
+        verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
+            record_sql(current_user.username, u"更改", u"机房",
+                        site.id, item, value)
             setattr(site, item, value) 
-            db.session.add(user)
+            db.session.add(site)
             return "OK"
         return res 
     return u"更改失败没有找到该用户"

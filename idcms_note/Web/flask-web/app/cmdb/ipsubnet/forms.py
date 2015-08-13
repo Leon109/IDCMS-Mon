@@ -2,17 +2,18 @@
 
 import os
 import sys
+import time
 
 from flask.ext.wtf import Form
 from wtforms import StringField
 from wtforms import ValidationError
-from wtforms.validators import Required, Length, IPAddress
+from wtforms.validators import Required, Length, IPAddress, Regexp
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Site, IpSubnet
-
+from app.utils.searchutils import re_date
 
 class IpSubnetForm(Form):
     subnet = StringField(u'IP子网', validators=[Required(message=u'IP子网不能为空'), 
@@ -32,6 +33,7 @@ class IpSubnetForm(Form):
     start_time = StringField(u'开通日期', validators=[Regexp(re_date, message=u'开通时间格式为yyyy-mm-dd')])
     expire_time = StringField(u'到期日期',validators=[Regexp(re_date, message=u'到期时间格式为yyyy-mm-dd')]) 
     remark = StringField(u'备注', validators=[Length(0, 64, message=u'备注最大64个字符')])
+
     def validate_subnet(self,field):
         if IpSubnet.query.filter_by(subnet=field.data).first():
              raise ValidationError(u'添加失败，这个IP子网已经存在')
@@ -39,3 +41,9 @@ class IpSubnetForm(Form):
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
             raise ValidationError(u'添加失败，这个机房不存在')
+
+    def validate_exoire_time(self, field):
+        start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
+        expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
+        if expire_time < start_time:
+            raise ValidationError(u'添加失败，到期时间小于开通时间')

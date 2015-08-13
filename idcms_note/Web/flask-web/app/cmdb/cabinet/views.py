@@ -17,6 +17,8 @@ from app import db
 from app.models import Cabinet, IpPool
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
+from app.utils.record import record_sql
+
 
 # 初始化参数
 titles = {'path':'/cmdb/cabinet', 'title':u'IDCMS-CMDB-机柜表'}
@@ -25,7 +27,7 @@ thead = [
     [3,u'所在机房', 'site'], [4, u'所在机架','rack'], [5,u'机架位置', 'seat'],
     [6, u'设备带宽', 'bandwidth'], [7, u'上联端口', 'up_link'],[8, u'设备高度','height'], 
     [9, u'设备品牌', 'brand'], [10, u'设备型号', 'model'],[11, u'设备SN','sn'], 
-    [12, u'销售代表', 'salesman'], [13,u'使用用户', 'clinet'],[14, u'开通时间', 'start_time'],
+    [12, u'销售代表', 'sales'], [13,u'使用用户', 'clinet'],[14, u'开通时间', 'start_time'],
     [15, u'到期时间' ,'expire_time'], [16, u'备注' ,'remark']
 ]
 #url结尾字符
@@ -35,8 +37,8 @@ change_page= '/cmdb/cabinet/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hide', u'管理设备'],
-        'additem':['', 'content hide', u'添加设备']
+        'edititem':['', 'content hidden', u'管理设备'],
+        'additem':['', 'content hidden', u'添加设备']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -66,17 +68,29 @@ def cabinet():
                  brand=cabinet_form.brand.data,
                  model=cabinet_form.model.data,
                  sn=cabinet_form.sn.data,
-                 salesman=cabinet_form.salesman.data,
+                 sales=cabinet_form.sales.data,
                  client=cabinet_form.client.data,
                  start_time=cabinet_form.start_time.data,
                  expire_time=cabinet_form.expire_time.data,
                  remark=cabinet_form.remark.data
             )
             db.session.add(cabinet)
+            db.session.commit()
             if cabinet_form.wan_ip.data:
                 ip = IpPool.query.filter_by(ip=cabinet_form.wan_ip.data).first()
                 ip.client = cabinet_form.client.data
                 db.session.add(ip)
+
+            value = ("an:%s wan_ip:%s lan_ip:%s site:%s rack:%s seat:%s"
+                    "bandwidth:%s up_link:%s height:%s brand:%s model:%s"
+                    "sn:%s sales:%s client:%s start_time:%s expire_time%s remark:%s"
+            ) % (cabinet.an, cabinet.wan_ip, cabinet.lan_ip, cabinet.rack,
+                 cabinet.site, cabinet.seat, cabinet.bandwidth, cabinet.up_link,
+                 cabinet.height, cabinet.brand, cabinet.model, cabinet.sn,
+                 cabinet.sales, cabinet.client, cabinet.start_time, cabinet.expire_time,
+                 cabinet.remark)
+            record_sql(current_user.username, u"创建", u"机柜表", cabinet.id, "an", value)
+
             flash(u'设备添加成功')
         else:
             for key in cabinet_form.errors.keys():
@@ -115,6 +129,8 @@ def cabinet_delete():
             change_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
             change_ip.client=''
             db.session.add(change_ip)
+        record_sql(current_user.username, u"删除", u"机柜表",
+                   cabinet.id, "an", cabinet.an)
         db.session.delete(cabinet)
         db.session.commit()
         return "OK"
@@ -140,6 +156,8 @@ def cabinet_change():
                 add_ip = IpPool.query.filter_by(ip=value).first()
                 add_ip.client = cabinet.client
                 db.session.add(add_ip)
+            record_sql(current_user.username, u"更改", u"机柜表",
+                       cabinet.id, item, value)
             setattr(cabinet, item, value) 
             db.session.add(cabinet)
             return "OK"

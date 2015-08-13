@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 
 from flask.ext.wtf import Form
 from wtforms import StringField, SelectField
@@ -38,3 +39,9 @@ class RackForm(Form):
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
             raise ValidationError(u'添加失败，这个机房不存在')
+
+    def validate_exoire_time(self, field):
+        start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
+        expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
+        if expire_time < start_time:
+            raise ValidationError(u'添加失败，到期时间小于开通时间')

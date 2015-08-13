@@ -17,6 +17,7 @@ from app import db
 from app.models import Rack, Cabinet
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
+from app.utils.record import record_sql
 
 # 初始化参数
 titles = {'path':'/cmdb/rack', 'title':u'IDCMS-CMDB-机架'}
@@ -32,8 +33,8 @@ change_page= '/cmdb/rack/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hide', u'管理机架'],
-        'additem':['', 'content hide', u'添加机架']
+        'edititem':['', 'content hidden', u'管理机架'],
+        'additem':['', 'content hidden', u'添加机架']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -62,12 +63,20 @@ def rack():
                 remark=rack_form.remark.data
             )
             db.session.add(rack)
+            db.session.commit()
+            value = (
+                "rack:%s site:%s count:%s power:%s sales:%s client:%s"
+                "start_time:%s expire_time:%s remark:%s"
+            ) % (rack.rack, rack.site, rack.count, rack.power, rack.sales,
+                 rack.client, rack.start_time, rack.expire_time, rack.remark)
+            record_sql(current_user.username, u"创建", u"机架", rack.id, "rack", value)
             flash(u'机柜添加成功')
         else:
             for key in rack_form.errors.keys():
                 flash(rack_form.errors[key][0])
 
     if request.method == "GET":
+        print type(Permission.ADMIN)
         search = request.args.get('search', '')
         if search:
             # 搜索
@@ -98,6 +107,8 @@ def rack_delete():
     if rack:
         if Cabinet.query.filter_by(rack=rack.rack, site=rack.site).first():
             return u'删除失败，还有设置使用这个机柜'
+        record_sql(current_user.username, u"删除", u"机架",
+                   rack.id, "rack", rack.rack)
         db.session.delete(rack)
         db.session.commit()
         return "OK"
@@ -115,6 +126,8 @@ def reak_change():
         verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
+            record_sql(current_user.username, u"更改", u"机架",
+                       rack.id, item, value)
             setattr(rack, item, value) 
             db.session.add(rack)
             return "OK"

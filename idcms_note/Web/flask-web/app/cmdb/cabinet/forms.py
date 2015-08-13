@@ -37,7 +37,7 @@ class CabinetForm(Form):
                         (u'华为', u'华为'), ('H3C', 'H3C'), (u'兼容机', u'兼容机')])
     model = StringField(u'设备型号', validators=[Length(0, 32, message=u'设备型号最大为32个字符')])
     sn = StringField(u'设备SN', validators=[Length(0, 32, message=u'设备SN最大为32个字符')])
-    salesman = StringField(u'销售代表', validators=[Required(message=u'销售代表不能为空'),
+    sales = StringField(u'销售代表', validators=[Required(message=u'销售代表不能为空'),
                             Length(1, 64, message=u'销售代表为1-64个字符')])
     client = StringField(u'使用用户', validators=[Required(message=u'使用用户不能为空'),
                          Length(1, 64, message=u'使用用户为1-64个字符')])
@@ -74,3 +74,9 @@ class CabinetForm(Form):
     def validate_rack(self, field):
         if not Rack.query.filter_by(rack=field.data, site=self.site.data).first():
             raise ValidationError(u'添加失败，这个机架不存在')
+
+    def validate_exoire_time(self, field):
+        start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
+        expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
+        if expire_time < start_time:
+            raise ValidationError(u'添加失败，到期时间小于开通时间')

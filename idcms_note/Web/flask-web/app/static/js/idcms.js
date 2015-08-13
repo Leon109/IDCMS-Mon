@@ -4,8 +4,8 @@ $(function(){
         $(this).addClass('active').siblings('li').removeClass('active')
         var id = $(this).attr('id')
         //变量组合使用＋号
-        $('div#'+id).removeClass('hide')
-        $('div.content').not('#'+id).addClass('hide')
+        $('div#'+id).removeClass('hidden')
+        $('div.content').not('#'+id).addClass('hidden')
     });
 })
 

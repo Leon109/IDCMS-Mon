@@ -17,6 +17,7 @@ from app import db
 from app.models import IpSubnet, IpPool
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
+from app.utils.record import record_sql
 
 # 初始化参数
 titles = {'path':'/cmdb/ipsubnet', 'title':u'IDCMS-CMDB-IP子网管理'}
@@ -33,8 +34,8 @@ change_page= '/cmdb/ipsubnet/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hide', u'管理IP子网'],
-        'additem':['', 'content hide', u'添加IP子网']
+        'edititem':['', 'content hidden', u'管理IP子网'],
+        'additem':['', 'content hidden', u'添加IP子网']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -53,8 +54,8 @@ def ipsubnet():
         if ipsubnet_form.validate_on_submit():
             ipsubnet=IpSubnet(
                  subnet=ipsubnet_form.subnet.data,
-                 start_ip=ipsubnet_form.s_ip.data,
-                 end_ip=ipsubnet_form.e_ip.data,
+                 start_ip=ipsubnet_form.start_ip.data,
+                 end_ip=ipsubnet_form.end_ip.data,
                  netmask=ipsubnet_form.netmask.data,
                  site=ipsubnet_form.site.data,
                  sales=ipsubnet_form.sales.data,
@@ -64,6 +65,16 @@ def ipsubnet():
                  remark=ipsubnet_form.remark.data
             )
             db.session.add(ipsubnet)
+            db.session.commit()
+            value = ("subnet:%s start_ip:%s end_ip:%s netmask:%s"
+                     "site:%s sales:%s client:%s start_time:%s"
+                     "expire_time:%s remark:%s" 
+            ) % (ipsubnet.subnet, ipsubnet.start_ip, ipsubnet.end_ip,
+                 ipsubnet.netmask, ipsubnet.site, ipsubnet.sales, ipsubnet.client,
+                 ipsubnet.start_time, ipsubnet.expire_time, ipsubnet.remark)
+            record_sql(current_user.username, u"创建", u"IP子网",
+                       ipsubnet.id, "subnet", value)
+            
             flash(u'IP子网添加成功')
         else:
             for key in ipsubnet_form.errors.keys():
@@ -100,6 +111,8 @@ def ipsubnet_delete():
     if ipsubnet:
         if IpPool.query.filter_by(subneet=ipsubnet.subnet).first():
             return u"删除失败 有IP使用这个子网"
+        record_sql(current_user.username, u"删除", u"IP子网",
+                   ipsubnet.id, "ipsubnet", ipsubnet.subnet)
         db.session.delete(ipsubnet)
         db.session.commit()
         return "OK"
@@ -113,10 +126,12 @@ def ipsubnet_change():
     item = request.form["item"]
     value = request.form['value']
     ipsubnet = IpSubnet.query.filter_by(id=change_id).first()
-    if iprange:
-        verify = CustomValidator(item, value)
+    if ipsubnet:
+        verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
+            record_sql(current_user.username, u"更改", u"IP子网",
+                       ipsubnet.id, item, value)
             setattr(ipsubnet, item, value) 
             db.session.add(ipsubnet)
             return "OK"

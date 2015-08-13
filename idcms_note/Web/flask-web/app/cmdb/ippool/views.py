@@ -17,6 +17,7 @@ from app import db
 from app.models import IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
+from app.utils.record import record_sql
 
 # 初始化参数
 titles = {'path':'/cmdb/iprange', 'title':u'IDCMS-CMDB-IP子网管理'}
@@ -32,8 +33,8 @@ change_page= '/cmdb/ippool/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hide', u'管理IP池'],
-        'additem':['', 'content hide', u'添加IP']
+        'edititem':['', 'content hidden', u'管理IP池'],
+        'additem':['', 'content hidden', u'添加IP']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -67,10 +68,19 @@ def ippool():
                         remark=ippool_form.remark.data
                     )
                     db.session.add(ippool)
-                    flash(u'IP添加成功')
+                    db.session.commit()
+                    
+                    value = ("ip:%s gateway:%s subnet:%s site:%s"
+                             "client:%s remark:%s"
+                    ) % (ippool.ip, ippool.gateway, ippool.subnet,
+                         ippool.site, ippool.client, ippool.remark)
+                    record_sql(current_user.username, u"创建", u"IP池",
+                               ippool.id, "ip", value)
+
                 else:
                     flash(u'添加失败 %s 已经添加' % add_ip)
                     break
+            flash(u'IP添加成功')    
              
         else:
             for key in ippool_form.errors.keys():
@@ -106,6 +116,8 @@ def ippool_delete():
     if ippool:
         if Cabinet.query.filter_by(wan_ip=ippool.ip).first():
             return "删除失败 这个IP有设备在使用"
+        record_sql(current_user.username, u"删除", u"IP池",
+                   ippool.id, "ip", ippool.ip)
         db.session.delete(ippool)
         db.session.commit()
         return "OK"
@@ -123,6 +135,8 @@ def ippool_change():
         verify = CustomValidator(item, value)
         res = verify.validate_return()
         if res == "OK":
+            record_sql(current_user.username, u"修改", u"IP池",
+                       ippool.id, item, value)
             setattr(ippool, item, value) 
             db.session.add(ippool)
             return "OK"

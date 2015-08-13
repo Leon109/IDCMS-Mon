@@ -20,17 +20,22 @@ def search_res(item, field, search):
     try:
       option = {docm.split("==")[0]:docm.split("==")[1] for docm in search.split()}
       if option:
+          print option
           for key in option.keys():
               # 第一次进行初始查询，后面的开始从上一次的基础上进行过滤
               if key == option.keys()[0]:
-                  res = getattr(item,'query').filter(getattr(item,key).endswith(option[key]))
-              res = res.filter(getattr(item,key).endswith(option[key]))
+                  print option[key]
+                  res = getattr(item,'query').filter(getattr(item,key).like("%"+option[key]+"%"))
+              else:
+                res = res.filter(getattr(item,key).like("%"+option[key]+"%"))
      # 如果不是多重搜索
     except IndexError:
         if search == "ALL":
             res = getattr(item,'query')
         else:
-            res = getattr(item,'query').filter(getattr(item,field).endswith(search))
+            # 如果使用模糊搜索
+            # res = getattr(item,'query').filter(getattr(item,field).endswith(search))
+            res = getattr(item,'query').filter(getattr(item,field).like("%"+search+"%"))
     # 如果搜索的项目发生错误
     except AttributeError:
         res = None
