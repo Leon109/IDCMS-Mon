@@ -76,7 +76,6 @@ def rack():
                 flash(rack_form.errors[key][0])
 
     if request.method == "GET":
-        print type(Permission.ADMIN)
         search = request.args.get('search', '')
         if search:
             # 搜索

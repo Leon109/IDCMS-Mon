@@ -3,6 +3,7 @@
 import os
 import sys
 import re
+import time
 
 from flask.ext.wtf import Form
 from wtforms import StringField, SelectField
@@ -12,7 +13,7 @@ from wtforms.validators import Required, Length, Regexp
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, Rack, IpPool, Cabinet
+from app.models import Site, Rack, IpPool, Cabinet, Sales, Client
 from app.utils.searchutils import re_date, re_ip
 
 
@@ -38,9 +39,9 @@ class CabinetForm(Form):
     model = StringField(u'设备型号', validators=[Length(0, 32, message=u'设备型号最大为32个字符')])
     sn = StringField(u'设备SN', validators=[Length(0, 32, message=u'设备SN最大为32个字符')])
     sales = StringField(u'销售代表', validators=[Required(message=u'销售代表不能为空'),
-                            Length(1, 64, message=u'销售代表为1-64个字符')])
+                            Length(1, 32, message=u'销售代表最大为32个字符')])
     client = StringField(u'使用用户', validators=[Required(message=u'使用用户不能为空'),
-                         Length(1, 64, message=u'使用用户为1-64个字符')])
+                         Length(1, 64, message=u'使用用户为最大为64个字符')])
     start_time = StringField(u'开通日期', validators=[Regexp(re_date, message=u'开通时间格式为yyyy-mm-dd')])
     expire_time = StringField(u'到期日期',validators=[Regexp(re_date, message=u'到期时间格式为yyyy-mm-dd')])
     remark = StringField(u'备注', validators=[Length(0, 64, message=u'备注最大64个字符')])
@@ -64,27 +65,27 @@ class CabinetForm(Form):
     
     def validate_lan_ip(self, field):
         if field.data:
-            if not  re.match(re_ip, field.data):
+            if not re.match(re_ip, field.data):
                 raise ValidationError(u'添加失败 内网IP应该是一个IP格式')
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败，这个机房不存在')
+            raise ValidationError(u'添加失败 这个机房不存在')
 
     def validate_rack(self, field):
         if not Rack.query.filter_by(rack=field.data, site=self.site.data).first():
-            raise ValidationError(u'添加失败，这个机架不存在')
+            raise ValidationError(u'添加失败 这个机架不存在')
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个销售不存在')
+            raise ValidationError(u'添加失败 这个销售不存在')
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个客户不存在')
+            raise ValidationError(u'添加失败 这个客户不存在')
 
-    def validate_exoire_time(self, field):
+    def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
         expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
         if expire_time < start_time:
-            raise ValidationError(u'添加失败，到期时间小于开通时间')
+            raise ValidationError(u'添加失败 到期时间小于开通时间')

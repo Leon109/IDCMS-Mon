@@ -7,7 +7,7 @@ import re
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, IpSubnet, IpPool, Cabinet
+from app.models import Site, IpSubnet, IpPool, Cabinet, Client
 from app.utils.searchutils import re_ip
 
 class CustomValidator():
@@ -22,6 +22,7 @@ class CustomValidator():
             "ip":self.validate_ip,
             "subnet":self.validate_subnet,
             "site":self.validate_site,
+            "client":self.validate_client,
             "netmask":self.validate_ipvali,
             "gateway":self.validate_ipvali
         }
@@ -29,7 +30,12 @@ class CustomValidator():
     def validate_return(self):
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
-        return "OK"
+        else:
+            if len(self.value) > 64: 
+                return u"更改失败 最大64个字符"
+            if self.item in ("remark") or self.value:
+                return "OK"
+            return u"这个项目不能为空"
 
     def validate_ip(self, value):
         if not re.match(re_ip, value):
@@ -51,7 +57,13 @@ class CustomValidator():
         if not Site.query.filter_by(site=value).first():
             return u'更改失败，这个机房不存在'
         return "OK"
-    
+
+    def validate_client(self,value):
+        if value:
+            if not Client.query.filter_by(username=value).first():
+                return u'更改失败 这个客户不存在'
+        return "OK"
+
     def validate_ipvali(self, value):
         if re.match(re_ip, value):
             return "OK"

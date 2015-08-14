@@ -7,14 +7,14 @@ from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
 
 from .. import cmdb
-from .forms import clientForm
+from .forms import ClientForm
 from .customvalidator import CustomValidator
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app import db
-from app.models import Client, Rack, IpPool, Cabinet
+from app.models import Client, Rack, IpSubnet, IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
 from app.utils.searchutils import search_res
 from app.utils.record import record_sql
@@ -22,8 +22,7 @@ from app.utils.record import record_sql
 # 初始化参数
 titles = {'path':'/cmdb/client', 'title':u'IDCMS-CMDB-客户管理'}
 thead = [
-    [0, u'客户','username'], [1,u'联系方式', 'contact'], [2,u'邮箱地址', 'email'],
-    [3, u'备注' ,'remark']
+    [0, u'客户','username'], [1,u'联系方式', 'contact'], [2, u'备注' ,'remark']
 ]
 # url分页地址函数
 endpoint = '.client'
@@ -33,8 +32,8 @@ change_page= '/cmdb/client/change'
 
 def init__sidebar(sidebar_class):
     sidebarclass = {
-        'edititem':['', 'content hidden', u'管理销售'],
-        'additem':['', 'content hidden', u'添加销售']
+        'edititem':['', 'content hidden', u'管理客户'],
+        'additem':['', 'content hidden', u'添加客户']
     }
     sidebarclass[sidebar_class][0] = 'active' 
     sidebarclass[sidebar_class][1] = 'content'
@@ -52,18 +51,16 @@ def client():
         sidebarclass = init__sidebar('additem')
         if client_form.validate_on_submit():
             client = Client(
-                client=Client_form.username.data,
+                username=client_form.username.data,
                 contact=client_form.contact.data,
-                email=client_form.email.data,
                 remark=client_form.remark.data
             )
             db.session.add(client)
             db.session.commit()
             value = (
-                "username:%s isp:%s contact:%s email:%s","remark:%s"
-            ) % (client.usrename, client.contact, client.email, client.remark)
-            record_sql(current_user.username, u"创建", u"销售",
-                       client.id, "client", value)
+                "username:%s contact:%s remark:%s"
+            ) % (client.username, client.contact, client.remark)
+            record_sql(current_user.username, u"创建", u"销售", client.id, "client", value)
             flash(u'客户添加成功')
         else:
             for key in client_form.errors.keys():
@@ -75,7 +72,7 @@ def client():
             # 搜索
             page = int(request.args.get('page', 1))
             sidebarclass = init__sidebar('edititem')
-            res = search_res(client, 'client' , search)
+            res = search_res(Client, 'username' , search)
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
@@ -100,12 +97,13 @@ def client_delete():
     if client:
         if Rack.query.filter_by(client=client.username).first():
             return u"删除失败 这个销售有机架在使用"
-        if IpPool.query.filter_by(client=client.username).first():
+        if IpSubnet.query.filter_by(client=client.username).first():
             return u"删除失败 这个销售有IP子网在使用"
+        if IpPool.query.filter_by(client=client.username).first():
+            return u"删除失败 这个销售有IP在使用"
         if Cabinet.query.filter_by(client=client.username).first():
             return u"删除失败 这个销售有设备在使用"
-        record_sql(current_user.username, u"删除", u"客户",
-                   client.id, "client", client.username)
+        record_sql(current_user.username, u"删除", u"客户", client.id, "client", client.username)
         db.session.delete(client)
         db.session.commit()
         return "OK"
@@ -123,8 +121,7 @@ def client_change():
         verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
-            record_sql(current_user.username, u"更改", u"客户",
-                        client.id, item, value)
+            record_sql(current_user.username, u"更改", u"客户", client.id, item, value)
             setattr(client, item, value) 
             db.session.add(client)
             return "OK"

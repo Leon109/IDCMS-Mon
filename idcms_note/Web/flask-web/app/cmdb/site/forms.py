@@ -25,6 +25,7 @@ class SiteForm(Form):
     contact = StringField(u'联系方式', validators=[Required(message=u'机房名不能为空'),
                           Length(1, 64, message=u'联系方式最大64个字符')])
     remark = StringField(u'备注', validators=[Length(0, 64, message=u'备注最大64个字符')])
+
     def validate_site(self, field):
         '''如果这么写，wtf会自动监测这个问题'''
         if Site.query.filter_by(site=field.data).first():

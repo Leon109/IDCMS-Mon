@@ -109,7 +109,7 @@ def ipsubnet_delete():
     del_id = int(request.form["id"])
     ipsubnet = IpSubnet.query.filter_by(id=del_id).first()
     if ipsubnet:
-        if IpPool.query.filter_by(subneet=ipsubnet.subnet).first():
+        if IpPool.query.filter_by(subnet=ipsubnet.subnet).first():
             return u"删除失败 有IP使用这个子网"
         record_sql(current_user.username, u"删除", u"IP子网",
                    ipsubnet.id, "ipsubnet", ipsubnet.subnet)

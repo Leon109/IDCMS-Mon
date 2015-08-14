@@ -25,11 +25,15 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            if self.item in ("remark") or self.value
+            if len(self.value) > 64:
+                return u"更改失败 最大字符为64个字符"
+            if self.item in ("remark") or self.value:
                 return "OK"
-            return "这个项目不能为空"
+            return u"这个项目不能为空"
 
     def validate_site(self, value):
+        if len(self.value) > 64:
+            return u"更改失败 最大字符为64个字符"
         if Site.query.filter_by(site=value).first():
             return u"更改失败 机房已经存在"
         if Rack.query.filter_by(site=self.change_site.site).first():

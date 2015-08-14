@@ -11,7 +11,7 @@ from wtforms.validators import Required, Length, IPAddress, Regexp
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, IpSubnet, IpPool
+from app.models import Site, IpSubnet, IpPool, Client
 
 re_ip_one = '^(25[0-5]|2[0-4]\d|[01]?\d\d?)$'
 
@@ -42,3 +42,9 @@ class IpPoolForm(Form):
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
             raise ValidationError(u'添加失败 这个机房不存在')
+
+    def validate_client(self, field):
+        if field.data:
+            if not Client.query.filter_by(username=field.data).first():
+                raise ValidationError(u'添加失败 这个客户不存在')
+

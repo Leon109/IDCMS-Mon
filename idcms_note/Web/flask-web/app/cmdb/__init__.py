@@ -3,6 +3,8 @@ from flask import Blueprint
 cmdb = Blueprint('cmdb', __name__)
 
 from . import views
+from .sales import views
+from .client import views
 from .site import views
 from .rack import views
 from .ipsubnet import views

@@ -6,7 +6,7 @@ import sys
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Client, Rack, IpSubnet, Cabinet
+from app.models import Client, Rack, IpSubnet, IpPool, Cabinet
 
 class CustomValidator():
     '''自定义检测
@@ -15,7 +15,7 @@ class CustomValidator():
     '''
     def __init__(self, item, item_id, value):
         self.item = item
-        self.change_Client = Client.query.filter_by(id=int(item_id)).first()
+        self.change_client = Client.query.filter_by(id=int(item_id)).first()
         self.value = value
         self.sm =  {
             "username":self.validate_username,
@@ -25,18 +25,24 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            if self.item in ("email", "remark") or self.value
+            if len(self.value) > 64:
+                return u"更改失败 最大不能超过64个字符"
+            if self.item in ("remark") or self.value:
                 return "OK"
-            return "这个项目不能为空"
+            return u"这个项目不能为空"
 
     def validate_username(self, value):
+        if len(self.value) > 64:
+            return "更改失败 最大不能超过64个字符"
         if Client.query.filter_by(username=value).first():
             return u"更改失败 这个客户已经存在"
-        if Rack.query.filter_by(Client=self.change_Client.username).first():
+        if Rack.query.filter_by(client=self.change_client.username).first():
             return u"更改失败 这个客户有机架在使用"
-        if IpSubnet.query.filter_by(Client=self.change_Client.username).first():
+        if IpSubnet.query.filter_by(client=self.change_client.username).first():
             return u"更改失败 这个客户有IP子网在使用"
-        if Cabinet.query.filter_by(Client=self.change_Client.username).first():
+        if IpPool.query.filter_by(client=self.change_client.username).first():
+            return u"更改失败 这个客户有IP在使用"
+        if Cabinet.query.filter_by(client=self.change_client.username).first():
             return u"更改失败 这个客户有设备在使用"
         else:
             return "OK"

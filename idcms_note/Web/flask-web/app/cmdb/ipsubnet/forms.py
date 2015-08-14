@@ -12,7 +12,7 @@ from wtforms.validators import Required, Length, IPAddress, Regexp
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, IpSubnet
+from app.models import Site, IpSubnet, Sales, Client
 from app.utils.searchutils import re_date
 
 class IpSubnetForm(Form):
@@ -44,11 +44,11 @@ class IpSubnetForm(Form):
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个销售不存在')
+            raise ValidationError(u'添加失败 这个销售不存在')
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个客户不存在')
+            raise ValidationError(u'添加失败 这个客户不存在')
 
     def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))

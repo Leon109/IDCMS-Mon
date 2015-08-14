@@ -8,7 +8,7 @@ import time
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Rack,Site
+from app.models import Rack, Site, Sales, Client
 from app.utils.searchutils import re_date
 
 
@@ -26,6 +26,8 @@ class CustomValidator():
             "site":self.validate_site,
             "count":self.validate_count,
             "power":self.validate_power,
+            "sales":self.validate_sales,
+            "client":self.validate_client,
             "start_time":self.validate_start_time,
             "expire_time":self.validate_expire_time
         }
@@ -34,10 +36,11 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            if self.item in ("remark") or self.value
+            if len(self.value) > 64:
+                return u"更改失败 最大64个字符"
+            if self.item in ("remark") or self.value:
                 return "OK"
-            return "这个项目不能为空"
-
+            return u"这个项目不能为空"
 
     def validate_rack(self,value):
         if Rack.query.filter_by(rack=value, site=self.change_rack.site).first():
@@ -66,19 +69,29 @@ class CustomValidator():
         if re.match(re_power, value):
             return "OK"
         return u"更改失败, 格式为 数字+A"
+
+    def validate_sales(self,value):
+        if not Sales.query.filter_by(username=value).first():
+            return u'更改失败 这个销售不存在'
+        return "OK"
+
+    def validate_client(self,value):
+        if not Client.query.filter_by(username=value).first():
+            return u'更改失败 这个客户不存在'
+        return "OK"
     
     def validate_start_time(self, value):
         if re.match(re_date, value):
             start_time = time.mktime(time.strptime(value,'%Y-%m-%d'))
-            expire_time = time.mktime(time.strptime(self.change_rack.expire_time,'%Y-%m-%d'))
+            expire_time = time.mktime(time.strptime(str(self.change_rack.expire_time),'%Y-%m-%d'))
             if start_time > expire_time:
-                return u"添加失败，开通时间小于到期时间"
+                return u"添加失败，开通时间大于到期时间"
             return "OK"
         return u"更改失败，时间格式不正确"
 
     def validate_expire_time(self, value):
         if re.match(re_date, value):
-            start_time = time.mktime(time.strptime(self.change_rack.start_time,'%Y-%m-%d'))
+            start_time = time.mktime(time.strptime(str(self.change_rack.start_time),'%Y-%m-%d'))
             expire_time = time.mktime(time.strptime(value,'%Y-%m-%d'))
             if expire_time < start_time:
                 return u"添加失败，到期时间小于开通时间"

@@ -12,7 +12,7 @@ from wtforms.validators import Required, Length, Regexp
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, Rack, Sales, Clinet
+from app.models import Site, Rack, Sales, Client
 from app.utils.searchutils import re_date
 
 
@@ -34,22 +34,22 @@ class RackForm(Form):
     
     def validate_rack(self, field):
         if Rack.query.filter_by(rack=field.data, site=self.site.data).first():
-            raise ValidationError(u'添加失败，这个机房已经有该机柜')
+            raise ValidationError(u'添加失败 这个机房已经有该机柜')
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败，这个机房不存在')
+            raise ValidationError(u'添加失败 这个机房不存在')
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个销售不存在')
+            raise ValidationError(u'添加失败 这个销售不存在')
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败，这个客户不存在')
+            raise ValidationError(u'添加失败 这个客户不存在')
 
-    def validate_exoire_time(self, field):
+    def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
         expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
         if expire_time < start_time:
-            raise ValidationError(u'添加失败，到期时间小于开通时间')
+            raise ValidationError(u'添加失败 到期时间小于开通时间')

@@ -5,8 +5,8 @@ from ..utils.permission import Permission
 
 class CustomValidator():
     '''自定义检测
-    如国检测正确返回 OK
-    如国失败返回提示信息
+    如果检测正确返回 OK
+    如果失败返回提示信息
     '''
     def __init__(self, item, value):
         self.item = item
@@ -34,4 +34,3 @@ class CustomValidator():
             return "OK"
         else:
             return u"权限名称错误"
-

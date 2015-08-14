@@ -10,8 +10,8 @@ from app.models import Sales, Rack, IpSubnet, Cabinet
 
 class CustomValidator():
     '''自定义检测
-    如国检测正确返回 OK
-    如国失败返回提示信息
+    如果检测正确返回 OK
+    如果失败返回提示信息
     '''
     def __init__(self, item, item_id, value):
         self.item = item
@@ -25,11 +25,15 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            if self.item in ("email", "remark") or self.value
+            if len(self.value) > 64:
+                return u"更改失败,不能超过64个字符"
+            if self.item in ("remark") or self.value:
                 return "OK"
-            return "这个项目不能为空"
+            return u"这个项目不能为空"
 
     def validate_username(self, value):
+        if len(value) >  32:
+            return u"更改失败，不能超过32个字符"
         if Sales.query.filter_by(username=value).first():
             return u"更改失败 这个销售已经存在"
         if Rack.query.filter_by(sales=self.change_sales.username).first():

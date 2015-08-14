@@ -84,8 +84,8 @@ def cabinet():
             value = ("an:%s wan_ip:%s lan_ip:%s site:%s rack:%s seat:%s"
                     "bandwidth:%s up_link:%s height:%s brand:%s model:%s"
                     "sn:%s sales:%s client:%s start_time:%s expire_time%s remark:%s"
-            ) % (cabinet.an, cabinet.wan_ip, cabinet.lan_ip, cabinet.rack,
-                 cabinet.site, cabinet.seat, cabinet.bandwidth, cabinet.up_link,
+            ) % (cabinet.an, cabinet.wan_ip, cabinet.lan_ip, cabinet.site, 
+                 cabinet.rack, cabinet.seat, cabinet.bandwidth, cabinet.up_link,
                  cabinet.height, cabinet.brand, cabinet.model, cabinet.sn,
                  cabinet.sales, cabinet.client, cabinet.start_time, cabinet.expire_time,
                  cabinet.remark)
@@ -129,8 +129,7 @@ def cabinet_delete():
             change_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
             change_ip.client=''
             db.session.add(change_ip)
-        record_sql(current_user.username, u"删除", u"机柜表",
-                   cabinet.id, "an", cabinet.an)
+        record_sql(current_user.username, u"删除", u"机柜表", cabinet.id, "an", cabinet.an)
         db.session.delete(cabinet)
         db.session.commit()
         return "OK"

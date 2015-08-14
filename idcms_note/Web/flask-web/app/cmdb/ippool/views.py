@@ -121,7 +121,7 @@ def ippool_delete():
         db.session.delete(ippool)
         db.session.commit()
         return "OK"
-    return u"删除失败没有找到这个IP子网"
+    return u"删除失败 没有找到这个IP"
 
 @cmdb.route('/cmdb/ippool/change',  methods=['GET', 'POST'])
 @login_required
