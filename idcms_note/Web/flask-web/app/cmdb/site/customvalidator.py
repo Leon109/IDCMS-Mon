@@ -27,7 +27,7 @@ class CustomValidator():
         else:
             if len(self.value) > 64:
                 return u"更改失败 最大字符为64个字符"
-            if self.item in ("remark") or self.value:
+            if self.item in ("dns", "remark") or self.value:
                 return "OK"
             return u"这个项目不能为空"
 

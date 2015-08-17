@@ -24,6 +24,7 @@ class SiteForm(Form):
                            Length(1, 64, message=u'详细地址最大64个字符')])
     contact = StringField(u'联系方式', validators=[Required(message=u'机房名不能为空'),
                           Length(1, 64, message=u'联系方式最大64个字符')])
+    dns = StringField(u'机房DNS', validators=[Length(0, 64, message=u'机房DNS最大64个字符')])
     remark = StringField(u'备注', validators=[Length(0, 64, message=u'备注最大64个字符')])
 
     def validate_site(self, field):

@@ -1,3 +1,8 @@
 #python
 
 *.pyc
+
+#dir
+
+/idcms_note/Web/flask-web/migrations
+

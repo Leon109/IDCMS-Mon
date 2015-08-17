@@ -23,7 +23,8 @@ from app.utils.record import record_sql
 titles = {'path':'/cmdb/site', 'title':u'IDCMS-CMDB-机房'}
 thead = [
     [0, u'机房','site'], [1,u'ISP', 'isp'], [2,u'地理位置', 'location'],
-    [3, u'地址','address'], [4, u'联系方式', 'contact'], [5, u'备注' ,'remark']
+    [3, u'地址','address'], [4, u'联系方式', 'contact'], [5, u'联系方式', 'dns'], 
+    [6, u'备注' ,'remark']
 ]
 # url分页地址函数
 endpoint = '.site'
@@ -57,15 +58,16 @@ def site():
                 location=site_form.location.data,
                 address=site_form.address.data,
                 contact=site_form.contact.data,
+                dns=site_form.contact.data,
                 remark=site_form.remark.data
             )
             db.session.add(site)
             db.session.commit()
             value = (
                 "site:%s isp:%s location:%s address:%s"
-                "contact:%s remark:%s"
+                "contact:%s  dns:%s remark:%s"
             ) % (site.site, site.isp, site.location, 
-                 site.address, site.contact,site.remark)
+                 site.address, site.contact, site.dns, site.remark)
             record_sql(current_user.username, u"创建", u"机房",
                        site.id, "site", value)
             flash(u'机房添加成功')

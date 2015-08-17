@@ -80,6 +80,7 @@ class Site(db.Model):
     location = db.Column(db.String(64))
     address = db.Column(db.String(64))
     contact = db.Column(db.String(64))
+    dns = db.Column(db.String(64))
     remark = db.Column(db.String(64))
 
     def __repr__(self):
@@ -87,7 +88,7 @@ class Site(db.Model):
 
     def to_list(self):
         return [self.site,self.isp, self.location,
-                self.address, self.contact, self.remark] 
+                self.address, self.contact, self.dns, self.remark] 
 
 
 class Rack(db.Model):
