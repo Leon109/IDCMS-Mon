@@ -23,9 +23,20 @@ def search_res(item, field, search):
           for key in option.keys():
               # 第一次进行初始查询，后面的开始从上一次的基础上进行过滤
               if key == option.keys()[0]:
+                  # 如果是时间，单独处理
+                  if key in ("start_time", "expire_time"):
+                      value = option[key].split(":")
+                      if len(value) == 2:
+                          res = getattr(item,'query').filter(getattr(item,key).between(value[0], value[1]))
+                          break
                   res = getattr(item,'query').filter(getattr(item,key).like("%"+option[key]+"%"))
               else:
-                res = res.filter(getattr(item,key).like("%"+option[key]+"%"))
+                  if key in ("start_time", "expire_time"):
+                      value = option[key].split(":")
+                      if len(value) == 2:
+                          res = res.filter(getattr(item,key).between(value[0], value[1]))
+                          break
+                  res = res.filter(getattr(item,key).like("%"+option[key]+"%"))
      # 如果不是多重搜索
     except IndexError:
         if search == "ALL":
@@ -38,4 +49,3 @@ def search_res(item, field, search):
     except AttributeError:
         res = None
     return res
-

@@ -23,7 +23,7 @@ from app.utils.record import record_sql
 titles = {'path':'/cmdb/site', 'title':u'IDCMS-CMDB-机房'}
 thead = [
     [0, u'机房','site'], [1,u'ISP', 'isp'], [2,u'地理位置', 'location'],
-    [3, u'地址','address'], [4, u'联系方式', 'contact'], [5, u'联系方式', 'dns'], 
+    [3, u'地址','address'], [4, u'联系方式', 'contact'], [5, u'机房DNS', 'dns'], 
     [6, u'备注' ,'remark']
 ]
 # url分页地址函数
