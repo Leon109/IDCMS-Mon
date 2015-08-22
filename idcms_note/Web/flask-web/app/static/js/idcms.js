@@ -84,8 +84,8 @@ $(document).ready(function() {
     };
     var count = $("div.choose a").last().attr('data-column');
     var defs = [];
-    if ( parseInt(count) >= 9){
-        for (var i=9; i< parseInt(count)+1; i++){
+    if ( parseInt(count) >= 11){
+        for (var i=11; i < parseInt(count)+1; i++){
             defs.push(i)
         }
         table_dict["columnDefs"] = [{

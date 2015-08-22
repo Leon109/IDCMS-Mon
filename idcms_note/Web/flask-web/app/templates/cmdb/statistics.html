@@ -1,0 +1,83 @@
+{% extends "navbase.html" %}
+{% block muen %}
+<div class="side">
+  <ul class="nav nav-sidebar">
+    <li id='base' class="active" url="/cmdb/statistics/base_info"><a href="#">基础资源统计</a></li>
+    <li id='site' url="/cmdb/statistics/site_info/"><a href="#">机房资源统计</a></li>
+    <li id='salse' url="/cmdb/statistics/salse"><a href="#">销售设备统计</a></li>
+    <li><a href="/cmdb">返回导航</a></li>
+  </ul>
+</div>
+{% endblock %}
+{% block content %}
+<div id="site" class='content hidden'>
+  <span class="text-primary">选择机房</span>
+    <select id="site_info">
+      {% for site in all_site %}
+      <option value={{ site.site }}>{{ site.site }}</option>
+      {% endfor %}
+  </select>
+</div>
+<div class="panel panel-default" style='margin-top:20px;'>
+    <div class="panel-body">
+        <div id="main" style="height:400px"></div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='echarts/build/dist/echarts.js') }}"></script>
+<script type="text/javascript">
+function echarts_run(url){
+    var res = null;
+    $.ajax({
+      url: url,
+      async: false,
+      dataType: 'json',
+      success: function (json){
+        res = json;
+      }
+    });
+
+    require.config({
+        paths: {
+            echarts: '/static/echarts/build/dist'
+        }
+    });
+    
+    require(
+        [
+            'echarts',
+            'echarts/theme/macarons',
+             res.graph // 使用柱状图就加载bar模块，按需加载
+        ],
+        function (ec, theme) {
+            var myChart = ec.init(document.getElementById('main'), theme); 
+            var option = res.option
+            myChart.setOption(option); 
+        }
+    );
+};
+
+$(document).ready(function(){
+    var url = null;
+    $('div.side li').click(function(){
+        $(this).addClass('active').siblings('li').removeClass('active')
+        base_url = $(this).attr('url')
+        url = base_url
+        var id = $(this).attr('id')
+        $('div#'+id).removeClass('hidden')
+        $('div.content').not('#'+id).addClass('hidden')
+        if (id=='site'){
+            url = base_url + $('#site_info').val()
+        }
+        $('#site_info').change(function(){
+            url = base_url + $(this).val()
+            echarts_run(url)
+        });
+        echarts_run(url)
+    });
+    url = "/cmdb/statistics/base_info"
+    echarts_run(url)
+});
+</script>
+{% endblock %}

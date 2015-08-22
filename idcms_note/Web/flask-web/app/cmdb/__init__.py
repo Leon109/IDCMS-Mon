@@ -11,6 +11,7 @@ from .ipsubnet import views
 from .ippool import views
 from .cabinet import views
 from .record import views
+from .statistics import views
 
 from ..utils.permission import Permission
 

@@ -84,7 +84,7 @@ class CustomValidator():
         return u"更改失败 格式为 数字+M"
     
     def validate_height(self,value):
-        re_power = '^\d\dU$'
+        re_power = '^\d+U$'
         if re.match(re_power, value):
             return "OK"
         return u"更改失败 格式为 数字+U"

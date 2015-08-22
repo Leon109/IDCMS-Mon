@@ -58,7 +58,7 @@ def site():
                 location=site_form.location.data,
                 address=site_form.address.data,
                 contact=site_form.contact.data,
-                dns=site_form.contact.data,
+                dns=site_form.dns.data,
                 remark=site_form.remark.data
             )
             db.session.add(site)
