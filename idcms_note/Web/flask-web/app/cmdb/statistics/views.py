@@ -30,8 +30,7 @@ def ehart_init():
                     'saveAsImage': {'show': True}
                     }
             },
-            'calculable': True, 'xAxis': [], 'yAxis': [],
-            'series': []
+            'calculable': True, 'series': []
         }  
     }
     return echart
@@ -52,9 +51,9 @@ def base_info():
     res["graph"] = 'echarts/chart/bar'
     option = res["option"]
     option['title']['text'] = u'基础资源统计'
-    option['xAxis'].append({"type": 'value', "boundaryGap": [0, 0.01]})
-    option["yAxis"].append({'type': 'category', 
-        'data':[u'机房', u'机柜', u'设备', u'客户', u'销售']})
+    option['xAxis'] = {"type": 'value', "boundaryGap": [0, 0.01]}
+    option["yAxis"] = {'type': 'category', 
+        'data':[u'机房', u'机柜', u'设备', u'客户', u'销售']}
     data = []
     for item in [Site, Rack, Cabinet, Client, Sales]:
         data.append(item.query.count())
@@ -65,21 +64,27 @@ def base_info():
 @login_required
 @permission_validation(Permission.ADMIN)
 def site_info(sitename):
-    res = ehart_init
-    res['title'] = {'text': u'机房资源统计'}
-    res['ydata'] = [u'机柜',u'设备']
+    res = ehart_init()
+    res["graph"] = 'echarts/chart/bar'
+    option = res["option"]
+    option['title']['text'] =  u'机房资源统计'
+    option['xAxis'] = {"type": 'value', "boundaryGap": [0, 0.01]}
+    option["yAxis"] = {'type': 'category', 'data': [u'机柜', u'设备']}
     data = []
     for item in [Rack, Cabinet]:
         data.append(item.query.filter_by(site=sitename).count())
-    res['sdata'] = data
+    option['series'].append({"type": "bar", "data": data})
     return json.dumps(res)
 
 @cmdb.route('/cmdb/statistics/sales_info',  methods=['GET'])
 @login_required
 @permission_validation(Permission.ADMIN)
 def sales_info():
-    res={}
-    res['title'] = {'text': u'销售设备统计'}
+    res = ehart_init()
+    res["graph"] = 'echarts/chart/pie'
+    option = res["option"]
+    option['title'] = {'text': u'销售设备统计', 'x': 'center'}
+    option['tooltip'] =  {'trigger':'item', 'formatter': "{a}<br/>{b} : {c} ({d}%)"}
     sales_all = Sales.query.all()
     ydata = []
     sdata = []
@@ -89,9 +94,6 @@ def sales_info():
         data['name'] = sales.username
         data['value'] = Cabinet.query.filter_by(sales=sales.username).count()
         sdata.append(data)
-    res['ydata'] = ydata
-    res['sdata'] = sdata
+    option['legend'] = {'orient':'vertical', 'x': 'left', 'data': ydata}
+    option['series'].append({'name': u'销售',"type": "pie",  'radius': '55%', 'center': ['50%', '60%'], "data": sdata})
     return json.dumps(res)
-
-
-
