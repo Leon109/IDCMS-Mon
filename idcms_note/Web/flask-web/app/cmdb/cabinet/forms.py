@@ -35,7 +35,8 @@ class CabinetForm(Form):
     height = SelectField(u'设备高度', choices=[('1U', '1U'),('2U', '2U'), ('3U','3U' ), ('4U','4U')])
     brand = SelectField(u'设备品牌', choices=[(u'戴尔', u'戴尔'), (u'惠普', u'惠普'), ('IBM', 'IBM'), 
                         (u'浪潮', u'浪潮' ), (u'联想', u'联想'), (u'金品', u'金品'), (u'思科', u'思科'),
-                        (u'华为', u'华为'), ('H3C', 'H3C'), (u'兼容机', u'兼容机')])
+                        (u'华为', u'华为'), ('H3C', 'H3C'), ('TP-Link', 'TP-Link'),('D-Link', 'D-Link'),
+                        (u'兼容机', u'兼容机')])
     model = StringField(u'设备型号', validators=[Length(0, 32, message=u'设备型号最大为32个字符')])
     sn = StringField(u'设备SN', validators=[Length(0, 32, message=u'设备SN最大为32个字符')])
     sales = StringField(u'销售代表', validators=[Required(message=u'销售代表不能为空'),

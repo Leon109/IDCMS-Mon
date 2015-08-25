@@ -65,8 +65,9 @@ $(function(){
 
 // DataTable
 $(document).ready(function() {
-    var table_dict = { 
-        aLengthMenu:[50, 100],
+    var table_dict = {
+        bPaginate: false,
+        //aLengthMenu:[50, 100],
         language: {
             "sLengthMenu": "显示 _MENU_ 项结果",
             "sZeroRecords": "没有匹配结果",
