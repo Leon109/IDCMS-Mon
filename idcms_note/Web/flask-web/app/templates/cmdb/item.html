@@ -1,49 +1,70 @@
 {% extends "navbase.html" %}
 {% import "macros.html" as macros %}
-{% block muen %}
-  <div class="side">
-    <ul class="nav nav-sidebar">
-        <li id="edititem" class="{{ sidebarclass['edititem'][0] }}"><a href="#">{{ sidebarclass['edititem'][2] }}</a></li>
-        <li id ="additem" class="{{ sidebarclass['additem'][0] }}"><a href="#">{{ sidebarclass['additem'][2] }}</a></li>
-        <li><a href="/cmdb">返回导航</a><li>
+{% block sidebar %}
+{% for side in sidebar['sidebar_for'] %}
+<li class={{ sidebar[side]['class'] }}>
+    <a href=sidebar[side]['href']>
+    <i class={{ sidebar[side]['icon'] }}></i>
+    <span class="title">{{sidebar[side]['title']}}</span>
+    <span class="arrow "></span>
+    </a>
+    <ul class="sub-menu">
+        {% for l in sidebar[side]['li_for'] %}
+        <li class="{{ sidebar[side]['li'][l][0] }}" id={{ sidebar[side]['li'][l][1] }}>
+        <a herf="javascript:;">{{ sidebar[side]['li'][l][2] }}</a>
+        </li>
+        {% endfor %}
     </ul>
-  </div>
+    </li>
+{% endfor %}
 {% endblock %}
 {% block content %}
-  <div id="edititem" class="{{ sidebarclass['edititem'][1] }}">
-   {{ macros.render_search(thead, search_value, items, Permission, current_user, del_page, change_page) }}
+<div id="edititem" class="{{ li_css['edititem'] }}">
+    {{ macros.render_search(thead, search_value, items, Permission, current_user, del_page, change_page) }}
     {% if items %}
       <div class="pagination">
           {{ macros.render_pagination(pagination, endpoint, search=search_value) }}
       </div>
     {% endif %}
-  </div>
-  <div id="additem" class="{{ sidebarclass['additem'][1] }}">
+</div>
+<div id="additem" class="{{ li_css['additem'] }}">
     {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
-    <h3 class="page-header">{{ sidebarclass['edititem'][2] }}</h3>
-      <form class="form-horizontal" method="post">
-        {{ item_form.hidden_tag() }}
-          {% for form in item_form %}
-            {% if form != item_form.csrf_token %}
-              <div class="form-group col-sm-6">
-                {{ form.label(class="col-sm-3 control-label") }}
-                <div class="col-sm-7">
-                  {{ form(class="form-control")}}
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
-            <div class="form-group col-sm-6">
-              <div class="col-sm-offset-3 col-sm-6">
-                <button type="submit" name="action" value="register" class="btn btn-success">确认提交</button>
-              </div>
+    <div class="portlet box green">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-bank"></i>添加销售
             </div>
-      </form>
-     {% else %}
-     <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
-     {% endif %}
-  </div>
+        </div>
+        <div class="portlet-body form">
+            <form class="form-horizontal" method="post">
+                <div class="form-body">
+                    <div class="row">
+                    {{ item_form.hidden_tag() }}
+                    {% for form in item_form %}
+                        {% if form != item_form.csrf_token %}
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.label(class="col-sm-3 control-label") }}
+                                <div class="col-sm-9">
+                                    {{ form(class="form-control")}}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}  
+                    </div>
+                </div>
+            <div class="form-actions right">
+                <button type="submit" class="btn blue"><i class="fa fa-check"></i>保存</button>
+            </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
+    {% endif %}
+</div>
 {% endblock %}
 {% block js %}
-  <script src="{{ url_for('static', filename='js/idcms.js') }}"></script>
+<script src="{{ url_for('static', filename='js/idcms.js') }}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 // 导航切换
 $(function(){
-    $('div.side li').click(function(){
+    $('ul.sub-menu li').click(function(){
         $(this).addClass('active').siblings('li').removeClass('active')
         var id = $(this).attr('id')
         //变量组合使用＋号
@@ -54,10 +54,10 @@ $(function(){
             }   
         });  
     });
-    // 结果提示
+    //结果提示
     $('#tipModal button').click(function(){
         if(det){
-            location.reload(true)
+            $("form.seek").submit()
         }
     });
 })
@@ -66,7 +66,14 @@ $(function(){
 // DataTable
 $(document).ready(function() {
     var table_dict = {
-        bPaginate: false,
+        //分页
+        paging:   false,
+        // 排序
+        //ordering: false,
+        //页面信息
+        info:     false,
+        //bPaginate: false,
+        //bLengthChange: false,
         //aLengthMenu:[50, 100],
         language: {
             "sLengthMenu": "显示 _MENU_ 项结果",
@@ -83,23 +90,21 @@ $(document).ready(function() {
             }        
         },
     };
-    var count = $("div.choose a").last().attr('data-column');
+    
     var defs = [];
-    if ( parseInt(count) >= 11){
-        for (var i=11; i < parseInt(count)+1; i++){
-            defs.push(i)
-        }
-        table_dict["columnDefs"] = [{
-            "targets": defs,
-            "visible": false,
-        }]
-    };
+    $('input[name="hidden"]:checked').each(function(){    
+            defs.push(parseInt(($(this).attr('data-column'))));
+    });
+    table_dict["columnDefs"] = [{
+        "targets": defs,
+        "visible": false,
+    }]
     var table = $('#search').DataTable( 
         table_dict
     );
-    var count = $("div.choose a").last().attr('data-column');
-    $('a.toggle-vis').on( 'click', function (e) {
-        e.preventDefault();
+    
+    $('input.toggle-vis').on( 'click', function (e) {
+        //e.preventDefault();
  
         // Get the column API object
         var column = table.column( $(this).attr('data-column') );

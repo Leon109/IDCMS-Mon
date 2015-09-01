@@ -27,7 +27,7 @@ thead = [
     [3,u'所在机房', 'site'], [4, u'所在机架','rack'], [5,u'机架位置', 'seat'],
     [6, u'设备带宽', 'bandwidth'], [7, u'上联端口', 'up_link'],[8, u'设备高度','height'], 
     [9, u'设备品牌', 'brand'], [10, u'设备型号', 'model'],[11, u'设备SN','sn'], 
-    [12, u'销售代表', 'sales'], [13,u'使用用户', 'clinet'],[14, u'开通时间', 'start_time'],
+    [12, u'销售代表', 'sales'], [13,u'使用用户', 'client'],[14, u'开通时间', 'start_time'],
     [15, u'到期时间' ,'expire_time'], [16, u'备注' ,'remark']
 ]
 #url结尾字符
