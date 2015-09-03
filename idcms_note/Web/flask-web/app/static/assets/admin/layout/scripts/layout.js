@@ -188,7 +188,7 @@ var Layout = function () {
                 });
             }
 
-            e.preventDefault();
+            //e.preventDefault();
         });
 
         // handle ajax links within sidebar menu

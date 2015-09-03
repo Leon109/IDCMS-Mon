@@ -16,8 +16,7 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Client, Rack, IpSubnet, IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.searchutils import search_res
-from app.utils.record import record_sql
+from app.utils.utils import search_res, record_sql
 
 # 初始化参数
 titles = {'path':'/cmdb/client', 'title':u'IDCMS-CMDB-客户管理'}

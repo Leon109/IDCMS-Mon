@@ -91,7 +91,7 @@
                 <table id="search" class="table table-striped table-bordered display" cellspacing="0" width="100%" style='margin-top:20px;'>
                     <thead>
                         <tr>
-                        {% for th in thead %}
+                        {% for th in thead[:-1] %}
                             <th>{{ th[1] }}</th>
                         {% endfor %}
                         {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
@@ -161,7 +161,7 @@
           <div class="form-group">
            <label class="control-label" >更改项目</label>
                <select id="subitem" class="form-control" name="item">
-                {% for th in thead %} 
+                {% for th in thead[:-1] %} 
                 <option value="{{ th[2] }}">{{ th[1] }}</option>
                 {% endfor %}
               </select>

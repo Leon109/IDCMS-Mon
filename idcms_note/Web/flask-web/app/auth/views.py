@@ -9,7 +9,7 @@ from .customvalidator import CustomValidator
 from .. import db
 from ..models import User
 from ..utils.permission import Permission, permission_validation
-from ..utils.searchutils import search_res
+from ..utils.utils import search_res
 
 thead = [[0, u'用户名','username'], [1,u'密码', 'password'], [2,u'权限', 'role']]
 

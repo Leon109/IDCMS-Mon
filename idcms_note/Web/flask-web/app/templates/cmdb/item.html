@@ -3,10 +3,9 @@
 {% block sidebar %}
 {% for side in sidebar['sidebar_for'] %}
 <li class={{ sidebar[side]['class'] }}>
-    <a href=sidebar[side]['href']>
+    <a href={{ sidebar[side]['href'] }}>
     <i class={{ sidebar[side]['icon'] }}></i>
     <span class="title">{{sidebar[side]['title']}}</span>
-    <span class="arrow "></span>
     </a>
     <ul class="sub-menu">
         {% for l in sidebar[side]['li_for'] %}

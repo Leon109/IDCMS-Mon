@@ -18,15 +18,14 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Sales, Rack, IpSubnet, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.searchutils import search_res
-from app.utils.record import record_sql
+from app.utils.utils import search_res, record_sql
 
 
 # 初始化参数
 sidebar = sidebar()
 init__thead = [
-    [0, u'销售','username', False], [1,u'联系方式', 'contact', False], 
-    [2, u'备注' ,'remark', False]
+    [0, u'销售','username', False], [1, u'联系方式', 'contact', False], 
+    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', True]
 ]
 # url分页地址函数
 endpoint = '.sales'
@@ -56,6 +55,8 @@ def sales():
     sales_form = SalesForm()
     thead = copy.deepcopy(init__thead)
     sidebar, li_css = init__sidebar('edititem')
+    search = None
+
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
         sidebar, li_css = init__sidebar("additem")
@@ -78,14 +79,22 @@ def sales():
         
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox  = request.args.getlist('hidden')
-        for box in checkbox:
-            thead[int(box)][3] = True
+        checkbox = request.args.getlist('hidden')
+        
         if search:
             # 搜索
-            page = int(request.args.get('page', 1))
             sidebar, li_css = init__sidebar("edititem")
+            # 通过checbox更改隐藏表头
+            if checkbox:
+                for box in checkbox:
+                    thead[int(box)][3] = True
+            else:
+                for box in range(0,len(thead)):
+                    thead[box][3] = False
+            
+            page = int(request.args.get('page', 1))
             res = search_res(Sales, 'username' , search)
+            res = res.search_return()
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
@@ -95,10 +104,10 @@ def sales():
                     sidebar=sidebar, li_css=li_css,  pagination=pagination,
                     search_value=search, items=items
                 )
-
+    
     return render_template(
         'cmdb/item.html', item_form=sales_form, thead=thead,
-         sidebar=sidebar, li_css=li_css
+         sidebar=sidebar, li_css=li_css, search_value=search
     )
 
 @cmdb.route('/cmdb/sales/delete',  methods=['GET', 'POST'])
