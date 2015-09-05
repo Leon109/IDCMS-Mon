@@ -15,8 +15,6 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Site, Rack, Client, Sales, Cabinet
 from app.utils.permission import Permission, permission_validation
-# 初始化参数
-titles = {'path':'/cmdb/statistics', 'title':u'IDCMS-CMDB-统计分析'}
 
 def ehart_init():
     echart = {

@@ -1,19 +1,28 @@
 {% extends "navbase.html" %}
 {% import "macros.html" as macros %}
-{% block muen %}
-  <div class="side">
-    <ul class="nav nav-sidebar">
-        <li id="edititem" class="active"><a href="#">操作记录</a></li>
-        <li><a href="/cmdb">返回导航</a><li>
+{% block sidebar %}
+{% for side in sidebar['sidebar_for'] %}
+<li class={{ sidebar[side]['class'] }}>
+    <a href={{ sidebar[side]['href'] }}>
+    <i class={{ sidebar[side]['icon'] }}></i>
+    <span class="title">{{sidebar[side]['title']}}</span>
+    </a>
+    <ul class="sub-menu">
+        {% for l in sidebar[side]['li_for'] %}
+        <li class="{{ sidebar[side]['li'][l][0] }}" id={{ sidebar[side]['li'][l][1] }}>
+        <a herf="javascript:;">{{ sidebar[side]['li'][l][2] }}</a>
+        </li>
+        {% endfor %}
     </ul>
-  </div>
+    </li>
+{% endfor %}
 {% endblock %}
 {% block content %}
 {{ macros.render_record(thead, search_value, items) }}
- {% if items %}
-<div class="pagination">
-  {{ macros.render_pagination(pagination, endpoint, search=search_value) }}
-</div>
+{% if items %}
+    <div class="pagination">
+        {{ macros.render_pagination(pagination, endpoint, search=search_value) }}
+    </div>
 {% endif %}
 {% endblock %}
 {% block js %}

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import copy
 
 from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
@@ -9,6 +10,7 @@ from flask.ext.login import login_required, current_user
 from .. import cmdb
 from .forms import IpSubnetForm
 from .customvalidator import CustomValidator
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -16,30 +18,22 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import IpSubnet, IpPool
 from app.utils.permission import Permission, permission_validation
-from app.utils.searchutils import search_res
-from app.utils.record import record_sql
+from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
 # 初始化参数
-titles = {'path':'/cmdb/ipsubnet', 'title':u'IDCMS-CMDB-IP子网管理'}
-thead = [
-    [0, u'IP子网','subnet'], [1,u'起始IP', 'start_ip'], [2,u'结束IP', 'end_ip'],
-    [3, u'子网掩码','netmask'], [4, u'所属机房', 'site'], [5, u'销售代表', 'sales'], 
-    [6, u'使用用户', 'client'], [7, u'开通时间' ,'start_time'], [8, u'到期时间' ,'expire_time'],
-    [9, u'备注' ,'remark']
+sidebar_name = "ipsubnet"
+start_thead = [
+    [0, u'IP子网','subnet', False], [1,u'起始IP', 'start_ip', False], 
+    [2,u'结束IP', 'end_ip', False],[3, u'子网掩码','netmask', False], 
+    [4, u'所属机房', 'site', False], [5, u'销售代表', 'sales', False], 
+    [6, u'使用用户', 'client', False], [7, u'开通时间' ,'start_time', False], 
+    [8, u'到期时间' ,'expire_time', False], [9, u'备注' ,'remark', False],
+    [10, u'操作', "setting", False]
 ]
 # url分页地址函数
 endpoint = '.ipsubnet'
 del_page = '/cmdb/ipsubnet/delete'
 change_page= '/cmdb/ipsubnet/change'
-
-def init__sidebar(sidebar_class):
-    sidebarclass = {
-        'edititem':['', 'content hidden', u'管理IP子网'],
-        'additem':['', 'content hidden', u'添加IP子网']
-    }
-    sidebarclass[sidebar_class][0] = 'active' 
-    sidebarclass[sidebar_class][1] = 'content'
-    return sidebarclass
 
 @cmdb.route('/cmdb/ipsubnet',  methods=['GET', 'POST'])
 @login_required
@@ -47,10 +41,13 @@ def ipsubnet():
     '''IP子网'''
     role_Permission = getattr(Permission, current_user.role)
     ipsubnet_form = IpSubnetForm()
-    sidebarclass = init__sidebar('edititem')
+    sidebar = copy.deepcopy(start_sidebar)
+    thead = copy.deepcopy(start_thead)
+    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebarclass = init__sidebar('additem')
+        sidebar, li_css = init_sidebar(sidebar, sidebar_name,'additem')
         if ipsubnet_form.validate_on_submit():
             ipsubnet=IpSubnet(
                  subnet=ipsubnet_form.subnet.data,
@@ -82,24 +79,28 @@ def ipsubnet():
 
     if request.method == "GET":
         search = request.args.get('search', '')
+        checkbox = request.args.getlist('hidden')
+        thead = init_checkbox(thead, checkbox)
         if search:
             # 搜索
+            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
-            sidebarclass = init__sidebar('edititem')
             res = search_res(IpSubnet, 'subnet', search)
+            res = res.search_return()
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', titles=titles, thead=thead, 
-                    endpoint=endpoint, del_page=del_page, change_page=change_page,
-                    item_form=ipsubnet_form, sidebarclass=sidebarclass, pagination=pagination,
-                    search_value=search, items=items
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
+                    del_page=del_page, change_page=change_page,
+                    item_form=ipsubnet_form, pagination=pagination,
+                    search_value=search, sidebar=sidebar, li_css=li_css,
+                    items=items
                 )
     
     return render_template(
-        'cmdb/item.html', titles = titles, item_form=ipsubnet_form,
-        sidebarclass=sidebarclass
+        'cmdb/item.html', item_form=ipsubnet_form,thead=thead,
+        sidebar=sidebar, li_css=li_css, search_value=search
     )
 
 @cmdb.route('/cmdb/ipsubnet/delete',  methods=['GET', 'POST'])

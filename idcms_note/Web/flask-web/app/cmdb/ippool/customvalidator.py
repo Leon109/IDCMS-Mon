@@ -8,7 +8,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Site, IpSubnet, IpPool, Cabinet, Client
-from app.utils.searchutils import re_ip
+from app.utils.utils import re_ip
 
 class CustomValidator():
     '''自定义检测

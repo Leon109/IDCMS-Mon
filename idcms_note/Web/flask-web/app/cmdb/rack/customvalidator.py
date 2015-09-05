@@ -9,7 +9,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Rack, Site, Sales, Client
-from app.utils.searchutils import re_date
+from app.utils.utils import re_date
 
 
 class CustomValidator():

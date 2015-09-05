@@ -10,7 +10,7 @@ from flask.ext.login import login_required, current_user
 from .. import cmdb
 from .forms import SalesForm
 from .customvalidator import CustomValidator
-from ..sidebar import sidebar
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -18,34 +18,19 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Sales, Rack, IpSubnet, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql
+from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
 
 # 初始化参数
-sidebar = sidebar()
-init__thead = [
+sidebar_name = 'sales'
+start_thead = [
     [0, u'销售','username', False], [1, u'联系方式', 'contact', False], 
-    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', True]
+    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', False]
 ]
 # url分页地址函数
 endpoint = '.sales'
 del_page = '/cmdb/sales/delete'
 change_page= '/cmdb/sales/change'
-
-
-def init__sidebar(item):
-    sidebar['sales']['class'] = "active open"
-    sidebar['sales']['li'][item][0] = "active"
-    li_list = sidebar['sales']['li'].keys()
-    li_list.remove(item)
-    for licss  in li_list:
-        sidebar['sales']['li'][licss][0] = ""
-    li_css = {
-        'edititem':'content hidden',
-        'additem':'content hidden',
-    }
-    li_css[item] = 'content'
-    return sidebar, li_css
 
 @cmdb.route('/cmdb/sales',  methods=['GET', 'POST'])
 @login_required
@@ -53,13 +38,13 @@ def sales():
     '''机房设置'''
     role_Permission = getattr(Permission, current_user.role)
     sales_form = SalesForm()
-    thead = copy.deepcopy(init__thead)
-    sidebar, li_css = init__sidebar('edititem')
-    search = None
-
+    sidebar = copy.deepcopy(start_sidebar)
+    thead = copy.deepcopy(start_thead)
+    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init__sidebar("additem")
+        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
         if sales_form.validate_on_submit():
             sales = Sales(
                 username=sales_form.username.data,
@@ -80,18 +65,9 @@ def sales():
     if request.method == "GET":
         search = request.args.get('search', '')
         checkbox = request.args.getlist('hidden')
-        
+        thead = init_checkbox(thead, checkbox)
         if search:
-            # 搜索
-            sidebar, li_css = init__sidebar("edititem")
-            # 通过checbox更改隐藏表头
-            if checkbox:
-                for box in checkbox:
-                    thead[int(box)][3] = True
-            else:
-                for box in range(0,len(thead)):
-                    thead[box][3] = False
-            
+            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Sales, 'username' , search)
             res = res.search_return()
@@ -104,7 +80,6 @@ def sales():
                     sidebar=sidebar, li_css=li_css,  pagination=pagination,
                     search_value=search, items=items
                 )
-    
     return render_template(
         'cmdb/item.html', item_form=sales_form, thead=thead,
          sidebar=sidebar, li_css=li_css, search_value=search

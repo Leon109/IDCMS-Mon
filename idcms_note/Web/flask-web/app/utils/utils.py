@@ -37,9 +37,10 @@ class search_res():
     def search_return(self):
         search_info = self.search.split("::")
         if len(search_info) == 2:
-            search_type = self.search.split("::")[0].strip()
-            search = self.search.split("::")[1]
-            return self.search_run[search_type](self.item, self.field, search)
+            search_type = self.search.split("::")[0]
+            if search_type in self.search_run:
+                search = self.search.split("::")[1]
+                return self.search_run[search_type](self.item, self.field, search)
         return self.search_run['recursive']()
 
     def search_all(self, item, field, search):
@@ -101,3 +102,29 @@ def record_sql(user, status, table, table_id, item, value):
         date=date,
     )   
     db.session.add(record)
+
+# 侧边栏初始化
+def init_sidebar(sidebar, sidebar_name,item):
+    sidebar[sidebar_name]['class'] = "active open"
+    sidebar[sidebar_name]['li'][item][0] = "active"
+    li_list = sidebar[sidebar_name]['li'].keys()
+    li_list.remove(item)
+    for licss  in li_list:
+        sidebar[sidebar_name]['li'][licss][0] = ""
+    li_css = {
+        'edititem':'content hidden',
+        'additem':'content hidden',
+    }
+    li_css[item] = 'content'
+    return sidebar, li_css
+
+# 选择框初始化
+
+def init_checkbox(thead, checkbox):
+    if checkbox:
+        for box in checkbox:
+            thead[int(box)][3] = True
+    else:
+        for box in range(0,len(thead)):
+            thead[box][3] = False
+    return thead

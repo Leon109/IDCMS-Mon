@@ -2,6 +2,7 @@
 
 import os
 import sys
+import copy
 
 from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
@@ -9,6 +10,7 @@ from flask.ext.login import login_required, current_user
 from .. import cmdb
 from .forms import IpPoolForm
 from .customvalidator import CustomValidator
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -16,29 +18,20 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.searchutils import search_res
-from app.utils.record import record_sql
+from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
 # 初始化参数
-titles = {'path':'/cmdb/ippool', 'title':u'IDCMS-CMDB-IP子网管理'}
-thead = [
-    [0, u'IP','ip'], [1,u'子网掩码', 'netmask'], [2,u'网关地址', 'gateway'],
-    [3, u'所属子网','subnet'], [4, u'所属机房', 'site'], [5, u'使用用户' ,'client'],
-    [6, u'备注' ,'remark']
+sidebar_name = 'ippool'
+start_thead = [
+    [0, u'IP','ip', False], [1,u'子网掩码', 'netmask', False], 
+    [2,u'网关地址', 'gateway', False], [3, u'所属子网','subnet', False], 
+    [4, u'所属机房', 'site', False], [5, u'使用用户' ,'client', False],
+    [6, u'备注' ,'remark', False], [7, u'操作', 'setting', False]
 ]
 # url分页地址函数
 endpoint = '.ippool'
 del_page = '/cmdb/ippool/delete'
 change_page= '/cmdb/ippool/change'
-
-def init__sidebar(sidebar_class):
-    sidebarclass = {
-        'edititem':['', 'content hidden', u'管理IP池'],
-        'additem':['', 'content hidden', u'添加IP']
-    }
-    sidebarclass[sidebar_class][0] = 'active' 
-    sidebarclass[sidebar_class][1] = 'content'
-    return sidebarclass
 
 @cmdb.route('/cmdb/ippool',  methods=['GET', 'POST'])
 @login_required
@@ -46,10 +39,13 @@ def ippool():
     '''IP池'''
     role_Permission = getattr(Permission, current_user.role)
     ippool_form = IpPoolForm()
-    sidebarclass = init__sidebar('edititem')
+    sidebar = copy.deepcopy(start_sidebar)
+    thead = copy.deepcopy(start_thead)
+    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebarclass = init__sidebar('additem')
+        sidebar, li_css = init_sidebar(sidebar, sidebar_name,'additem')
         if ippool_form.validate_on_submit():
             ip_list = ippool_form.start_ip.data.split('.')
             fornt_ip = '.'.join(ip_list[:-1])
@@ -88,23 +84,28 @@ def ippool():
 
     if request.method == "GET":
         search = request.args.get('search', '')
+        checkbox = request.args.getlist('hidden')
+        thead = init_checkbox(thead, checkbox)
         if search:
             # 搜索
+            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
-            sidebarclass = init__sidebar('edititem')
             res = search_res(IpPool, 'ip', search)
+            res = res.search_return()
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', titles=titles, thead=thead, 
-                    endpoint=endpoint, del_page=del_page, change_page=change_page,
-                    item_form=ippool_form, sidebarclass=sidebarclass, pagination=pagination,
-                    search_value=search, items=items
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
+                    del_page=del_page, change_page=change_page,
+                    item_form=ippool_form, pagination=pagination,
+                    search_value=search, sidebar=sidebar, li_css=li_css,
+                    items=items
                 )
     
     return render_template(
-        'cmdb/item.html', titles = titles, item_form=ippool_form, sidebarclass=sidebarclass
+        'cmdb/item.html', item_form=ippool_form, thead=thead,
+        sidebar=sidebar, li_css=li_css, search_value=search
     )
 
 @cmdb.route('/cmdb/ippool/delete',  methods=['GET', 'POST'])

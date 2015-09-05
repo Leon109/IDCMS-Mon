@@ -1,57 +1,5 @@
 {% macro render_record(thead, search_value, items) %}
 {# 查看功能 #}
-<div class="container-fluid">
-    <div class="row" style='margin-top:20px' action="">
-      <div class="col-lg-5 col-md-offset-3" style="margin-right:10px">
-        <form class="form-horizontal">
-          <div class="input-group">
-              <input type="text" class="form-control" name="search" value="{{ search_value }}" placeholder="搜索语法见帮助" required autofocus>
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="submit">搜索</button>
-            </span>
-          </div>
-        </form>
-      </div>
-    </div>
-</div>
-<div class="container-fluid">
-  <div class="row" style='margin-top:20px'>
-   <div class="choose">
-     选择查看项目:
-     {% for th in thead %}
-       <a class="toggle-vis" href='#' data-column="{{ th[0] }}">{{ th[1] }}</a>
-     {% endfor %}
-    </div>
-    <div class="col-lg-12">
-      <div class="panel panel-default" style='margin-top:20px;'>
-        <div class="panel-body">
-         <table id="search" class="table table-striped table-bordered display" cellspacing="0" width="100%" style='margin-top:20px;'>
-            <thead>
-              <tr>
-                {% for th in thead %}
-                    <th>{{ th[1] }}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in items %}
-                 <tr>
-                  {%  for content in item.to_list() %}
-                    <td>{{ content }}</td>
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endmacro %}
-
-{% macro render_search(thead, search_value, items, Permission, current_user, del_page, change_page) %}
-{# 搜索加修改功能 #}
 <div>
   <form class="seek">
       <div class="row">
@@ -78,8 +26,84 @@
       </div>
   </form>
 </div>
-<div class="container-fluid">
-    <div class="row" style='margin-top:20px'>
+<div class="row" style='margin-top:20px'>
+    <div class="col-md-12">
+        <div class="portlet box blue-hoki" style="margin-top:20px">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>搜索结果
+                </div>
+            </div>
+            <div class="portlet-body">
+                {% if items %}
+                <table id="search" class="table table-striped table-bordered display" cellspacing="0" width="100%" style='margin-top:20px;'>
+                    <thead>
+                        <tr>
+                        {% for th in thead %}
+                            <th>{{ th[1] }}</th>
+                        {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items %}
+                         <tr>
+                        {%  for content in item.to_list() %}
+                            <td>{{ content }}</td>
+                        {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <h3 class="text-primary">没有结果，请尝试搜索<h3>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_search(thead, search_value, items, Permission, current_user, del_page, change_page) %}
+{# 搜索加修改功能 #}
+<div>
+  <form class="seek">
+      <div class="row">
+          <div class="col-md-6  col-md-offset-3">
+              <div class="input-group">
+                  <input type="text" class="form-control" name="search" value="{{ search_value }}"  placeholder="搜索内容" required autofocus />
+                    <span class="input-group-btn">
+                    <button class="btn blue" type="submit">搜索</button>
+                    </span>
+              </div>
+          </div>
+      </div>
+      <div class="row" style='margin-top:20px'>
+        <label style='margin-left:20px'>选择隐藏项目： </label>
+        {% for th in thead[:-1] %}
+            {% if not th[3] %}
+            <label><input name="hidden" value= {{th[0]}}  type="checkbox" class="toggle-vis" data-column="{{ th[0] }}"/>{{ th[1] }}
+            </label>
+            {% else %}
+            <label><input name="hidden" value= {{th[0]}}  type="checkbox" class="toggle-vis" checked  data-column="{{ th[0] }}"/>{{ th[1] }}
+            </label>
+            {% endif%}
+        {% endfor %}
+        {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
+            {% if not thead[-1][3] %}
+            <label><input name="hidden" value= {{thead[-1][0]}}  type="checkbox" class="toggle-vis" data-column="{{ thead[-1][0] }}"/>
+            {{ thead[-1][1] }}
+            </label>
+            {% else %}
+            <label><input name="hidden" value= {{thead[-1][0]}}  type="checkbox" class="toggle-vis" checked  data-column="{{ thead[-1][0] }}"/>
+            {{ thead[-1][1] }}
+            </label>
+            {% endif %}
+        {%endif%}
+      </div>
+  </form>
+</div>
+<div class="row" style='margin-top:20px'>
+    <div class="col-md-12">
         <div class="portlet box blue-hoki" style="margin-top:20px">
             <div class="portlet-title">
                 <div class="caption">

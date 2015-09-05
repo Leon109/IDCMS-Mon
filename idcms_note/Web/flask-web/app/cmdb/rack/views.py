@@ -2,6 +2,7 @@
 
 import os
 import sys
+import copy
 
 from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
@@ -9,6 +10,7 @@ from flask.ext.login import login_required, current_user
 from .. import cmdb
 from .forms import RackForm
 from .customvalidator import CustomValidator
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -16,29 +18,21 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Rack, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.searchutils import search_res
-from app.utils.record import record_sql
+from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
 # 初始化参数
-titles = {'path':'/cmdb/rack', 'title':u'IDCMS-CMDB-机架'}
-thead = [
-    [0, u'机柜','rack'], [1,u'机房', 'site'], [2,u'机架U数', 'count'],
-    [3, u'机架电流','power'], [4, u'销售代表', 'sales'], [5, u'机架用户', 'client'], 
-    [6, u'开通时间' ,'start_time'],[7, u'到期时间' ,'expire_time'],[8, u'备注' ,'remark']
+sidebar_name = "rack"
+start_thead = [
+    [0, u'机柜','rack', False], [1,u'机房', 'site', False], 
+    [2,u'机架U数', 'count', False],[3, u'机架电流','power', False], 
+    [4, u'销售代表', 'sales', False], [5, u'机架用户', 'client', False], 
+    [6, u'开通时间' ,'start_time', False],[7, u'到期时间' ,'expire_time', False],
+    [8, u'备注' ,'remark', False], [9, u'操作', 'setting', False]
 ]
 # url结尾函数
 endpoint = '.rack'
 del_page = '/cmdb/rack/delete'
 change_page= '/cmdb/rack/change'
-
-def init__sidebar(sidebar_class):
-    sidebarclass = {
-        'edititem':['', 'content hidden', u'管理机架'],
-        'additem':['', 'content hidden', u'添加机架']
-    }
-    sidebarclass[sidebar_class][0] = 'active' 
-    sidebarclass[sidebar_class][1] = 'content'
-    return sidebarclass
 
 @cmdb.route('/cmdb/rack',  methods=['GET', 'POST'])
 @login_required
@@ -46,10 +40,13 @@ def rack():
     '''机架设置'''
     role_Permission = getattr(Permission, current_user.role)
     rack_form = RackForm()
-    sidebarclass = init__sidebar('edititem')
+    sidebar = copy.deepcopy(start_sidebar)
+    thead = copy.deepcopy(start_thead)
+    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebarclass = init__sidebar('additem')
+        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
         if rack_form.validate_on_submit():
             rack = Rack(
                 rack=rack_form.rack.data,
@@ -77,24 +74,29 @@ def rack():
 
     if request.method == "GET":
         search = request.args.get('search', '')
+        checkbox = request.args.getlist('hidden')
+        thead = init_checkbox(start_thead, checkbox)
         if search:
             # 搜索
+            sidebar = copy.deepcopy(start_sidebar)
+            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
-            sidebarclass = init__sidebar('edititem')
             res = search_res(Rack, 'rack', search)
+            res = res.search_return()
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', titles=titles, thead=thead, 
-                    endpoint=endpoint, del_page=del_page, change_page=change_page,
-                    item_form=rack_form, sidebarclass=sidebarclass, pagination=pagination,
-                    search_value=search, items=items
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
+                    del_page=del_page, change_page=change_page,
+                    item_form=rack_form, pagination=pagination,
+                    search_value=search,  sidebar=sidebar, li_css=li_css,
+                    items=items 
                 )
     
     return render_template(
-        'cmdb/item.html', titles = titles, item_form=rack_form,
-        sidebarclass=sidebarclass
+        'cmdb/item.html', item_form=rack_form, thead=thead,
+        sidebar=sidebar, li_css=li_css, search_value=search
     )
 
 @cmdb.route('/cmdb/rack/delete',  methods=['GET', 'POST'])

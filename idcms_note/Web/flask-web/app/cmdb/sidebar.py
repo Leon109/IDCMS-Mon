@@ -1,6 +1,6 @@
 #coding=utf-8
 
-init__sidebar = {
+start_sidebar = {
     "sidebar_for":[
         "sales", "client", "site", "rack",
         "ipsubnet", "ippool", "cabinet",
@@ -47,7 +47,7 @@ init__sidebar = {
         "class":"",
         "href":"/cmdb/rack",
         "icon":"icon-grid",
-        "title":u"客户管理",
+        "title":u"机柜管理",
         "li_for":["edititem", "additem"],
         "li":{ 
             "edititem": ["", "edititem",  u"机柜管理"],
@@ -97,12 +97,7 @@ init__sidebar = {
         "icon":"icon-notebook",
         "title":u"操作记录",
         "li_for":["edititem"],
-        "li":{ 
-            "edititem": ["", "edititem",  u"操作记录"],
-        }   
+        "li":{"edititem": ["", "edititem", u"查询操作记录"]}
     },
 
 }
-
-def sidebar():
-    return init__sidebar

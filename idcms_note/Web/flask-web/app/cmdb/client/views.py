@@ -2,6 +2,7 @@
 
 import os
 import sys
+import copy
 
 from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
@@ -9,6 +10,7 @@ from flask.ext.login import login_required, current_user
 from .. import cmdb
 from .forms import ClientForm
 from .customvalidator import CustomValidator
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -16,27 +18,18 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Client, Rack, IpSubnet, IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql
+from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
 # 初始化参数
-titles = {'path':'/cmdb/client', 'title':u'IDCMS-CMDB-客户管理'}
-thead = [
-    [0, u'客户','username'], [1,u'联系方式', 'contact'], [2, u'备注' ,'remark']
+sidebar_name = "client"
+start_thead = [
+    [0, u'客户','username', False], [1,u'联系方式', 'contact', False], 
+    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', False]
 ]
 # url分页地址函数
 endpoint = '.client'
 del_page = '/cmdb/client/delete'
 change_page= '/cmdb/client/change'
-
-
-def init__sidebar(sidebar_class):
-    sidebarclass = {
-        'edititem':['', 'content hidden', u'管理客户'],
-        'additem':['', 'content hidden', u'添加客户']
-    }
-    sidebarclass[sidebar_class][0] = 'active' 
-    sidebarclass[sidebar_class][1] = 'content'
-    return sidebarclass
 
 @cmdb.route('/cmdb/client',  methods=['GET', 'POST'])
 @login_required
@@ -44,10 +37,13 @@ def client():
     '''机房设置'''
     role_Permission = getattr(Permission, current_user.role)
     client_form = ClientForm()
-    sidebarclass = init__sidebar('edititem')
+    sidebar = copy.deepcopy(start_sidebar)
+    thead = copy.deepcopy(start_thead)
+    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebarclass = init__sidebar('additem')
+        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
         if client_form.validate_on_submit():
             client = Client(
                 username=client_form.username.data,
@@ -66,25 +62,30 @@ def client():
                 flash(client_form.errors[key][0])
         
     if request.method == "GET":
-        search = request.args.get('search', '')
+        search = request.args.get('search', '') 
+        checkbox = request.args.getlist('hidden')
+        thead = init_checkbox(start_thead, checkbox)
         if search:
             # 搜索
-            page = int(request.args.get('page', 1))
-            sidebarclass = init__sidebar('edititem')
+            sidebar = copy.deepcopy(start_sidebar)
+            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            page = int(request.args.get('page', 1)) 
             res = search_res(Client, 'username' , search)
+            res = res.search_return()
             if res:
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', titles=titles, thead=thead, 
-                    endpoint=endpoint, del_page=del_page, change_page=change_page, 
-                    item_form=client_form, sidebarclass=sidebarclass, pagination=pagination,
-                    search_value=search, items=items
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
+                    del_page=del_page, change_page=change_page, 
+                    item_form=client_form, pagination=pagination,
+                    search_value=search, sidebar=sidebar, li_css=li_css,
+                    items=items
                 )
 
     return render_template(
-        'cmdb/item.html', titles = titles, item_form=client_form, 
-        sidebarclass=sidebarclass
+        'cmdb/item.html', item_form=client_form, thead=thead,
+        sidebar=sidebar, li_css=li_css, search_value=search
     )
 
 @cmdb.route('/cmdb/client/delete',  methods=['GET', 'POST'])

@@ -67,14 +67,16 @@ $(function(){
 $(document).ready(function() {
     var table_dict = {
         //分页
-        paging:   false,
+        paging: false,
         // 排序
         //ordering: false,
         //页面信息
-        info:     false,
+        info: false,
+        scroller: true,
         //bPaginate: false,
         //bLengthChange: false,
         //aLengthMenu:[50, 100],
+        dom: "<'row' <'col-md-12'T>><'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r><'table-scrollable't><'row'<'col-md-5 col-sm-12'i><'col-md-7     col-sm-12'p>>",
         language: {
             "sLengthMenu": "显示 _MENU_ 项结果",
             "sZeroRecords": "没有匹配结果",
@@ -99,6 +101,7 @@ $(document).ready(function() {
         "targets": defs,
         "visible": false,
     }]
+    // 运行
     var table = $('#search').DataTable( 
         table_dict
     );
