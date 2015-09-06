@@ -82,7 +82,7 @@
       <div class="row" style='margin-top:20px'>
         <div class="col-md-12">
             <label style='margin-left:5px'>选择隐藏项目： </label>
-            {% for th in thead[:-1] %}
+            {% for th in thead[:-2] %}
                 {% if not th[3] %}
                 <label><input name="hidden" value= {{th[0]}}  type="checkbox" class="toggle-vis" data-column="{{ th[0] }}"/>{{ th[1] }}
                 </label>
@@ -92,16 +92,18 @@
                 {% endif%}
             {% endfor %}
             {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
-                {% if not thead[-1][3] %}
-                <label><input name="hidden" value= {{thead[-1][0]}}  type="checkbox" class="toggle-vis" data-column="{{ thead[-1][0] }}"/>
-                {{ thead[-1][1] }}
-                </label>
-                {% else %}
-                <label><input name="hidden" value= {{thead[-1][0]}}  type="checkbox" class="toggle-vis" checked  data-column="{{ thead[-1][0] }}"/>
-                {{ thead[-1][1] }}
-                </label>
-                {% endif %}
-            {%endif%}
+                {% for th in thead[-2:] %}
+                    {% if not th[3] %}
+                    <label><input name="hidden" value= {{th[0]}}  type="checkbox" class="toggle-vis {{ th[2] }}" data-column="{{ th[0] }}"/>
+                    {{ th[1] }}
+                    </label>
+                    {% else %}
+                    <label><input name="hidden" value= {{th[0]}}  type="checkbox" class="toggle-vis {{ th[2] }}" checked  data-column="{{ th[0] }}"/>
+                    {{ th[1] }}
+                    </label>
+                    {% endif %}
+                {%endfor%}
+            {% endif %}
         </div>
       </div>
   </form>
@@ -115,15 +117,20 @@
                 </div>
             </div>
             <div class="portlet-body">
+                <div id="batch_processing" class="btn-set pull-right" style="margin-bottom:20px">
+                    <button id="batch_delete" type="button" class="btn btn-danger">批量删除</button>
+                    <button id="batch_change" type="button" class="btn btn-info">批量修改</button>
+                </div>
                 {% if items %}
                 <table id="search" class="table table-striped table-bordered display" cellspacing="0" width="100%" style='margin-top:20px;'>
                     <thead>
                         <tr>
-                        {% for th in thead[:-1] %}
+                        {% for th in thead[:-2] %}
                             <th>{{ th[1] }}</th>
                         {% endfor %}
                         {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
-                            <th>操作</th>
+                            <th style="width:100px">操作</th>
+                            <th style="width:15px"><input type="checkbox" id="checkAll"/></th>
                         {% endif %}
                         </tr>
                     </thead>
@@ -142,6 +149,7 @@
                             data-id={{ item.id }} data-toggle="modal" data-target=".bs-example-modal-sm-setting"><i class="fa fa-edit"></i>修改</button>
                             </div>
                             </td>
+                            <td><input data-id={{ item.id }} type="checkbox" name="checkList"/></td>
                         {% endif%}
                         </tr>
                     {% endfor %}

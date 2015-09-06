@@ -25,7 +25,8 @@ from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 sidebar_name = 'sales'
 start_thead = [
     [0, u'销售','username', False], [1, u'联系方式', 'contact', False], 
-    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', True]
+    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', True],
+    [4, u'批量处理', 'batch', True]
 ]
 # url分页地址函数
 endpoint = '.sales'
