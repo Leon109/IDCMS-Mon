@@ -21,7 +21,7 @@
 {{ macros.render_record(thead, search_value, items) }}
 {% if items %}
     <div class="pagination">
-        {{ macros.render_pagination(pagination, endpoint, search=search_value) }}
+        {{ macros.render_pagination(pagination, endpoint, search=search_value, hiddens=checkbox) }}
     </div>
 {% endif %}
 {% endblock %}

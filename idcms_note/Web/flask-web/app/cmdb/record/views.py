@@ -37,7 +37,7 @@ def record():
     thead = copy.deepcopy(start_thead)
     search = request.args.get('search', '')
     # hiddens用于分页隐藏字段处理
-    checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') :
+    checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     if search:
         # 搜索
@@ -55,7 +55,7 @@ def record():
                 items=items, checkbox=str(checkbox)
             )
 
-        return render_template(
-            'cmdb/record.html', thead=thead, sidebar=sidebar,
-            search_value=search
-        )
+    return render_template(
+        'cmdb/record.html', thead=thead, sidebar=sidebar,
+        search_value=search
+    )
