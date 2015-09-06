@@ -118,9 +118,17 @@ def init_sidebar(sidebar, sidebar_name,item):
 # 选择框初始化
 
 def init_checkbox(thead, checkbox):
+    '''处理需要隐藏的字段
+    checkbox 是一个列表，对应需要隐藏的字段的索引
+    '''
     if checkbox:
-        for box in checkbox:
-            thead[int(box)][3] = True
+        if isinstance(checkbox, str):
+            checkbox = eval(checkbox)
+        for th in  thead:
+            if str(th[0]) in checkbox:
+                th [3] = True
+            else:
+                th[3] = False
     else:
         for box in range(0,len(thead)):
             thead[box][3] = False

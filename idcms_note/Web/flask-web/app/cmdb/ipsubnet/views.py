@@ -28,7 +28,7 @@ start_thead = [
     [4, u'所属机房', 'site', False], [5, u'销售代表', 'sales', False], 
     [6, u'使用用户', 'client', False], [7, u'开通时间' ,'start_time', False], 
     [8, u'到期时间' ,'expire_time', False], [9, u'备注' ,'remark', False],
-    [10, u'操作', "setting", False]
+    [10, u'操作', "setting", True]
 ]
 # url分页地址函数
 endpoint = '.ipsubnet'
@@ -79,10 +79,11 @@ def ipsubnet():
 
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox = request.args.getlist('hidden')
-        thead = init_checkbox(thead, checkbox)
+        # hiddens用于分页隐藏字段处理
+        checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') 
         if search:
             # 搜索
+            thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(IpSubnet, 'subnet', search)
@@ -95,13 +96,13 @@ def ipsubnet():
                     del_page=del_page, change_page=change_page,
                     item_form=ipsubnet_form, pagination=pagination,
                     search_value=search, sidebar=sidebar, sidebar_name=sidebar_name,
-                    items=items
+                    items=items, checkbox=str(checkbox)
                 )
     
-    return render_template(
-        'cmdb/item.html', item_form=ipsubnet_form,thead=thead,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-    )
+        return render_template(
+            'cmdb/item.html', item_form=ipsubnet_form,thead=thead,
+            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        )
 
 @cmdb.route('/cmdb/ipsubnet/delete',  methods=['GET', 'POST'])
 @login_required

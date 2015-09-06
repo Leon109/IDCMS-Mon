@@ -27,7 +27,7 @@ start_thead = [
     [2,u'机架U数', 'count', False],[3, u'机架电流','power', False], 
     [4, u'销售代表', 'sales', False], [5, u'机架用户', 'client', False], 
     [6, u'开通时间' ,'start_time', False],[7, u'到期时间' ,'expire_time', False],
-    [8, u'备注' ,'remark', False], [9, u'操作', 'setting', False]
+    [8, u'备注' ,'remark', False], [9, u'操作', 'setting', True]
 ]
 # url结尾函数
 endpoint = '.rack'
@@ -74,10 +74,11 @@ def rack():
 
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox = request.args.getlist('hidden')
-        thead = init_checkbox(start_thead, checkbox)
+        # hiddens用于分页隐藏字段处理
+        checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')         
         if search:
             # 搜索
+            thead = init_checkbox(thead, checkbox)
             sidebar = copy.deepcopy(start_sidebar)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
@@ -91,13 +92,13 @@ def rack():
                     del_page=del_page, change_page=change_page,
                     item_form=rack_form, pagination=pagination,
                     search_value=search,  sidebar=sidebar, sidebar_name=sidebar_name,
-                    items=items 
+                    items=items, checkbox=str(checkbox)
                 )
     
-    return render_template(
-        'cmdb/item.html', item_form=rack_form, thead=thead,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-    )
+        return render_template(
+            'cmdb/item.html', item_form=rack_form, thead=thead,
+            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        )
 
 @cmdb.route('/cmdb/rack/delete',  methods=['GET', 'POST'])
 @login_required

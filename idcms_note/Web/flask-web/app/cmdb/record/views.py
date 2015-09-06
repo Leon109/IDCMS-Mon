@@ -36,11 +36,12 @@ def record():
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     search = request.args.get('search', '')
-    checkbox = request.args.getlist('hidden')
-    thead = init_checkbox(thead, checkbox)
+    # hiddens用于分页隐藏字段处理
+    checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') :
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     if search:
         # 搜索
+        thead = init_checkbox(thead, checkbox)
         page = int(request.args.get('page', 1))
         res = search_res(Record, 'username' , search)
         res = res.search_return()
@@ -51,10 +52,10 @@ def record():
                 'cmdb/record.html', thead=thead, 
                 endpoint=endpoint, pagination=pagination,
                 search_value=search, sidebar=sidebar,
-                items=items
+                items=items, checkbox=str(checkbox)
             )
 
-    return render_template(
-        'cmdb/record.html', thead=thead, sidebar=sidebar,
-         search_value=search
-    )
+        return render_template(
+            'cmdb/record.html', thead=thead, sidebar=sidebar,
+            search_value=search
+        )

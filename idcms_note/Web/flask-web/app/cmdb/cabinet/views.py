@@ -26,9 +26,9 @@ start_thead = [
     [0, u'资产编号','an', False], [1,u'外网IP', 'wan_ip', False], [2,u'内网IP', 'lan_ip', False],
     [3,u'所在机房', 'site', False], [4, u'所在机架','rack', False], [5,u'机架位置', 'seat', False],
     [6, u'设备带宽', 'bandwidth', False], [7, u'上联端口', 'up_link', False],[8, u'设备高度','height', False], 
-    [9, u'设备品牌', 'brand', False], [10, u'设备型号', 'model', False],[11, u'设备SN','sn', False], 
+    [9, u'设备品牌', 'brand', False], [10, u'设备型号', 'model', False],[11, u'设备SN','sn', True], 
     [12, u'销售代表', 'sales', False], [13,u'使用用户', 'client', False],[14, u'开通时间', 'start_time', False],
-    [15, u'到期时间' ,'expire_time', False], [16, u'备注' ,'remark', False], [17, u'操作', 'setting', False]
+    [15, u'到期时间' ,'expire_time', False], [16, u'备注' ,'remark', True], [17, u'操作', 'setting', True]
     
 ]
 #url结尾字符
@@ -93,10 +93,11 @@ def cabinet():
 
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox = request.args.getlist('hidden')
-        thead = init_checkbox(thead, checkbox)
+        # hiddens用于分页隐藏字段处理
+        checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') 
         if search:
             # 搜索
+            thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Cabinet, 'an', search)
@@ -108,13 +109,13 @@ def cabinet():
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page, item_form=cabinet_form, 
                     pagination=pagination, sidebar=sidebar, sidebar_name=sidebar_name, search_value=search, 
-                    items=items
+                    items=items, checkbox=str(checkbox)
                 )
     
-    return render_template(
-        'cmdb/item.html', item_form=cabinet_form,thead=thead,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-    )
+        return render_template(
+            'cmdb/item.html', item_form=cabinet_form,thead=thead,
+            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        )
 
 @cmdb.route('/cmdb/cabinet/delete',  methods=['GET', 'POST'])
 @login_required

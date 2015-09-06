@@ -27,7 +27,7 @@ start_thead = [
     [0, u'机房','site', False], [1,u'ISP', 'isp', False], 
     [2,u'地理位置', 'location', False], [3, u'地址','address', False], 
     [4, u'联系方式', 'contact', False], [5, u'机房DNS', 'dns', False], 
-    [6, u'备注' ,'remark', False], [7, u'操作', 'setting', False]
+    [6, u'备注' ,'remark', False], [7, u'操作', 'setting', True]
 ]
 # url分页地址函数
 endpoint = '.site'
@@ -73,10 +73,11 @@ def site():
         
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox = request.args.getlist('hidden')
-        thead = init_checkbox(thead, checkbox)
+        # hiddens用于分页隐藏字段处理
+        checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')  
         if search:
             # 搜索
+            thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Site, 'site' , search)
@@ -89,13 +90,13 @@ def site():
                     del_page=del_page, change_page=change_page, 
                     item_form=site_form, pagination=pagination,
                     search_value=search, sidebar=sidebar, sidebar_name=sidebar_name, 
-                    items=items
+                    items=items, checkbox=str(checkbox)
                 )
 
-    return render_template(
-        'cmdb/item.html', item_form=site_form, thead=thead,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-    )
+        return render_template(
+            'cmdb/item.html', item_form=site_form, thead=thead,
+            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        )
 
 @cmdb.route('/cmdb/site/delete',  methods=['GET', 'POST'])
 @login_required

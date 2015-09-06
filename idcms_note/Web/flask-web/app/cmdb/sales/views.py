@@ -25,7 +25,7 @@ from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 sidebar_name = 'sales'
 start_thead = [
     [0, u'销售','username', False], [1, u'联系方式', 'contact', False], 
-    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', False]
+    [2, u'备注' ,'remark', False], [3, u'操作', 'setting', True]
 ]
 # url分页地址函数
 endpoint = '.sales'
@@ -64,9 +64,10 @@ def sales():
         
     if request.method == "GET":
         search = request.args.get('search', '')
-        checkbox = request.args.getlist('hidden')
-        thead = init_checkbox(thead, checkbox)
+        # hiddens用于分页隐藏字段处理
+        checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') 
         if search:
+            thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Sales, 'username' , search)
@@ -78,12 +79,12 @@ def sales():
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page, item_form=sales_form,
                     sidebar=sidebar, sidebar_name=sidebar_name,  pagination=pagination,
-                    search_value=search, items=items
+                    search_value=search, items=items, checkbox=str(checkbox)
                 )
-    return render_template(
-        'cmdb/item.html', item_form=sales_form, thead=thead,
-         sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-    )
+        return render_template(
+            'cmdb/item.html', item_form=sales_form, thead=thead,
+            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        )
 
 @cmdb.route('/cmdb/sales/delete',  methods=['GET', 'POST'])
 @login_required
