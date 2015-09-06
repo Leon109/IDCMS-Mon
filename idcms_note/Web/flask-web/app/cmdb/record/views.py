@@ -38,7 +38,7 @@ def record():
     search = request.args.get('search', '')
     checkbox = request.args.getlist('hidden')
     thead = init_checkbox(thead, checkbox)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     if search:
         # 搜索
         page = int(request.args.get('page', 1))

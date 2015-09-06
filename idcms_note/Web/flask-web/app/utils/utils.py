@@ -107,16 +107,13 @@ def record_sql(user, status, table, table_id, item, value):
 def init_sidebar(sidebar, sidebar_name,item):
     sidebar[sidebar_name]['class'] = "active open"
     sidebar[sidebar_name]['li'][item][0] = "active"
+    sidebar[sidebar_name]['li'][item][3] = 'content'
     li_list = sidebar[sidebar_name]['li'].keys()
     li_list.remove(item)
     for licss  in li_list:
         sidebar[sidebar_name]['li'][licss][0] = ""
-    li_css = {
-        'edititem':'content hidden',
-        'additem':'content hidden',
-    }
-    li_css[item] = 'content'
-    return sidebar, li_css
+        sidebar[sidebar_name]['li'][licss][3] = "content hidden"
+    return sidebar
 
 # 选择框初始化
 

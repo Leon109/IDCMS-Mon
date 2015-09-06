@@ -44,11 +44,11 @@ def cabinet():
     cabinet_form = CabinetForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
+        sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if cabinet_form.validate_on_submit():
             cabinet = Cabinet(
                  an = cabinet_form.an.data,
@@ -97,7 +97,7 @@ def cabinet():
         thead = init_checkbox(thead, checkbox)
         if search:
             # 搜索
-            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Cabinet, 'an', search)
             res = res.search_return()
@@ -107,13 +107,13 @@ def cabinet():
                 return render_template(
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page, item_form=cabinet_form, 
-                    pagination=pagination, sidebar=sidebar, li_css=li_css, search_value=search, 
+                    pagination=pagination, sidebar=sidebar, sidebar_name=sidebar_name, search_value=search, 
                     items=items
                 )
     
     return render_template(
         'cmdb/item.html', item_form=cabinet_form,thead=thead,
-        sidebar=sidebar, li_css=li_css, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
     )
 
 @cmdb.route('/cmdb/cabinet/delete',  methods=['GET', 'POST'])

@@ -42,11 +42,11 @@ def rack():
     rack_form = RackForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
+        sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if rack_form.validate_on_submit():
             rack = Rack(
                 rack=rack_form.rack.data,
@@ -79,7 +79,7 @@ def rack():
         if search:
             # 搜索
             sidebar = copy.deepcopy(start_sidebar)
-            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Rack, 'rack', search)
             res = res.search_return()
@@ -90,13 +90,13 @@ def rack():
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page,
                     item_form=rack_form, pagination=pagination,
-                    search_value=search,  sidebar=sidebar, li_css=li_css,
+                    search_value=search,  sidebar=sidebar, sidebar_name=sidebar_name,
                     items=items 
                 )
     
     return render_template(
         'cmdb/item.html', item_form=rack_form, thead=thead,
-        sidebar=sidebar, li_css=li_css, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
     )
 
 @cmdb.route('/cmdb/rack/delete',  methods=['GET', 'POST'])

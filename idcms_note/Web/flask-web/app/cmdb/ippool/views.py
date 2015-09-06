@@ -41,11 +41,11 @@ def ippool():
     ippool_form = IpPoolForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init_sidebar(sidebar, sidebar_name,'additem')
+        sidebar = init_sidebar(sidebar, sidebar_name,'additem')
         if ippool_form.validate_on_submit():
             ip_list = ippool_form.start_ip.data.split('.')
             fornt_ip = '.'.join(ip_list[:-1])
@@ -88,7 +88,7 @@ def ippool():
         thead = init_checkbox(thead, checkbox)
         if search:
             # 搜索
-            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(IpPool, 'ip', search)
             res = res.search_return()
@@ -99,13 +99,13 @@ def ippool():
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page,
                     item_form=ippool_form, pagination=pagination,
-                    search_value=search, sidebar=sidebar, li_css=li_css,
+                    search_value=search, sidebar=sidebar, sidebar_name=sidebar_name,
                     items=items
                 )
     
     return render_template(
         'cmdb/item.html', item_form=ippool_form, thead=thead,
-        sidebar=sidebar, li_css=li_css, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
     )
 
 @cmdb.route('/cmdb/ippool/delete',  methods=['GET', 'POST'])

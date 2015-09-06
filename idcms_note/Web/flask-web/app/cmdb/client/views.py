@@ -39,11 +39,11 @@ def client():
     client_form = ClientForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
+        sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if client_form.validate_on_submit():
             client = Client(
                 username=client_form.username.data,
@@ -68,7 +68,7 @@ def client():
         if search:
             # 搜索
             sidebar = copy.deepcopy(start_sidebar)
-            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1)) 
             res = search_res(Client, 'username' , search)
             res = res.search_return()
@@ -79,13 +79,13 @@ def client():
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page, 
                     item_form=client_form, pagination=pagination,
-                    search_value=search, sidebar=sidebar, li_css=li_css,
+                    search_value=search, sidebar=sidebar, sidebar_name=sidebar_name,
                     items=items
                 )
 
     return render_template(
         'cmdb/item.html', item_form=client_form, thead=thead,
-        sidebar=sidebar, li_css=li_css, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
     )
 
 @cmdb.route('/cmdb/client/delete',  methods=['GET', 'POST'])

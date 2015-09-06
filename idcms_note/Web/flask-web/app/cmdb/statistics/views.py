@@ -2,12 +2,14 @@
 
 import os
 import sys
+import copy
 import json
 
 from flask import render_template
 from flask.ext.login import login_required
 
 from .. import cmdb
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -15,6 +17,10 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Site, Rack, Client, Sales, Cabinet
 from app.utils.permission import Permission, permission_validation
+from app.utils.utils import init_sidebar
+
+# 初始化函数
+sidebar_name = "statistics"
 
 def ehart_init():
     echart = {
@@ -38,8 +44,10 @@ def ehart_init():
 @login_required
 @permission_validation(Permission.ADMIN)
 def statistics():
+    sidebar = copy.deepcopy(start_sidebar)
+    sidebar = init_sidebar(sidebar, sidebar_name,'base')
     all_site = Site.query.all()
-    return render_template('/cmdb/statistics.html', titles=titles, all_site=all_site)
+    return render_template('/cmdb/statistics.html', sidebar=sidebar, sidebar_name=sidebar_name, all_site=all_site)
 
 @cmdb.route('/cmdb/statistics/base_info',  methods=['GET'])
 @login_required

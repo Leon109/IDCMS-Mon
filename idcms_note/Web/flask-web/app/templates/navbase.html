@@ -6,8 +6,8 @@
 <div class="page-header navbar navbar-fixed-top">
     <div class="page-header-inner">
         <div class="page-logo">
-            <a href="index.html">
-            <img src="/static/assets/admin/layout/img/logo.png" alt="logo" class="logo-default"/>
+            <a href="/cmdb">
+            <img src="/static/assets/admin/layout/img/IDCMS-CMDB.png" alt="logo" class="logo-default"/>
             </a>
             <div class="menu-toggler sidebar-toggler">
             <!-- DOC: Remove the above "hide" to enable the sidebar toggler button on header -->
@@ -19,12 +19,22 @@
             <ul class="nav navbar-nav pull-right">
                 <li class="dropdown dropdown-user">
                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                    <img alt="" class="img-circle" src="/static/assets/admin/layout/img/avatar3_small.jpg"/>
+                    <img alt="" class="img-circle" src="/static/assets/admin/layout/img/user.jpg"/>
                     <span class="username username-hide-on-mobile">
                     {{ current_user.username }}</span>
                     <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-default">
+                        <li>
+                            <a href="/cmdb/cabinet">
+                            <i class=" icon-map"></i>CMDB
+                            </a>
+                        <li>
+                            <a href="/auth/setting">
+                            <i class="icon-settings"></i>设置</a>
+                        </li>
+                        <li class="divider">
+                        </li>
                         <li>
                             <a href="/auth/logout">
                             <i class="icon-key"></i>注销 </a>
@@ -34,6 +44,8 @@
             </ul>
         </div>
     </div>
+</div>
+<div class="clearfix">
 </div>
 <div class="page-container">
     <div class="page-sidebar-wrapper">

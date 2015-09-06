@@ -22,7 +22,7 @@ def create_app(config_name):
     login_manager.init_app(app)
 
     from .auth import auth
-    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(auth)
     from .cmdb import cmdb
     app.register_blueprint(cmdb)
     

@@ -1,63 +1,95 @@
 {% extends "navbase.html" %}
 {% import "macros.html" as macros %}
-{% block muen %}
-  <div class="side">
-    <ul class="nav nav-sidebar">
-      <li id="passwd" class="{{ sidebarclass['passwd'][0] }}"><a href="#">修改密码</a></li>
-      <li id="register" class="{{ sidebarclass['register'][0] }}"><a href="#">添加用户</a></li>
-      <li id ="edituser" class="{{ sidebarclass['edituser'][0] }}"><a href="#">管理用户</a></li>
+{% block sidebar %}
+{% for side in sidebar['sidebar_for'] %}
+<li class={{ sidebar[side]['class'] }}>
+    <a href={{ sidebar[side]['href'] }}>
+    <i class={{ sidebar[side]['icon'] }}></i>
+    <span class="title">{{sidebar[side]['title']}}</span>
+    </a>
+    <ul class="sub-menu">
+        {% for l in sidebar[side]['li_for'] %}
+        <li class="{{ sidebar[side]['li'][l][0] }}" id={{ sidebar[side]['li'][l][1] }}>
+        <a herf="javascript:;">{{ sidebar[side]['li'][l][2] }}</a>
+        </li>
+        {% endfor %}
     </ul>
-  </div>
+    </li>
+{% endfor %}
 {% endblock %}
 {% block content %}
-  <div id="register" class="{{ sidebarclass['register'][1] }}">
-      {# 使用Permission[current_user.role] 实现了类似 getattr(Permission, current_user.role) 的方法 #}
-      {% if Permission[current_user.role] >=  Permission.ADMIN %}
-        <h3 class="page-header">添加用户</h3>
-        <form class="form-horizontal" method="post">
-          {{ register_form.hidden_tag() }}
-          {% for form in register_form %}
-            {% if form != register_form.csrf_token %}
-              <div class="form-group">
-                {{ form.label(class="col-sm-2 control-label") }}
-                <div class="col-sm-3">
-                  {{ form(class="form-control")}}
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="submit" name="action" value="register" class="btn btn-success">确认提交</button>
+<div id="register" class="{{ sidebar[sidebar_name]['li']['register'][3] }}">
+    {# 使用Permission[current_user.role] 实现了类似 getattr(Permission, current_user.role) 的方法 #}
+    {% if Permission[current_user.role] >=  Permission.ADMIN %}
+    <div class="portlet box green">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-bank"></i>添加用户
             </div>
-          </div>
-        </form>
-      {% else %}
+        </div>
+        <div class="portlet-body form">
+            <form class="form-horizontal" method="post">
+                <div class="form-body">
+                    <div class="row">
+                    {{ register_form.hidden_tag() }}
+                    {% for form in register_form %}
+                        {% if form != register_form.csrf_token %}
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.label(class="col-sm-3 control-label") }}
+                                <div class="col-sm-9">
+                                    {{ form(class="form-control")}}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                </div>
+            <div class="form-actions right">
+                <button type="submit" class="btn blue" name="action" value="register"><i class="fa fa-check"></i>保存</button>
+            </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
         <div class="alert alert-info" role="alert">提示：当前用户没有权限</div>
-      {% endif %}
-  </div>
-  <div id="passwd" class="{{ sidebarclass['passwd'][1] }}">
-    <h3 class="page-header">修改密码</h3>
-     <form class="form-horizontal" method="post">
-       {{ passwd_form.hidden_tag() }}
-       {% for form in passwd_form %}
-         {% if form != passwd_form.csrf_token %}
-           <div class="form-group">
-             {{ form.label(class="col-sm-2 control-label") }}
-             <div class="col-sm-3">
-               {{ form(class="form-control")}}
-             </div>
-           </div>
-         {% endif %}
-       {% endfor %}
-       <div class="form-group">
-         <div class="col-sm-offset-2 col-sm-10">
-           <button type="submit" name="action" value="passwd" class="btn btn-success">确认提交</button>
-         </div>
-       </div>
-     </form>
-  </div>
-  <div id="edituser" class="{{ sidebarclass['edituser'][1] }}">
+    {% endif %}
+</div>
+<div id="passwd" class="{{ sidebar[sidebar_name]['li']['passwd'][3] }}">
+    <div class="portlet box green">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-bank"></i>修改密码
+            </div>
+        </div>
+        <div class="portlet-body form">
+            <form class="form-horizontal" method="post">
+                <div class="form-body">
+                    <div class="row">
+                    {{ passwd_form.hidden_tag() }}
+                    {% for form in passwd_form %}
+                        {% if form != passwd_form.csrf_token %}
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.label(class="col-sm-3 control-label") }}
+                                <div class="col-sm-9">
+                                    {{ form(class="form-control")}}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                </div>
+            <div class="form-actions right">
+                <button type="submit" class="btn blue" name="action" value="passwd"><i class="fa fa-check"></i>确认</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+  <div id="edituser" class="{{ sidebar[sidebar_name]['li']['edituser'][3] }}">
   {% if Permission[current_user.role] >=  Permission.ADMIN %}
     {{ macros.render_search(thead, search_value, items, Permission, current_user, del_page, change_page) }}
     {% if items %}

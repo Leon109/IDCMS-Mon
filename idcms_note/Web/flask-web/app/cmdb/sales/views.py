@@ -40,11 +40,11 @@ def sales():
     sales_form = SalesForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar, li_css = init_sidebar(sidebar, sidebar_name,'edititem')
+    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
             role_Permission >= Permission.ALTER_REPLY:
-        sidebar, li_css = init_sidebar(sidebar, sidebar_name, "additem")
+        sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if sales_form.validate_on_submit():
             sales = Sales(
                 username=sales_form.username.data,
@@ -67,7 +67,7 @@ def sales():
         checkbox = request.args.getlist('hidden')
         thead = init_checkbox(thead, checkbox)
         if search:
-            sidebar, li_css = init_sidebar(sidebar, sidebar_name, "edititem")
+            sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
             res = search_res(Sales, 'username' , search)
             res = res.search_return()
@@ -77,12 +77,12 @@ def sales():
                 return render_template(
                     'cmdb/item.html', thead=thead, endpoint=endpoint, 
                     del_page=del_page, change_page=change_page, item_form=sales_form,
-                    sidebar=sidebar, li_css=li_css,  pagination=pagination,
+                    sidebar=sidebar, sidebar_name=sidebar_name,  pagination=pagination,
                     search_value=search, items=items
                 )
     return render_template(
         'cmdb/item.html', item_form=sales_form, thead=thead,
-         sidebar=sidebar, li_css=li_css, search_value=search
+         sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
     )
 
 @cmdb.route('/cmdb/sales/delete',  methods=['GET', 'POST'])

@@ -18,7 +18,7 @@
 {% endfor %}
 {% endblock %}
 {% block content %}
-<div id="edititem" class="{{ li_css['edititem'] }}">
+<div id="edititem" class="{{ sidebar[sidebar_name]['li']['edititem'][3] }}">
     {{ macros.render_search(thead, search_value, items, Permission, current_user, del_page, change_page) }}
     {% if items %}
       <div class="pagination">
@@ -26,7 +26,7 @@
       </div>
     {% endif %}
 </div>
-<div id="additem" class="{{ li_css['additem'] }}">
+<div id="additem" class="{{  sidebar[sidebar_name]['li']['additem'][3] }}">
     {% if Permission[current_user.role] >=  Permission.ALTER_REPLY %}
     <div class="portlet box green">
         <div class="portlet-title">
