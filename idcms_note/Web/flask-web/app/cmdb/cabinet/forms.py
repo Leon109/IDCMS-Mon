@@ -59,7 +59,7 @@ class CabinetForm(Form):
                 raise ValidationError(u'添加失败 这个外网IP已经添加')
             ip = IpPool.query.filter_by(ip=field.data).first()
             if ip:
-                if ip.client:
+                if ip.sales or ip.client:
                     raise ValidationError(u'添加失败 这个外网IP已经使用')
             else:
                 raise ValidationError(u'添加失败 这个外网IP还没有添加')

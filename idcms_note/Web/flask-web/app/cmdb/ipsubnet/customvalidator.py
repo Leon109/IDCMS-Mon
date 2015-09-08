@@ -21,14 +21,14 @@ class CustomValidator():
         self.value = value
         self.change_ipsubnet = IpSubnet.query.filter_by(id=int(item_id)).first()
         self.sm =  {
-            "subnet":self.validate_subnet,
-            "start_ip":self.validate_ip,
-            "end_ip":self.validate_ip,
-            "site":self.validate_site,
-            "sales":self.validate_sales,
-            "client":self.validate_client,
-            "start_time":self.validate_start_time,
-            "expire_time":self.validate_expire_time
+            "subnet": self.validate_subnet,
+            "start_ip": self.validate_ip,
+            "end_ip": self.validate_ip,
+            "site": self.validate_site,
+            "sales": self.validate_sales,
+            "client": self.validate_client,
+            "start_time": self.validate_start_time,
+            "expire_time": self.validate_expire_time
         }
 
     def validate_return(self):

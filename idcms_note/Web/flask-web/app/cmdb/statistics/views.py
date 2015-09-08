@@ -42,7 +42,7 @@ def ehart_init():
 
 @cmdb.route('/cmdb/statistics',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def statistics():
     sidebar = copy.deepcopy(start_sidebar)
     sidebar = init_sidebar(sidebar, sidebar_name,'base')
@@ -51,7 +51,7 @@ def statistics():
 
 @cmdb.route('/cmdb/statistics/base_info',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def base_info():
     res = ehart_init()
     res["graph"] = 'echarts/chart/bar'
@@ -68,7 +68,7 @@ def base_info():
 
 @cmdb.route('/cmdb/statistics/site_info/<sitename>',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def site_info(sitename):
     res = ehart_init()
     res["graph"] = 'echarts/chart/bar'
@@ -84,7 +84,7 @@ def site_info(sitename):
 
 @cmdb.route('/cmdb/statistics/sales_info',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def sales_info():
     res = ehart_init()
     res["graph"] = 'echarts/chart/pie'

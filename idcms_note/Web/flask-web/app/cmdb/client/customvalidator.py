@@ -18,7 +18,7 @@ class CustomValidator():
         self.change_client = Client.query.filter_by(id=int(item_id)).first()
         self.value = value
         self.sm =  {
-            "username":self.validate_username,
+            "username": self.validate_username,
         }
 
     def validate_return(self):

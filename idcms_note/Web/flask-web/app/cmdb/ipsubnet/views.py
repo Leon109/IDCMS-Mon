@@ -23,17 +23,21 @@ from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 # 初始化参数
 sidebar_name = "ipsubnet"
 start_thead = [
-    [0, u'IP子网','subnet', False], [1,u'起始IP', 'start_ip', False], 
-    [2,u'结束IP', 'end_ip', False],[3, u'子网掩码','netmask', False], 
-    [4, u'所属机房', 'site', False], [5, u'销售代表', 'sales', False], 
-    [6, u'使用用户', 'client', False], [7, u'开通时间' ,'start_time', False], 
-    [8, u'到期时间' ,'expire_time', False], [9, u'备注' ,'remark', False],
-    [10, u'操作', "setting", True]
+    [0, u'IP子网','subnet', False, False], [1,u'起始IP', 'start_ip', False, False], 
+    [2,u'结束IP', 'end_ip', False, False],[3, u'子网掩码','netmask', False, False], 
+    [4, u'所属机房', 'site', False, True], [5, u'销售代表', 'sales', False, True], 
+    [6, u'使用用户', 'client', False, True], [7, u'开通时间' ,'start_time', False, True], 
+    [8, u'到期时间' ,'expire_time', False, True], [9, u'备注' ,'remark', False],
+    [10, u'操作', "setting", True], [11, u'批量处理', 'batch', True]
 ]
 # url分页地址函数
 endpoint = '.ipsubnet'
-del_page = '/cmdb/ipsubnet/delete'
-change_page= '/cmdb/ipsubnet/change'
+set_page = { 
+    'del_page': '/cmdb/ipsubnet/delete',
+    'change_page': '/cmdb/ipsubnet/change',
+    'batch_del_page': '/cmdb/ipsubnet/batchdelete',
+    'batch_change_page': '/cmdb/ipsubnet/batchchange'
+}
 
 @cmdb.route('/cmdb/ipsubnet',  methods=['GET', 'POST'])
 @login_required
@@ -46,7 +50,7 @@ def ipsubnet():
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
-            role_Permission >= Permission.ALTER_REPLY:
+            role_Permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name,'additem')
         if ipsubnet_form.validate_on_submit():
             ipsubnet=IpSubnet(
@@ -92,21 +96,19 @@ def ipsubnet():
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
-                    del_page=del_page, change_page=change_page,
-                    item_form=ipsubnet_form, pagination=pagination,
-                    search_value=search, sidebar=sidebar, sidebar_name=sidebar_name,
-                    items=items, checkbox=str(checkbox)
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, set_page=set_page, 
+                    item_form=ipsubnet_form, pagination=pagination, search_value=search, 
+                    sidebar=sidebar, sidebar_name=sidebar_name, items=items, checkbox=str(checkbox)
                 )
     
-        return render_template(
-            'cmdb/item.html', item_form=ipsubnet_form,thead=thead,
-            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-        )
+    return render_template(
+        'cmdb/item.html', item_form=ipsubnet_form,thead=thead, set_page=set_page,
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+    )
 
 @cmdb.route('/cmdb/ipsubnet/delete',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ALTER_REPLY)
+@permission_validation(Permission.ALTER)
 def ipsubnet_delete():
     del_id = int(request.form["id"])
     ipsubnet = IpSubnet.query.filter_by(id=del_id).first()
@@ -118,11 +120,11 @@ def ipsubnet_delete():
         db.session.delete(ipsubnet)
         db.session.commit()
         return "OK"
-    return u"删除失败 没有找到这个IP范围"
+    return u"删除失败 没有找到这个IP子网"
 
 @cmdb.route('/cmdb/ipsubnet/change',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ALTER_REPLY)
+@permission_validation(Permission.ALTER)
 def ipsubnet_change():
     change_id = int(request.form["id"])
     item = request.form["item"]
@@ -138,4 +140,51 @@ def ipsubnet_change():
             db.session.add(ipsubnet)
             return "OK"
         return res 
-    return u"更改失败没有找到该用户"
+    return u"更改失败没有找到该IP子网"
+
+@cmdb.route('/cmdb/ipsubnet/batchdelete',  methods=['POST'])
+@login_required
+@permission_validation(Permission.ALTER)
+def ipsubnet_batch_delete():
+    list_id = eval(request.form["list_id"])
+
+    for id in list_id:
+        ipsubnet = IpSubnet.query.filter_by(id=id).first()
+        if ipsubnet:
+            if IpPool.query.filter_by(subnet=ipsubnet.subnet).first():
+                return u"删除失败 *** <b>%s</b> *** 有IP在使用" % ipsubnet.subnet
+        else:
+            return u"删除失败没有这些IP子网"
+
+    for id in list_id:
+        ipsubnet = IpSubnet.query.filter_by(id=id).first()
+        record_sql(current_user.username, u"删除", u"IP子网",
+                   ipsubnet.id, "ipsubnet", ipsubnet.subnet)
+        db.session.delete(ipsubnet)
+    db.session.commit()
+    return "OK"
+
+@cmdb.route('/cmdb/ipsubnet/batchchange',  methods=['POST'])
+@login_required
+@permission_validation(Permission.ALTER)
+def ipsubnet_batch_change():
+    list_id = eval(request.form["list_id"])
+    item = request.form["item"]
+    value = request.form["value"]
+
+    for id in list_id:
+        ipsubnet = IpSubnet.query.filter_by(id=id).first()
+        if ipsubnet:
+            verify = CustomValidator(item, id, value)
+            res = verify.validate_return()
+            if not res == "OK":
+                return res
+        else:
+            return u"更改失败没有找到这些IP子网"
+
+    for id in list_id:
+        ipsubnet = IpSubnet.query.filter_by(id=id).first()
+        record_sql(current_user.username, u"更改", u"IP子网", ipsubnet.id, item, value)
+        setattr(ipsubnet, item, value)
+        db.session.add(ipsubnet)
+    return "OK"

@@ -1,5 +1,5 @@
-// 导航切换，批量处理
 $(function(){
+    // 导航切换，批量处理
     $('ul.sub-menu li').click(function(){
         $(this).addClass('active').siblings('li').removeClass('active')
         var id = $(this).attr('id')
@@ -7,6 +7,7 @@ $(function(){
         $('div#'+id).removeClass('hidden')
         $('div.content').not('#'+id).addClass('hidden')
     });
+    // 显示和隐藏批量处理
     $('input.batch').click(function(){
         if($("#batch_processing").is(":visible")){
             $("#batch_processing").hide();
@@ -28,21 +29,39 @@ $(function(){
         });
         return list;
     };
-    
+    //选择框是密码的时候输入栏类型变为passsword,选择其他的清空value值
+    $('#subitem').change(function(){
+        var change_item = $('#subitem').val()
+        if(change_item=="password"){
+            $('#subvalue').attr('type','password');
+            $('#subvalue').val('');
+        }else{
+            $('#subvalue').attr('type','text');
+            $('#subvalue').val('');
+        }
+    });
+    // 批量选择选择框变更更改value 
+    $('#batch-subitem').change(function(){
+        $('#batch-subvalue').val('');
+    });
+
     // 编辑删除
+    // det 返回确认
     var det
     // 定位删除项目
     $('div.setting button#delete').click(function(){
-        var id = $(this).attr('data-id')
+        var id = $(this).attr('data-id');
+        // 添加到提交项目的value中
         $('#subdelete').val(id);
     });
     // 定位修改项目
     $('div.setting button#change').click(function(){
-        var id = $(this).attr('data-id')
+        var id = $(this).attr('data-id');
+        // 添加到提交项目的value中
         $('#subchange').val(id);
     });
     // 确定删除项目
-    $('#confirmdeldelete').on('submit',function(e){
+    $('#confirm_delete').on('submit',function(e){
         e.preventDefault();
         var url = $(this).attr('action')
         var change_data = $('#subdelete').val()
@@ -57,13 +76,12 @@ $(function(){
         });
     });
     // 确认修改项目
-    $('#confirmdelchange').on('submit',function(e){
+    $('#confirm_change').on('submit',function(e){
         e.preventDefault();
         var url = $(this).attr('action')
         var change_id = $('#subchange').val()
         var change_item = $('#subitem').val()
         var change_value = $('#subvalue').val()
-        var sub = {id:change_id, item:change_item, value:change_value}
         $.post(url, {id:change_id, item:change_item, value:change_value}, function(res){
             if (res=='OK'){
                 det = true
@@ -73,13 +91,8 @@ $(function(){
             }   
         });  
     });
-    //结果提示
-    $('#tipModal button').click(function(){
-        if(det){
-            $("form.seek").submit()
-        }
-    });
-    //权限编辑删除
+    
+    //选择编辑删除
     // 全选
     $("#checkAll").click(function(){
         if ($(this).prop("checked") === true) {
@@ -108,12 +121,65 @@ $(function(){
     
     //批量删除
     $('#batch_delete').click(function(){
-        var x = checkbox_list();
-        alert(x)
+        var list_id = checkbox_list();
+        if(list_id.length > 0){
+            $('div.bs-modal-sm-batch-delete').modal('show')
+        }else{
+            $('#tipModal').find('.modal-body').html("没有选定任何删除的项目").end().modal('show')
+        } 
+    });
+
+    $('#confirm_batch_delete').on('submit',function(e){
+        e.preventDefault();
+        var list_id = checkbox_list();
+        var url = $(this).attr('action');
+        var json_id = JSON.stringify(list_id)
+        $.post(url, {list_id:json_id}, function(res){
+            if (res=='OK'){
+                //alert('删除成功')
+                det = true
+                $('#tipModal').find('.modal-body').html('批量删除成功').end().modal('show')
+            }else{
+                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+            }
+        });
+    });
+
+    //批量修改
+    $('#batch_change').click(function(){
+        var list_id = checkbox_list();
+        if(list_id.length > 0){ 
+            $('div.bs-modal-sm-batch-setting').modal('show')
+        }else{
+            $('#tipModal').find('.modal-body').html("没有选定任何修改的项目").end().modal('show')
+        }   
+    }); 
+
+    $('#confirm_batch_change').on('submit',function(e){
+        e.preventDefault();
+        var list_id = checkbox_list();
+        var url = $(this).attr('action')
+        var json_id = JSON.stringify(list_id)
+        var change_item = $('#batch-subitem').val()
+        var change_value = $('#batch-subvalue').val()
+        $.post(url, {list_id:json_id, item:change_item, value:change_value}, function(res){
+            if (res=='OK'){
+                det = true
+                $('#tipModal').find('.modal-body').html('批量修改成功').end().modal('show')
+            }else{
+                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+            }
+        });
+    });
+
+    //结果提示
+    $('#tipModal button').click(function(){
+        if(det){
+            $("form.seek").submit()
+        }
     });
 
 })
-
 
 
 $(document).ready(function() {

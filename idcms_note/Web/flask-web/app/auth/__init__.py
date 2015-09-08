@@ -10,10 +10,3 @@ from ..utils.permission import Permission
 @auth.app_context_processor
 def inject_permissions():
     return dict(Permission=Permission)
-
-@auth.app_context_processor
-def injcet_work():
-    titles = {'path':'/auth/setting', 'title':u'IDCMS-设置'}
-    del_page = '/auth/setting/delete'
-    change_page= '/auth/setting/change'
-    return dict(titles=titles, del_page=del_page, change_page=change_page)

@@ -30,7 +30,7 @@ endpoint = '.record'
 
 @cmdb.route('/cmdb/record',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ALTER_REPLY)
+@permission_validation(Permission.ALTER)
 def record():
     '''机房设置'''
     sidebar = copy.deepcopy(start_sidebar)
@@ -41,11 +41,11 @@ def record():
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     if search:
         # 搜索
-        thead = init_checkbox(thead, checkbox)
         page = int(request.args.get('page', 1))
         res = search_res(Record, 'username' , search)
         res = res.search_return()
         if res:
+            thead = init_checkbox(thead, checkbox)
             pagination = res.paginate(page, 100, False)
             items = pagination.items
             return render_template(

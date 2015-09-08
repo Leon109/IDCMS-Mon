@@ -9,18 +9,16 @@ class Permission:
     '''定义用户权限
     0 作为保留
     '''
-    # 查询全新
-    QUERY = 1 
-    # 查询和提交工单权限
-    QUERY_COMMIT = 2
+    # 查询权限
+    QUERY = 29
+    # 高级查询
+    ADVANCED_QUERY = 39
     # 修改权限
-    AKTER = 10
-    # 修改和回复权限
-    ALTER_REPLY = 11
+    ALTER = 69
     # 管理员权限
     ADMIN = 99
 
-def permission_validation(level):
+def permission_validation(level, level1=99):
     '''权限验证装饰器
        level 是级别，int类型小于这个级别的将抛出403错误
        要求：
@@ -37,7 +35,7 @@ def permission_validation(level):
             user = User.query.filter_by(id=u_id).first()
             role_id = getattr(Permission, user.role)
             # 通过用户对应数字判断用户权限
-            if role_id >= level:
+            if role_id >= level or role_id == level1 :
                 return func(*args, **kwargs)
             abort(403)
         return wrapper

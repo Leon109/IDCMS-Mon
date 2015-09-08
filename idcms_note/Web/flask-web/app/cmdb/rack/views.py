@@ -23,16 +23,21 @@ from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 # 初始化参数
 sidebar_name = "rack"
 start_thead = [
-    [0, u'机柜','rack', False], [1,u'机房', 'site', False], 
-    [2,u'机架U数', 'count', False],[3, u'机架电流','power', False], 
-    [4, u'销售代表', 'sales', False], [5, u'机架用户', 'client', False], 
-    [6, u'开通时间' ,'start_time', False],[7, u'到期时间' ,'expire_time', False],
-    [8, u'备注' ,'remark', False], [9, u'操作', 'setting', True]
+    [0, u'机柜','rack', False, False], [1,u'机房', 'site', False, False], 
+    [2,u'机架U数', 'count', False, True],[3, u'机架电流','power', False, True], 
+    [4, u'销售代表', 'sales', False, True], [5, u'机架用户', 'client', False, True], 
+    [6, u'开通时间' ,'start_time', False, True],[7, u'到期时间' ,'expire_time', False, True],
+    [8, u'备注' ,'remark', False, True], [9, u'操作', 'setting', True],
+    [10, u'批量处理', 'batch', True]
 ]
 # url结尾函数
 endpoint = '.rack'
-del_page = '/cmdb/rack/delete'
-change_page= '/cmdb/rack/change'
+set_page = { 
+    'del_page': '/cmdb/rack/delete',
+    'change_page': '/cmdb/rack/change',
+    'batch_del_page': '/cmdb/rack/batchdelete',
+    'batch_change_page': '/cmdb/rack/batchchange'
+}
 
 @cmdb.route('/cmdb/rack',  methods=['GET', 'POST'])
 @login_required
@@ -45,7 +50,7 @@ def rack():
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
-            role_Permission >= Permission.ALTER_REPLY:
+            role_Permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if rack_form.validate_on_submit():
             rack = Rack(
@@ -88,37 +93,36 @@ def rack():
                 pagination = res.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
-                    'cmdb/item.html', thead=thead, endpoint=endpoint, 
-                    del_page=del_page, change_page=change_page,
-                    item_form=rack_form, pagination=pagination,
-                    search_value=search,  sidebar=sidebar, sidebar_name=sidebar_name,
-                    items=items, checkbox=str(checkbox)
+                    'cmdb/item.html', thead=thead, endpoint=endpoint, set_page=set_page, 
+                    item_form=rack_form, pagination=pagination, search_value=search,
+                    sidebar=sidebar, sidebar_name=sidebar_name, items=items, checkbox=str(checkbox)
                 )
     
         return render_template(
-            'cmdb/item.html', item_form=rack_form, thead=thead,
+            'cmdb/item.html', item_form=rack_form, thead=thead, set_page=set_page,
             sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
         )
 
 @cmdb.route('/cmdb/rack/delete',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ALTER_REPLY)
+@permission_validation(Permission.ALTER)
 def rack_delete():
     del_id = int(request.form["id"])
     rack = Rack.query.filter_by(id=del_id).first()
     if rack:
+        # 这里要检查两个，应为不同机房，可能有相同名称机架名
         if Cabinet.query.filter_by(rack=rack.rack, site=rack.site).first():
-            return u'删除失败，还有设置使用这个机柜'
+            return u'删除失败，还有设备使用这个机架'
         record_sql(current_user.username, u"删除", u"机架",
                    rack.id, "rack", rack.rack)
         db.session.delete(rack)
         db.session.commit()
         return "OK"
-    return u"删除失败没有找到这个机柜"
+    return u"删除失败没有找到这个机架"
 
 @cmdb.route('/cmdb/rack/change',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ALTER_REPLY)
+@permission_validation(Permission.ALTER)
 def reak_change():
     change_id = int(request.form["id"])
     item = request.form["item"]
@@ -134,4 +138,50 @@ def reak_change():
             db.session.add(rack)
             return "OK"
         return res 
-    return u"更改失败没有找到该用户"
+    return u"更改失败没有找到该机架"
+
+@cmdb.route('/cmdb/rack/batchdelete',  methods=['POST'])
+@login_required
+@permission_validation(Permission.ALTER)
+def rack_batch_delete():
+    list_id = eval(request.form["list_id"])
+    
+    for id in list_id:
+        rack = Rack.query.filter_by(id=id).first()
+        if rack:
+            if Cabinet.query.filter_by(rack=rack.rack, site=rack.site).first():
+                return u"删除失败 *** <b>%s</b> *** 这个机架有设备在使用" % rack.rack
+        else:
+            return u"删除失败没有这些机架"
+
+    for id in list_id:
+        rack = Rack.query.filter_by(id=id).first()
+        record_sql(current_user.username, u"删除", u"机架", rack.id, "rack", rack.rack)
+        db.session.delete(rack)
+    db.session.commit()
+    return "OK"
+
+@cmdb.route('/cmdb/rack/batchchange',  methods=['POST'])
+@login_required
+@permission_validation(Permission.ALTER)
+def rack_batch_change():
+    list_id = eval(request.form["list_id"])
+    item = request.form["item"]
+    value = request.form["value"]
+
+    for id in list_id:
+        rack = Rack.query.filter_by(id=id).first()
+        if rack:
+            verify = CustomValidator(item, id, value)
+            res = verify.validate_return()
+            if not res == "OK":
+                return res
+        else:
+            return u"更改失败没有找到这些机架"
+
+    for id in list_id:
+        rack = Rack.query.filter_by(id=id).first()
+        record_sql(current_user.username, u"更改", u"机架", rack.id, item, value)
+        setattr(rack, item, value)
+        db.session.add(rack)
+    return "OK"
