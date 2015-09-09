@@ -9,4 +9,4 @@
 
 装饰器 参见 permission中的permission_validation  使用改装饰器如果没有权限认证会返回403错误
 
-一般注释都是 sales中
+一般注释都是 sales中,具体使用可以参考help
