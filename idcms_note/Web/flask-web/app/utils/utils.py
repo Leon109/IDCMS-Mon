@@ -69,15 +69,15 @@ class search_res():
                         value = option[key].split(":")
                         if len(value) == 2:
                             res = getattr(item,'query').filter(getattr(item,key).between(value[0], value[1]))
-                            break
-                    res = getattr(item,'query').filter(getattr(item,key).like("%"+option[key]+"%"))
+                    else:
+                        res = getattr(item,'query').filter(getattr(item,key).like("%"+option[key]+"%"))
                 else:
                     if key in ("start_time", "expire_time"):
                         value = option[key].split(":")
                         if len(value) == 2:
                             res = res.filter(getattr(item,key).between(value[0], value[1]))
-                            break
-                    res = res.filter(getattr(item,key).like("%"+option[key]+"%"))
+                    else:
+                        res = res.filter(getattr(item,key).like("%"+option[key]+"%"))
         # 如果不是多重搜索
         except IndexError:
             # 如果使用模糊搜索

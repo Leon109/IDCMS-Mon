@@ -67,7 +67,7 @@ def rack():
             db.session.add(rack)
             db.session.commit()
             value = (
-                "rack:%s site:%s count:%s power:%s sales:%s client:%s"
+                "rack:%s site:%s count:%s power:%s sales:%s client:%s "
                 "start_time:%s expire_time:%s remark:%s"
             ) % (rack.rack, rack.site, rack.count, rack.power, rack.sales,
                  rack.client, rack.start_time, rack.expire_time, rack.remark)
@@ -98,10 +98,10 @@ def rack():
                     sidebar=sidebar, sidebar_name=sidebar_name, items=items, checkbox=str(checkbox)
                 )
     
-        return render_template(
-            'cmdb/item.html', item_form=rack_form, thead=thead, set_page=set_page,
-            sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
-        )
+    return render_template(
+        'cmdb/item.html', item_form=rack_form, thead=thead, set_page=set_page,
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+    )
 
 @cmdb.route('/cmdb/rack/delete',  methods=['GET', 'POST'])
 @login_required

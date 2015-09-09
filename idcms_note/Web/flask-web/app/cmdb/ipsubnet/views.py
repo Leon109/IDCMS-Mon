@@ -67,8 +67,8 @@ def ipsubnet():
             )
             db.session.add(ipsubnet)
             db.session.commit()
-            value = ("subnet:%s start_ip:%s end_ip:%s netmask:%s"
-                     "site:%s sales:%s client:%s start_time:%s"
+            value = ("subnet:%s start_ip:%s end_ip:%s netmask:%s "
+                     "site:%s sales:%s client:%s start_time:%s "
                      "expire_time:%s remark:%s" 
             ) % (ipsubnet.subnet, ipsubnet.start_ip, ipsubnet.end_ip,
                  ipsubnet.netmask, ipsubnet.site, ipsubnet.sales, ipsubnet.client,

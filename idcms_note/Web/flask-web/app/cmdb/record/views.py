@@ -32,7 +32,7 @@ endpoint = '.record'
 @login_required
 @permission_validation(Permission.ALTER)
 def record():
-    '''机房设置'''
+    '''日志设置'''
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     search = request.args.get('search', '')

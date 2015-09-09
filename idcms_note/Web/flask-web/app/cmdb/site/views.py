@@ -66,7 +66,7 @@ def site():
             db.session.add(site)
             db.session.commit()
             value = (
-                "site:%s isp:%s location:%s address:%s"
+                "site:%s isp:%s location:%s address:%s "
                 "contact:%s  dns:%s remark:%s"
             ) % (site.site, site.isp, site.location, 
                  site.address, site.contact, site.dns, site.remark)

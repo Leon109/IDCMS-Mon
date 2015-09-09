@@ -104,8 +104,8 @@ def sales_delete():
             return u"删除失败 这个销售有机架在使用"
         if IpSubnet.query.filter_by(sales=sales.username).first():
             return u"删除失败 这个销售有IP子网在使用"
-        if IpPool.query.filter_by(client=client.username).first():
-            return u"删除失败 *** <b>%s</b> *** 有IP在使用" % client.username
+        if IpPool.query.filter_by(sales=sales.username).first():
+            return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
         if Cabinet.query.filter_by(sales=sales.username).first():
             return u"删除失败 这个销售有设备在使用"
         record_sql(current_user.username, u"删除", u"销售", sales.id, "sales", sales.username)
@@ -148,8 +148,8 @@ def sales_batch_delete():
                 return u"删除失败 *** <b>%s</b> *** 有机架在使用" % sales.username
             if IpSubnet.query.filter_by(sales=sales.username).first():
                 return u"删除失败 *** <b>%s</b> *** 有IP子网在使用" % sales.username
-            if IpPool.query.filter_by(client=client.username).first():
-                return u"删除失败 *** <b>%s</b> *** 有IP在使用" % client.username
+            if IpPool.query.filter_by(sales=sales.username).first():
+                return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
             if Cabinet.query.filter_by(sales=sales.username).first():
                 return u"删除失败 *** <b>%s</b> *** 有设备在使用" % sales.username
         else:

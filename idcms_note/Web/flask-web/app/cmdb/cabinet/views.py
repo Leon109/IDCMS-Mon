@@ -26,7 +26,7 @@ start_thead = [
     [0, u'资产编号','an', False, False], [1,u'外网IP', 'wan_ip', False, False], 
     [2,u'内网IP', 'lan_ip', False, False], [3,u'所在机房', 'site', False, False], 
     [4, u'所在机架','rack', False, True], [5,u'机架位置', 'seat', False, False],
-    [6, u'设备带宽', 'bandwidth', False, True], [7, u'上联端口', 'up_link', True],
+    [6, u'设备带宽', 'bandwidth', False, True], [7, u'上联端口', 'up_link', False, True],
     [8, u'设备高度','height', False, False], [9, u'设备品牌', 'brand', False, True], 
     [10, u'设备型号', 'model', False, True], [11, u'设备SN','sn', True, False], 
     [12, u'销售代表', 'sales', False, True], [13,u'使用用户', 'client', False, True],
@@ -88,9 +88,9 @@ def cabinet():
                 ip.client = cabinet_form.client.data
                 db.session.add(ip)
 
-            value = ("an:%s wan_ip:%s lan_ip:%s site:%s rack:%s seat:%s"
-                    "bandwidth:%s up_link:%s height:%s brand:%s model:%s"
-                    "sn:%s sales:%s client:%s start_time:%s expire_time%s remark:%s"
+            value = ("an:%s wan_ip:%s lan_ip:%s site:%s rack:%s seat:%s "
+                    "bandwidth:%s up_link:%s height:%s brand:%s model:%s "
+                    "sn:%s sales:%s client:%s start_time:%s expire_time:%s remark:%s"
             ) % (cabinet.an, cabinet.wan_ip, cabinet.lan_ip, cabinet.site, 
                  cabinet.rack, cabinet.seat, cabinet.bandwidth, cabinet.up_link,
                  cabinet.height, cabinet.brand, cabinet.model, cabinet.sn,
@@ -235,24 +235,27 @@ def cabinet_batch_change():
 
     for id in list_id:
         cabinet = Cabinet.query.filter_by(id=id).first()
-        if item == "wan_ip":
-            if cabinet.wan_ip:
-                old_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
-                record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                            'sales', '')
-                record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                            'client', '')
-                old_ip.sales = ''
-                old_ip.client = ''
-                db.session.add(old_ip)
-            add_ip = IpPool.query.filter_by(ip=value).first()
-            record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                        'sales', cabinet.sales)
-            record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                        'client', cabinet.client)
-            add_ip.sales = cabinet.sales
-            add_ip.client = cabinet.client
-            db.session.add(add_ip)
+        
+        # 批量修改不能更改外网IP，因为每个用户外网IP都是不同的
+        # 这是写了一下批量修改该外网IP的方法，以作参考
+        #if item == "wan_ip":
+        #    if cabinet.wan_ip:
+        #        old_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
+        #        record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
+        #                    'sales', '')
+        #        record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
+        #                    'client', '')
+        #        old_ip.sales = ''
+        #        old_ip.client = ''
+        #        db.session.add(old_ip)
+        #    add_ip = IpPool.query.filter_by(ip=value).first()
+        #    record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
+        #                'sales', cabinet.sales)
+        #    record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
+        #                'client', cabinet.client)
+        #    add_ip.sales = cabinet.sales
+        #    add_ip.client = cabinet.client
+        #    db.session.add(add_ip)
 
         record_sql(current_user.username, u"更改", u"机柜表",
                    cabinet.id, item, value)

@@ -15,7 +15,7 @@ $(function(){
             $("#batch_processing").show();
         }
     });
-})
+});
 
 // 删除修改函数
 $(function(){
@@ -179,7 +179,7 @@ $(function(){
         }
     });
 
-})
+});
 
 
 $(document).ready(function() {
@@ -228,12 +228,14 @@ $(document).ready(function() {
         {
         "targets": defs,
         "visible": false
-        },
-        {
-        "targets": [-1,-2],
-        "orderable": false
         }
-    ]
+    ];
+    // 如果不是/cmdb/record字段最后连个搜索字段禁止排序
+    var ban_sort = {"targets": [-1,-2], "orderable": false};
+    var url_end = window.location.pathname;
+    if(url_end != "/cmdb/record"){
+        table_dict["columnDefs"].push(ban_sort)
+    };
     // 运行
     var table = $('#search').DataTable( 
         table_dict
@@ -248,5 +250,5 @@ $(document).ready(function() {
  
         // Toggle the visibility
         column.visible( ! column.visible() );
-    } );
-} );
+    });
+});

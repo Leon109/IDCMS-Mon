@@ -4,7 +4,7 @@ start_sidebar = {
     "sidebar_for":[
         "sales", "client", "site", "rack",
         "ipsubnet", "ippool", "cabinet",
-        "record", "statistics"
+        "record", "statistics", "help"
     ],
     
     "sales":{
@@ -112,5 +112,14 @@ start_sidebar = {
             "salse": ["", "salse", u'销售设备统计', 'content hidden', '/cmdb/statistics/sales_info']
         }
     },  
+
+    "help":{
+        "class":"",
+        "href":"/cmdb/help",
+        "icon":" icon-book-open",
+        "title":u"使用帮助",
+        "li_for":["usage"],
+        "li":{"usage": ["", "usage", u"查询操作记录", 'content hidden']}
+    },
 
 }

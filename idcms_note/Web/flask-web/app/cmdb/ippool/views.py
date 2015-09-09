@@ -72,9 +72,9 @@ def ippool():
                     db.session.add(ippool)
                     db.session.commit()
                     
-                    value = ("ip:%s gateway:%s subnet:%s site:%s"
+                    value = ("ip:%s netmask:%s gateway:%s subnet:%s site:%s "
                             "sales:'%s" "client:%s remark:%s"
-                    ) % (ippool.ip, ippool.gateway, ippool.subnet,
+                    ) % (ippool.ip, ippool.netmask, ippool.gateway, ippool.subnet,
                          ippool.site, ippool.sales, ippool.client, ippool.remark)
                     record_sql(current_user.username, u"创建", u"IP池",
                                ippool.id, "ip", value)
