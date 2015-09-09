@@ -9,7 +9,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Rack, Site, IpPool, Cabinet, Sales, Client
-from app.utils.searchutils import re_date, re_ip
+from app.utils.utils import re_date, re_ip
 
 
 class CustomValidator():
@@ -22,17 +22,17 @@ class CustomValidator():
         self.value = value
         self.change_cabinet = Cabinet.query.filter_by(id=int(item_id)).first()
         self.sm =  {
-            "rack":self.validate_an,
-            "wan_ip":self.validate_wan_ip,
-            "lan_ip":self.validate_lan_ip,
-            "site":self.validate_site,
-            "rack":self.validate_rack,
-            "bandwidth":self.validate_bandwidth,
-            "height":self.validate_height,
-            "sales":self.validate_sales,
-            "client":self.validate_client,
-            "start_time":self.validate_start_time,
-            "expire_time":self.validate_expire_time
+            "rack": self.validate_an,
+            "wan_ip": self.validate_wan_ip,
+            "lan_ip": self.validate_lan_ip,
+            "site": self.validate_site,
+            "rack": self.validate_rack,
+            "bandwidth": self.validate_bandwidth,
+            "height": self.validate_height,
+            "sales": self.validate_sales,
+            "client": self.validate_client,
+            "start_time": self.validate_start_time,
+            "expire_time": self.validate_expire_time
         }
 
     def validate_return(self):
@@ -58,7 +58,7 @@ class CustomValidator():
             return u'更改失败呢，这个外网IP已经使用'
         ip = IpPool.query.filter_by(ip=value).first()
         if ip: 
-            if not ip.client:
+            if not ip.sales or ip.client:
                 return "OK"
             return u'添加失败 这个IP已经使用'
         else:
@@ -70,7 +70,7 @@ class CustomValidator():
         return "OK"
 
     def validate_site(self,value):
-        return u"不能更改机房 更护机房要先执行下架"
+        return u"不能更改机房更改机房要先执行下架(删除) 然后从新添加"
 
     def validate_rack(self,value):
         if not Rack.query.filter_by(rack=value ,site=self.change_cabinet.site).first():

@@ -7,8 +7,8 @@ import re
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
-from app.models import Site, IpSubnet, IpPool, Cabinet, Client
-from app.utils.searchutils import re_ip
+from app.models import Sales, Site, IpSubnet, IpPool, Cabinet, Client
+from app.utils.utils import re_ip
 
 class CustomValidator():
     '''自定义检测
@@ -19,12 +19,13 @@ class CustomValidator():
         self.item = item
         self.value = value
         self.sm =  {
-            "ip":self.validate_ip,
-            "subnet":self.validate_subnet,
-            "site":self.validate_site,
-            "client":self.validate_client,
-            "netmask":self.validate_ipvali,
-            "gateway":self.validate_ipvali
+            "ip": self.validate_ip,
+            "subnet": self.validate_subnet,
+            "site": self.validate_site,
+            "sales": self.validate_sales,
+            "client": self.validate_client,
+            "netmask": self.validate_ipvali,
+            "gateway": self.validate_ipvali
         }
 
     def validate_return(self):
@@ -56,6 +57,11 @@ class CustomValidator():
     def validate_site(self, value):
         if not Site.query.filter_by(site=value).first():
             return u'更改失败，这个机房不存在'
+        return "OK"
+
+    def validate_sales(self,value):
+        if not Sales.query.filter_by(username=value).first():
+            return u'更改失败 这个销售不存在'
         return "OK"
 
     def validate_client(self,value):

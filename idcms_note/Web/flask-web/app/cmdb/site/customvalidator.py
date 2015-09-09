@@ -18,7 +18,7 @@ class CustomValidator():
         self.change_site = Site.query.filter_by(id=int(item_id)).first()
         self.value = value
         self.sm =  {
-            "site":self.validate_site,
+            "site": self.validate_site,
         }
 
     def validate_return(self):

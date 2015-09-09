@@ -13,7 +13,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Site, IpSubnet, Sales, Client
-from app.utils.searchutils import re_date
+from app.utils.utils import re_date
 
 class IpSubnetForm(Form):
     subnet = StringField(u'IP子网', validators=[Required(message=u'IP子网不能为空'), 

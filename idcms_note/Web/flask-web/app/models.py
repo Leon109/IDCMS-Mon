@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
         return '<User %r>' % self.username
 
     def to_list(self):
-        return [self.username, self.password_hash, self.role]
+        return [self.username, '******', self.role]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -144,6 +144,7 @@ class IpPool(db.Model):
     gateway = db.Column(db.String(64))
     subnet = db.Column(db.String(64))
     site = db.Column(db.String(64))
+    sales = db.Column(db.String(32))
     client = db.Column(db.String(64))
     remark = db.Column(db.String(64))
     

@@ -8,3 +8,5 @@
 用户权限属性通过 模型中的role 定义，用户登录后可以通过current_user.role获取
 
 装饰器 参见 permission中的permission_validation  使用改装饰器如果没有权限认证会返回403错误
+
+一般注释都是 sales中

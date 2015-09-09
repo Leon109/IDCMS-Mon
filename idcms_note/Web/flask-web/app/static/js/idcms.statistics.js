@@ -33,7 +33,7 @@ function echarts_run(url){
 
 $(document).ready(function(){
     var url = null;
-    $('div.side li').click(function(){
+    $('ul.sub-menu li').click(function(){
         $(this).addClass('active').siblings('li').removeClass('active')
         base_url = $(this).attr('url')
         url = base_url

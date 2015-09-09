@@ -19,9 +19,8 @@ class RegistrationForm(Form):
     password = PasswordField(u'密码', validators=[
         Required(u'密码不能为空'), EqualTo('password2', message=u'两次输入的密码不一致')])
     password2 = PasswordField(u'确认密码', validators=[Required(u'确认密码不能为空')])
-    role = SelectField(u'选择角色', choices=[('QUERY', u'查询'),
-        ('QUERY_COMMIT', u'查询提交'), ('ALTER',u'修改' ), ('ALTER_REPLY',u'修改处理'),
-        ('ADMIN', u'管理员')])
+    role = SelectField(u'选择角色', choices=[('QUERY', u'查询'), ('ADVANCED_QUERY',u'高级查询'),
+        ('ALTER',u'修改' ), ('ADMIN', u'管理员')])
     
     def validate_username(self, field):
         '''如果这么写，wtf会自动监测这个问题

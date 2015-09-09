@@ -9,7 +9,7 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Rack, Site, Sales, Client
-from app.utils.searchutils import re_date
+from app.utils.utils import re_date
 
 
 class CustomValidator():
@@ -22,14 +22,14 @@ class CustomValidator():
         self.change_rack = Rack.query.filter_by(id=int(item_id)).first()
         self.value = value
         self.sm =  {
-            "rack":self.validate_rack,
-            "site":self.validate_site,
-            "count":self.validate_count,
-            "power":self.validate_power,
-            "sales":self.validate_sales,
-            "client":self.validate_client,
-            "start_time":self.validate_start_time,
-            "expire_time":self.validate_expire_time
+            "rack": self.validate_rack,
+            "site": self.validate_site,
+            "count": self.validate_count,
+            "power": self.validate_power,
+            "sales": self.validate_sales,
+            "client": self.validate_client,
+            "start_time": self.validate_start_time,
+            "expire_time": self.validate_expire_time
         }
 
     def validate_return(self):

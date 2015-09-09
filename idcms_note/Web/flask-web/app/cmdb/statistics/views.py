@@ -2,12 +2,14 @@
 
 import os
 import sys
+import copy
 import json
 
 from flask import render_template
 from flask.ext.login import login_required
 
 from .. import cmdb
+from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
@@ -15,8 +17,10 @@ sys.path.insert(0, workdir + "/../../../")
 from app import db
 from app.models import Site, Rack, Client, Sales, Cabinet
 from app.utils.permission import Permission, permission_validation
-# 初始化参数
-titles = {'path':'/cmdb/statistics', 'title':u'IDCMS-CMDB-统计分析'}
+from app.utils.utils import init_sidebar
+
+# 初始化函数
+sidebar_name = "statistics"
 
 def ehart_init():
     echart = {
@@ -38,14 +42,16 @@ def ehart_init():
 
 @cmdb.route('/cmdb/statistics',  methods=['GET', 'POST'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def statistics():
+    sidebar = copy.deepcopy(start_sidebar)
+    sidebar = init_sidebar(sidebar, sidebar_name,'base')
     all_site = Site.query.all()
-    return render_template('/cmdb/statistics.html', titles=titles, all_site=all_site)
+    return render_template('/cmdb/statistics.html', sidebar=sidebar, sidebar_name=sidebar_name, all_site=all_site)
 
 @cmdb.route('/cmdb/statistics/base_info',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def base_info():
     res = ehart_init()
     res["graph"] = 'echarts/chart/bar'
@@ -62,7 +68,7 @@ def base_info():
 
 @cmdb.route('/cmdb/statistics/site_info/<sitename>',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def site_info(sitename):
     res = ehart_init()
     res["graph"] = 'echarts/chart/bar'
@@ -78,7 +84,7 @@ def site_info(sitename):
 
 @cmdb.route('/cmdb/statistics/sales_info',  methods=['GET'])
 @login_required
-@permission_validation(Permission.ADMIN)
+@permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def sales_info():
     res = ehart_init()
     res["graph"] = 'echarts/chart/pie'

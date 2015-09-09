@@ -1,45 +1,77 @@
 {% extends "base.html" %}
-    {% block head %}
-      <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
-    {% endblock %}
-    {% block body %}
-      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin-bottom: 0">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <ul class="nav navbar-nav">
-              <li><a class="navbar-brand" href={{ titles['path'] }}>{{ titles['title'] }}</a></li>
-            </ul>
-          </div>
-          <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-              <li><a>欢迎,{{ current_user.username }}</a></li>
-              <li><a href="/auth/logout">注销</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">选择位置<span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li><a href="/cmdb">CMDB</a></li>
-                  <li><a href="/gd">工单</a></li>
-                  <li><a href="/auth/setting">设置</a></li>
-                </ul>
-            </ul>
-          </div>
+{% block body_css %}
+<body class="page-header-fixed page-quick-sidebar-over-content page-sidebar-closed-hide-logo">
+{% endblock %}
+{% block body %}
+<div class="page-header navbar navbar-fixed-top">
+    <div class="page-header-inner">
+        <div class="page-logo">
+            <a href="/cmdb">
+            <img src="/static/assets/admin/layout/img/IDCMS-CMDB.png" alt="logo" class="logo-default"/>
+            </a>
+            <div class="menu-toggler sidebar-toggler">
+            <!-- DOC: Remove the above "hide" to enable the sidebar toggler button on header -->
+            </div>
         </div>
-      </nav>
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-3 col-md-2 sidebar">
-            {% block muen %}
-            <!--示例
-            <ul class="nav nav-sidebar">
-              <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-              <li><a href="#">Reports</a></li>
-              <li><a href="#">Analytics</a></li>
-              <li><a href="#">Export</a></li>
+        <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse">
+        </a>
+        <div class="top-menu">
+            <ul class="nav navbar-nav pull-right">
+                <li class="dropdown dropdown-user">
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                    <img alt="" class="img-circle" src="/static/assets/admin/layout/img/user.jpg"/>
+                    <span class="username username-hide-on-mobile">
+                    {{ current_user.username }}</span>
+                    <i class="fa fa-angle-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-default">
+                        <li>
+                            <a href="/cmdb/cabinet">
+                            <i class=" icon-map"></i>CMDB
+                            </a>
+                        <li>
+                            <a href="/auth/setting">
+                            <i class="icon-settings"></i>设置</a>
+                        </li>
+                        <li class="divider">
+                        </li>
+                        <li>
+                            <a href="/auth/logout">
+                            <i class="icon-key"></i>注销 </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
-            -->
-            {% endblock %}
-          </div>
-          <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        </div>
+    </div>
+</div>
+<div class="clearfix">
+</div>
+<div class="page-container">
+    <div class="page-sidebar-wrapper">
+        <div class="page-sidebar navbar-collapse collapse">
+            <ul class="page-sidebar-menu" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200" style="margin-top:25px;">
+                {% block sidebar %}
+                <!--示例
+                <li>
+                    <a href="javascript:;">
+                    <i class="icon-home"></i>
+                    <span class="title">Dashboard</span>
+                    <span class="arrow "></span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a href="index.html">
+                            Default Dashboard</a>
+                        </li>
+                    </ul>
+                </li>-->
+                {% endblock %}
+            </ul>
+        </div>
+    </div>
+    <div class="page-content-wrapper">
+        <div class="page-content">
             {% for message in get_flashed_messages() %}
               <div class="alert alert-danger">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -47,11 +79,17 @@
               </div>
             {% endfor %}
             {% block content %}
-            <!--示例
-            <h1 class="page-header">Dashboard</h1>
-            -->
+            <!--页面内容-->
             {% endblock %}
-          </div>
         </div>
-      </div>
-    {% endblock %}
+    </div>
+</div>
+<div class="page-footer">
+    <div class="page-footer-inner">
+         2015 &copy; IDCMS
+    </div>
+    <div class="scroll-to-top">
+        <i class="icon-arrow-up"></i>
+    </div>
+</div>
+{% endblock %}
