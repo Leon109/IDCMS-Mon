@@ -153,7 +153,7 @@ class IpPool(db.Model):
 
     def to_list(self):
         return [self.ip, self.netmask, self.gateway,self.subnet, 
-                self.site, self.client, self.remark]
+                self.site, self.sales, self.client, self.remark]
 
 class Cabinet(db.Model):
     __tablename__ = 'cabinet'

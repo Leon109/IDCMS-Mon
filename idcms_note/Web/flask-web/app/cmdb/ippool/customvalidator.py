@@ -60,8 +60,9 @@ class CustomValidator():
         return "OK"
 
     def validate_sales(self,value):
-        if not Sales.query.filter_by(username=value).first():
-            return u'更改失败 这个销售不存在'
+        if value:
+            if not Sales.query.filter_by(username=value).first():
+                return u'更改失败 这个销售不存在'
         return "OK"
 
     def validate_client(self,value):

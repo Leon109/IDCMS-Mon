@@ -25,9 +25,9 @@ sidebar_name = 'ippool'
 start_thead = [
     [0, u'IP','ip', False, False], [1,u'子网掩码', 'netmask', False, True], 
     [2,u'网关地址', 'gateway', False, True], [3, u'所属子网','subnet', False, True], 
-    [4, u'所属机房', 'site', False, True], [5, u'使用用户' ,'client', False, True],
-    [6, u'备注' ,'remark', False, True], [7, u'操作', 'setting', True],
-    [8, u'批量处理', 'batch', True]
+    [4, u'所属机房', 'site', False, True], [5, u'销售代表', 'sales', False, True],
+    [6, u'使用用户' ,'client', False, True], [7, u'备注' ,'remark', False, True],
+    [8, u'操作', 'setting', True], [9, u'批量处理', 'batch', True]
 ]
 # url分页地址函数
 endpoint = '.ippool'

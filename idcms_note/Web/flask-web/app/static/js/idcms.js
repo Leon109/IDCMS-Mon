@@ -64,10 +64,9 @@ $(function(){
     $('#confirm_delete').on('submit',function(e){
         e.preventDefault();
         var url = $(this).attr('action')
-        var change_data = $('#subdelete').val()
-        $.post(url, {id:change_data}, function(res){
+        var del_id = $('#subdelete').val()
+        $.post(url, {id:del_id}, function(res){
             if (res=='OK'){
-                //alert('删除成功')
                 det = true
                 $('#tipModal').find('.modal-body').html('删除成功').end().modal('show')
             }else{

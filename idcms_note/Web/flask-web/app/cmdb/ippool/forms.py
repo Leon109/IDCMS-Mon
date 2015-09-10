@@ -27,8 +27,7 @@ class IpPoolForm(Form):
                          IPAddress(message=u'ip子网应该是一个IP格式')])
     site = StringField(u'所属机房', validators=[Required(message=u'所属机房不能为空'), 
                        Length(1, 64, message=u'机房名为1-64个字符')])
-    sales = StringField(u'销售代表', validators=[Required(message=u'销售代表不能为空'),
-                         Length(1, 32, message=u'销售代表为1-32个字符')])
+    sales = StringField(u'销售代表', validators=[Length(0, 32, message=u'销售代表为1-32个字符')])
     client = StringField(u'使用用户', validators=[Length(0, 64, message=u'使用用户最大为64个字符')])
     remark = StringField(u'备注', validators=[Length(0, 64, message=u'备注最大64个字符')])
    
@@ -46,8 +45,9 @@ class IpPoolForm(Form):
             raise ValidationError(u'添加失败 这个机房不存在')
 
     def validate_sales(self, field):
-        if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个销售不存在')
+        if field.data:
+            if not Sales.query.filter_by(username=field.data).first():
+                raise ValidationError(u'添加失败 这个销售不存在')
 
     def validate_client(self, field):
         if field.data:
