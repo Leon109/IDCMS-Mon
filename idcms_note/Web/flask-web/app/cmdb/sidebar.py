@@ -119,7 +119,7 @@ start_sidebar = {
         "icon":" icon-book-open",
         "title":u"使用帮助",
         "li_for":["usage"],
-        "li":{"usage": ["", "usage", u"查询操作记录", 'content hidden']}
+        "li":{"usage": ["", "usage", u"操作说明", 'content hidden']}
     },
 
 }
