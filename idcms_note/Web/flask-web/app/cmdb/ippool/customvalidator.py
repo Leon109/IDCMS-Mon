@@ -44,6 +44,8 @@ class CustomValidator():
             return u"更改失败，请输入一个正确的IP格式"
         if IpPool.query.filter_by(ip=value).first():
             return u"更改失败 这个IP已经添加"
+        if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
+            return u"更改失败 这个不能更改，有用户在使用"
         if Cabinet.query.filter_by(wan_ip=value).first():
             return u"更改失败 这个IP有设备在使用"
         return "OK"
