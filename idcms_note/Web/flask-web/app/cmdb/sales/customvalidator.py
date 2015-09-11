@@ -40,8 +40,8 @@ class CustomValidator():
             return u"更改失败 这个销售有机架在使用"
         if IpSubnet.query.filter_by(sales=self.change_sales.username).first():
             return u"更改失败 这个销售有IP子网在使用"
-        if IpPool.query.filter_by(client=client.username).first():
-            return u"删除失败 *** <b>%s</b> *** 有IP在使用" % client.username
+        if IpPool.query.filter_by(sales=self.change_sales.username).first():
+            return u"删除失败 这个销售有IP在使用"
         if Cabinet.query.filter_by(sales=self.change_sales.username).first():
             return u"更改失败 这个销售有设备在使用"
         else:
