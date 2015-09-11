@@ -42,13 +42,7 @@ class CustomValidator():
             return u"这个项目不能为空"
 
     def validate_subnet(self, value):
-        if not re.match(re_ip, value):
-            return u"更改失败 请输入一个正确的IP格式"
-        if IpSubnet.query.filter_by(subnet=value).first():
-            return u'更改失败 这个IP子网网已经添加'
-        if IpPool.query.filter_by(subnet=value).first():
-            return  u'更改失败 这个子网有IP使用'
-        return "OK"
+        return u"不能更改IP子网 更改IP子网要先执行删除 然后从新添加"
 
     def validate_ip(self, value):
         if re.match(re_ip, value):

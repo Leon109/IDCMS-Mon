@@ -40,15 +40,7 @@ class CustomValidator():
             return u"这个项目不能为空"
 
     def validate_ip(self, value):
-        if not re.match(re_ip, value):
-            return u"更改失败，请输入一个正确的IP格式"
-        if IpPool.query.filter_by(ip=value).first():
-            return u"更改失败 这个IP已经添加"
-        if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
-            return u"更改失败 这个不能更改，有用户在使用"
-        if Cabinet.query.filter_by(wan_ip=value).first():
-            return u"更改失败 这个IP有设备在使用"
-        return "OK"
+        return u"不能更改IP 更改IP要先执行删除 然后从新添加"
 
     def validate_subnet(self, value):
         if not re.match(re_ip, value):
@@ -65,7 +57,7 @@ class CustomValidator():
     def validate_sales(self,value):
         """只要符合这两个规定就可以成功"""
         if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
-            return u'更改失败，这个IP有设备在使用,只能通过更改设备来更改'
+            return u'更改失败，这个IP有设备在使用 只能通过更改设备来更改'
         if value:
             if not Sales.query.filter_by(username=value).first():
                 return u'更改失败 这个销售不存在'
@@ -74,7 +66,7 @@ class CustomValidator():
     def validate_client(self,value):
         """只要符合这两个规定就可以成功"""
         if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
-            return u'更改失败 这个IP有设备在使用,只能通过更改设备来更改'
+            return u'更改失败 这个IP有设备在使用 只能通过更改设备来更改'
         if value:
             if not Client.query.filter_by(username=value).first():
                 return u'更改失败 这个客户不存在'
