@@ -136,7 +136,7 @@ def ippool_change():
     value = request.form['value']
     ippool = IpPool.query.filter_by(id=change_id).first()
     if ippool:
-        verify = CustomValidator(item, value)
+        verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
             record_sql(current_user.username, u"更改", u"IP池",
@@ -179,7 +179,7 @@ def ippool_batch_change():
     for id in list_id:
         ippool = IpPool.query.filter_by(id=id).first()
         if ippool:
-            verify = CustomValidator(item, value)
+            verify = CustomValidator(item, id, value)
             res = verify.validate_return()
             if not res == "OK":
                 return res

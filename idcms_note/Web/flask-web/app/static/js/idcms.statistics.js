@@ -25,8 +25,8 @@ function echarts_run(url){
 
         function (ec, theme) {
             var myChart = ec.init(document.getElementById('main'), theme); 
-            var option = res.option
-            myChart.setOption(option); 
+            var option = res.option;
+            myChart.setOption(option);
         }
     );
 };

@@ -9,7 +9,7 @@ from flask.ext.login import login_required, current_user
 
 from .. import cmdb
 from .forms import CabinetForm
-from .customvalidator import CustomValidator
+from .customvalidator import CustomValidator, ChangeCheck
 from ..sidebar import start_sidebar
 
 workdir = os.path.dirname(os.path.realpath(__file__))
@@ -150,6 +150,7 @@ def cabinet_delete():
         return "OK"
     return u"删除失败没有找到这个设备"
 
+
 @cmdb.route('/cmdb/cabinet/change',  methods=['GET', 'POST'])
 @login_required
 @permission_validation(Permission.ALTER)
@@ -162,29 +163,9 @@ def cabinet_change():
         verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
-            if item == "wan_ip":
-                if cabinet.wan_ip:
-                    old_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
-                    record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                               'sales', '')
-                    record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                               'client', '')
-                    old_ip.sales = ''
-                    old_ip.client = ''
-                    db.session.add(old_ip)
-                add_ip = IpPool.query.filter_by(ip=value).first()
-                record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                           'sales', cabinet.sales)
-                record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                           'client', cabinet.client)
-                add_ip.sales = cabinet.sales
-                add_ip.client = cabinet.client
-                db.session.add(add_ip)
-            record_sql(current_user.username, u"更改", u"机柜表",
-                       cabinet.id, item, value)
-            setattr(cabinet, item, value) 
-            db.session.add(cabinet)
-            return "OK"
+           change = ChangeCheck(item, value, cabinet)
+           change.change_run()
+           return "OK"
         return res
     return u"更改失败没有找到该设备"
 
@@ -235,30 +216,6 @@ def cabinet_batch_change():
 
     for id in list_id:
         cabinet = Cabinet.query.filter_by(id=id).first()
-        
-        # 批量修改不能更改外网IP，因为每个用户外网IP都是不同的
-        # 这是写了一下批量修改该外网IP的方法，以作参考
-        #if item == "wan_ip":
-        #    if cabinet.wan_ip:
-        #        old_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
-        #        record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-        #                    'sales', '')
-        #        record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-        #                    'client', '')
-        #        old_ip.sales = ''
-        #        old_ip.client = ''
-        #        db.session.add(old_ip)
-        #    add_ip = IpPool.query.filter_by(ip=value).first()
-        #    record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-        #                'sales', cabinet.sales)
-        #    record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-        #                'client', cabinet.client)
-        #    add_ip.sales = cabinet.sales
-        #    add_ip.client = cabinet.client
-        #    db.session.add(add_ip)
-
-        record_sql(current_user.username, u"更改", u"机柜表",
-                   cabinet.id, item, value)
-        setattr(cabinet, item, value)
-        db.session.add(cabinet)
+        change = ChangeCheck(item, value, cabinet)
+        change.change_run()
     return "OK"

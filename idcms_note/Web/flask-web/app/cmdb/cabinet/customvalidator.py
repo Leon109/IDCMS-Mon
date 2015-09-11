@@ -5,12 +5,14 @@ import sys
 import re
 import time
 
+from flask.ext.login import current_user
+
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../../../")
 
+from app import db
 from app.models import Rack, Site, IpPool, Cabinet, Sales, Client
-from app.utils.utils import re_date, re_ip
-
+from app.utils.utils import re_date, re_ip, record_sql
 
 class CustomValidator():
     '''自定义检测
@@ -58,11 +60,11 @@ class CustomValidator():
             return u'更改失败呢，这个外网IP已经使用'
         ip = IpPool.query.filter_by(ip=value).first()
         if ip: 
-            if not ip.sales or ip.client:
-                return "OK"
-            return u'添加失败 这个IP已经使用'
+            if ip.sales or ip.client:
+                return u'添加失败 这个外网IP已经使用'
+            return "OK"
         else:
-            return u'添加失败 这个IP还没有添加'
+            return u'添加失败 这个外网IP还没有添加'
  
     def validate_lan_ip(self,value):
         if not re.match(re_ip, value):
@@ -117,3 +119,57 @@ class CustomValidator():
             return "OK"
         return u'更改失败，时间格式不正确'
 
+
+class ChangeCheck():
+    """根据不同的字段进行修改
+    主要是检查了ip是不是更改，如果更改了同事更改ip信息
+    """
+    def __init__(self,item, value, cabinet):
+        self.item = item
+        self.value = value
+        self.cabinet = cabinet
+        self.sm = {
+            "sales": self.sales_and_clinet,
+            "client": self.sales_and_clinet,
+            "wan_ip": self.wan_ip,
+        }
+    
+    def change_run(self):
+        if self.sm.get(self.item, None):
+            self.sm[self.item]()
+            record_sql(current_user.username, u"更改", u"机柜表",
+                    self.cabinet.id, self.item, self.value)
+            setattr(self.cabinet, self.item, self.value)
+            db.session.add(self.cabinet)
+        else:
+            record_sql(current_user.username, u"更改", u"机柜表",
+                    self.cabinet.id, self.item, self.value)
+            setattr(self.cabinet, self.item, self.value)
+            db.session.add(self.cabinet)
+
+    def sales_and_clinet(self):
+        if self.cabinet.wan_ip:
+            ip = IpPool.query.filter_by(ip=self.cabinet.wan_ip).first()
+            record_sql(current_user.username, u"更改", u"IP池", ip.id,
+                    self.item, self.value)
+            setattr(ip, self.item, self.value)
+            db.session.add(ip)
+
+    def wan_ip(self):
+        if self.cabinet.wan_ip:
+            old_ip = IpPool.query.filter_by(ip=self.cabinet.wan_ip).first()
+            record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
+                       'sales', '')
+            record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
+                       'client', '')
+            old_ip.sales = ''
+            old_ip.client = ''
+            db.session.add(old_ip)
+        add_ip = IpPool.query.filter_by(ip=self.value).first()
+        record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
+                   'sales', self.cabinet.sales)
+        record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
+                   'client', self.cabinet.client)
+        add_ip.sales = self.cabinet.sales
+        add_ip.client = self.cabinet.client
+        db.session.add(add_ip)
