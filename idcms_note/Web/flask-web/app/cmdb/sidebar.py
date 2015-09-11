@@ -107,7 +107,7 @@ start_sidebar = {
         "title":u"统计分析",
         "li_for":["base", "site", "salse"],
         "li":{
-            "base": ["", "base", u"查询操作记录", 'content hidden', '/cmdb/statistics/base_info'],
+            "base": ["", "base", u"基础资源统计", 'content hidden', '/cmdb/statistics/base_info'],
             "site": ["", "site", u'机房资源统计', 'content hidden', '/cmdb/statistics/site_info/'],
             "salse": ["", "salse", u'销售设备统计', 'content hidden', '/cmdb/statistics/sales_info']
         }
