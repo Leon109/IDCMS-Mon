@@ -7,7 +7,7 @@
     <div class="page-header-inner">
         <div class="page-logo">
             <a href="/cmdb">
-            <img src="/static/assets/admin/layout/img/IDCMS-CMDB.png" alt="logo" class="logo-default"/>
+            <img src="/static/theme/admin/layout/img/IDCMS-CMDB.png" alt="logo" class="logo-default"/>
             </a>
         </div>
         <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse" data-target=".navbar-collapse">
@@ -16,9 +16,9 @@
             <ul class="nav navbar-nav pull-right">
                 <li class="dropdown dropdown-user">
                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                    <img alt="" class="img-circle" src="/static/assets/admin/layout/img/user.jpg"/>
+                    <!--<img alt="" class="img-circle" src="/static/theme/admin/layout/img/user.jpg"/>-->
                     <span class="username username-hide-on-mobile">
-                    {{ current_user.username }}</span>
+                    {{ current_user.alias }}</span>
                     <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-default">

@@ -1,16 +1,11 @@
 #coding=utf-8
 
-import os
-import sys
 import time
 
 from flask.ext.wtf import Form
 from wtforms import StringField, SelectField
 from wtforms import ValidationError
 from wtforms.validators import Required, Length, Regexp
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Site, Rack, Sales, Client
 from app.utils.utils import re_date

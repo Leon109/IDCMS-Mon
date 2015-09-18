@@ -1,28 +1,14 @@
 #coding=utf-8
 
-import os
-import sys
-import copy  
+from ..same_module import *
 
-from flask import render_template, request, flash
-from flask.ext.login import login_required, current_user
-
-from .. import cmdb
 from .forms import SalesForm
 from .customvalidator import CustomValidator
-from ..sidebar import start_sidebar
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
-
-from app import db
-from app.models import Sales, Rack, IpSubnet, IpPool, Cabinet
-from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
-
 
 # 初始化参数
+# 这个模块对应的侧边栏名称
 sidebar_name = 'sales'
+# 用于搜索显示
 # 列表 0 表位置  1 显示名 2 数据库字段 3 初始化True是隐藏 False是隐藏 4 批量搜索是否能够更改
 start_thead = [
     [0, u'销售','username', False, False], [1, u'联系方式', 'contact', False, False], 
@@ -31,7 +17,6 @@ start_thead = [
 ]
 # url分页地址函数
 endpoint = '.sales'
-
 #处理修改页面
 set_page = {
     'del_page': '/cmdb/sales/delete',
@@ -39,6 +24,9 @@ set_page = {
     'batch_del_page': '/cmdb/sales/batchdelete',
     'batch_change_page': '/cmdb/sales/batchchange'
 }
+# 删除时需要检查的项目
+check_item = [('Rack', u'机架'), ('IpSubnet', u'IP子网'),
+              ('IpPool', u'IP池'), ('Cabinet', u'机柜表')]
 
 @cmdb.route('/cmdb/sales',  methods=['GET', 'POST'])
 @login_required
@@ -48,10 +36,12 @@ def sales():
     sales_form = SalesForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
-    sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
+    # 默认显示页面
+    sidebar = init_sidebar(sidebar, sidebar_name, 'edititem')
+    # 默认搜索栏内容
     search = ''
-    if request.method == "POST" and \
-            role_Permission >= Permission.ALTER:
+    # 添加
+    if request.method == "POST" and role_Permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if sales_form.validate_on_submit():
             sales = Sales(
@@ -59,20 +49,16 @@ def sales():
                 contact=sales_form.contact.data,
                 remark=sales_form.remark.data
             )
-            db.session.add(sales)
-            db.session.commit()
-            value = (
-                "usrename:%s contact:%s remark:%s"
-            ) % (sales.username, sales.contact, sales.remark)
-            record_sql(current_user.username, u"创建", u"销售",sales.id, "sales", value)
+            add_sql = edit(current_user.username, sales, "sales" )
+            add_sql.add()
             flash(u'销售添加成功')
         else:
             for key in sales_form.errors.keys():
                 flash(sales_form.errors[key][0])
-        
+    # 查询    
     if request.method == "GET":
         search = request.args.get('search', '')
-        # hiddens用于分页隐藏字段处理
+        # 获取前台选择框 hiddens用于分页隐藏字段处理
         checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') 
         if search:
             thead = init_checkbox(thead, checkbox)
@@ -100,17 +86,20 @@ def sales_delete():
     del_id = int(request.form["id"])
     sales = Sales.query.filter_by(id=del_id).first()
     if sales:
-        if Rack.query.filter_by(sales=sales.username).first():
-            return u"删除失败 这个销售有机架在使用"
-        if IpSubnet.query.filter_by(sales=sales.username).first():
-            return u"删除失败 这个销售有IP子网在使用"
-        if IpPool.query.filter_by(sales=sales.username).first():
-            return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
-        if Cabinet.query.filter_by(sales=sales.username).first():
-            return u"删除失败 这个销售有设备在使用"
-        record_sql(current_user.username, u"删除", u"销售", sales.id, "sales", sales.username)
-        db.session.delete(sales)
-        db.session.commit()
+        for item in check_item:
+            if getattr(item[0],'query').filter_by(sales=sales.username).first():
+                return u"删除失败，*** <b>%s</b> *** 有%s在使用" \ 
+                       % (sales.username, item[1])
+        #if Rack.query.filter_by(sales=sales.username).first():
+        #    return u"删除失败 这个销售有机架在使用"
+        #if IpSubnet.query.filter_by(sales=sales.username).first():
+        #    return u"删除失败 这个销售有IP子网在使用"
+        #if IpPool.query.filter_by(sales=sales.username).first():
+        #    return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
+        #if Cabinet.query.filter_by(sales=sales.username).first():
+        #    return u"删除失败 这个销售有设备在使用"
+        delete_sql = edit(current_user.username, sales, "sales", sales.username)
+        delete_sql.delete()
         return "OK"
     return u"删除失败 没有找到这个机房"
 
@@ -127,9 +116,8 @@ def sales_change():
         verify = CustomValidator(item, change_id, value)
         res = verify.validate_return()
         if res == "OK":
-            record_sql(current_user.username, u"更改", u"销售", sales.id, item, value)
-            setattr(sales, item, value) 
-            db.session.add(sales)
+            change_sql = edit(current_user.username, sales, item, value)
+            change_sql.change()
             return "OK"
         return res 
     return u"更改失败没有找到这个销售"
@@ -144,22 +132,26 @@ def sales_batch_delete():
     for id in list_id:
         sales = Sales.query.filter_by(id=id).first()
         if sales:
-            if Rack.query.filter_by(sales=sales.username).first():
-                return u"删除失败 *** <b>%s</b> *** 有机架在使用" % sales.username
-            if IpSubnet.query.filter_by(sales=sales.username).first():
-                return u"删除失败 *** <b>%s</b> *** 有IP子网在使用" % sales.username
-            if IpPool.query.filter_by(sales=sales.username).first():
-                return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
-            if Cabinet.query.filter_by(sales=sales.username).first():
-                return u"删除失败 *** <b>%s</b> *** 有设备在使用" % sales.username
+            for item in check_item:
+                if getattr(item[0],'query').filter_by(sales=sales.username).first():
+                    return u"删除失败，*** <b>%s</b> *** 有%s在使用" \
+                           % (sales.username, item[1])
+
+            #if Rack.query.filter_by(sales=sales.username).first():
+            #    return u"删除失败 *** <b>%s</b> *** 有机架在使用" % sales.username
+            #if IpSubnet.query.filter_by(sales=sales.username).first():
+            #    return u"删除失败 *** <b>%s</b> *** 有IP子网在使用" % sales.username
+            #if IpPool.query.filter_by(sales=sales.username).first():
+            #    return u"删除失败 *** <b>%s</b> *** 有IP在使用" % sales.username
+            #if Cabinet.query.filter_by(sales=sales.username).first():
+            #    return u"删除失败 *** <b>%s</b> *** 有设备在使用" % sales.username
         else:
             return u"删除失败没有这些销售"
 
     for id in list_id:
         sales = Sales.query.filter_by(id=id).first()
-        record_sql(current_user.username, u"删除", u"销售", sales.id, "sales", sales.username)
-        db.session.delete(sales)
-    db.session.commit()
+        delete_sql = edit(current_user.username, sales, "sales", sales.username)
+        delete_sql.delete()
     return "OK"
 
 # 批量修改
@@ -183,7 +175,6 @@ def sales_batch_change():
 
     for id in list_id:
         sales = Sales.query.filter_by(id=id).first()
-        record_sql(current_user.username, u"更改", u"销售", sales.id, item, value)
-        setattr(sales, item, value)
-        db.session.add(sales)
+        change_sql = edit(current_user.username, sales, item, value)
+        change_sql.change()
     return "OK"

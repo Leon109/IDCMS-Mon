@@ -1,12 +1,7 @@
 #coding=utf-8
 
-import os
-import sys
 import re
 import time
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Rack, Site, Sales, Client
 from app.utils.utils import re_date

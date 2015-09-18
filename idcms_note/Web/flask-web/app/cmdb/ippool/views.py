@@ -1,7 +1,5 @@
 #coding=utf-8
 
-import os
-import sys
 import copy
 
 from flask import render_template, request, flash
@@ -11,9 +9,6 @@ from .. import cmdb
 from .forms import IpPoolForm
 from .customvalidator import CustomValidator
 from ..sidebar import start_sidebar
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app import db
 from app.models import IpPool, Cabinet
@@ -79,7 +74,7 @@ def ippool():
                     record_sql(current_user.username, u"创建", u"IP池",
                                ippool.id, "ip", value)
                 else:
-                    flash(u'添加失败 %s 已经添加' % add_ip)
+                    flash(u'添加失败 %s 已经添加, 在此IP之前的IP已经添加成功' % add_ip)
                     break
             flash(u'IP添加成功')    
         else:

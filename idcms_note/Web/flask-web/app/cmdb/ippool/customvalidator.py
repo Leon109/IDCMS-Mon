@@ -1,11 +1,6 @@
 #coding=utf-8
 
-import os
-import sys
 import re
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app.models import Sales, Client, Site, IpSubnet, IpPool, Cabinet
 from app.utils.utils import re_ip

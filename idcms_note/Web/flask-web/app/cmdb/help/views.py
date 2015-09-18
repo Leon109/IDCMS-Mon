@@ -1,6 +1,5 @@
 #coding=utf-8
-import os
-import sys
+
 import copy
 
 from flask import render_template, request
@@ -8,9 +7,6 @@ from flask.ext.login import login_required
 
 from .. import cmdb
 from ..sidebar import start_sidebar
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app.utils.utils import init_sidebar
 

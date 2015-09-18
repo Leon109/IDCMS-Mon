@@ -17,9 +17,9 @@ from app.utils.utils import search_res, init_sidebar, init_checkbox
 # 初始化参数
 sidebar_name = 'setting'
 start_thead = [
-        [0, u'用户名','username', False, False], [1,u'密码', 'password', False, False], 
-        [2,u'权限', 'role', False, True], [3, u'操作', 'setting', True],
-        [4, u'批量处理', 'batch', True]
+        [0, u'用户名','username', False, False], [1, u'别名', 'alias', False, False],  
+        [1, u'密码', 'password', False, False], [2, u'权限', 'role', False, True], 
+        [3, u'操作', 'setting', True], [4, u'批量处理', 'batch', True]
 ]
 
 endpoint='.users_setting'
@@ -92,6 +92,7 @@ def users_setting():
             if register_form.validate_on_submit():
                 user = User(username=register_form.username.data,
                     password=register_form.password.data,
+                    alias=register_form.alias.data,
                     role=register_form.role.data)
                 db.session.add(user) 
                 flash(u'用户添加成功')

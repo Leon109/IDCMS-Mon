@@ -1,11 +1,5 @@
 #coding=utf-8
 
-import os
-import sys
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
-
 from app.models import Site, Rack, IpSubnet
 
 class CustomValidator():

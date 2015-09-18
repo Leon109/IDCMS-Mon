@@ -13,6 +13,7 @@ class CustomValidator():
         self.value = value
         self.sm =  {
             "username":self.validate_username,
+            "alias": self.validate_alias,
             "role":self.validate_role
         }
 
@@ -20,18 +21,28 @@ class CustomValidator():
         if self.sm.get(self.item, None):
             return self.sm[self.item](self.value)
         else:
-            if len(self.value) > 64: 
-                return u"更改失败 不能超过64个字符"
+            if len(self.value) > 12: 
+                return u"更改失败 不能超过12个字符"
             if self.value:
                 return "OK"
             return u"更改失败 这个项目不能为空"
 
     def validate_username(self, value):
-        if len(self.value) > 64: 
-            return u"更改失败 最大字符为64个字符"
+        if len(self.value) > 12: 
+            return u"更改失败 最大字符为12个字符"
         if not value:
             return u"更改失败 这个项目不能为空"
         if User.query.filter_by(username=value).first():
+            return u'用户名已经存在'
+        else:
+            return "OK"
+
+    def validate_alias(self, value):
+        if len(self.value) > 12: 
+            return u"更改失败 最大字符为12个字符"
+        if not value:
+            return u"更改失败 这个项目不能为空"
+        if User.query.filter_by(alias=value).first():
             return u'用户名已经存在'
         else:
             return "OK"

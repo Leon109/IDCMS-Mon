@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from app import db, login_manager
 
+#表列明不要使用is_ 和 _ 开头，记录日志的时候会过滤掉
+#逻辑关系，在项目中实现，不使用外键
 
 class User(UserMixin, db.Model):
     '''用户表
@@ -11,6 +13,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
+    alias = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     role = db.Column(db.String(64))
 
@@ -29,7 +32,7 @@ class User(UserMixin, db.Model):
         return '<User %r>' % self.username
 
     def to_list(self):
-        return [self.username, '******', self.role]
+        return [self.username, self.alias, '******', self.role]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -202,3 +205,21 @@ class Record(db.Model):
     def to_list(self):
         return [self.username, self.status, self.table,
                 self.table_id, self.item, self.value, self.date]
+
+class Task(db.Model):
+    __tablename__= 'task'
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.String(64), index=True)
+    title = db.Column(db.String(64))
+    task = db.Column(db.String(64))
+    site = db.Column(db.String(64))
+    body = db.Column(db.Text)
+    date = db.Column(db.DateTime)
+    status = db.Column(db.String(32))
+
+    def __repr__(self):
+        return '<Task %r>' % self.title
+    
+    def to_list(self):
+        return [self.author, self.title, self.task, self.site,
+                self.body, self.date, self.status]

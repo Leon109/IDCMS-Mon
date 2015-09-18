@@ -1,7 +1,5 @@
 #coding=utf-8
 
-import os
-import sys
 import copy
 
 from flask import render_template, request, flash
@@ -11,9 +9,6 @@ from .. import cmdb
 from .forms import CabinetForm
 from .customvalidator import CustomValidator, ChangeCheck
 from ..sidebar import start_sidebar
-
-workdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, workdir + "/../../../")
 
 from app import db
 from app.models import Cabinet, IpPool
