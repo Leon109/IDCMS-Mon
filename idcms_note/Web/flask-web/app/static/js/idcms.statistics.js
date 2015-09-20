@@ -1,12 +1,12 @@
 //统计分析功能
 function echarts_run(url){
-    var res = null;
+    var result = null;
     $.ajax({
       url: url,
       async: false,
       dataType: 'json',
       success: function (json){
-        res = json;
+        result = json;
       }
     });
 
@@ -20,12 +20,12 @@ function echarts_run(url){
         [
             'echarts',
             'echarts/theme/macarons',
-             res.graph
+             result.graph
         ],
 
         function (ec, theme) {
             var myChart = ec.init(document.getElementById('main'), theme); 
-            var option = res.option;
+            var option = result.option;
             myChart.setOption(option);
         }
     );

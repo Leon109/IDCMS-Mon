@@ -1,8 +1,7 @@
 #coding=utf-8
 
 from flask.ext.wtf import Form
-from wtforms import StringField
-from wtforms import ValidationError
+from wtforms import StringField, ValidationError
 from wtforms.validators import Required, Length, IPAddress, Regexp
 
 from app.models import Sales, Site, IpSubnet, IpPool, Client
@@ -32,18 +31,18 @@ class IpPoolForm(Form):
 
     def validate_subnet(self, field):
         if not IpSubnet.query.filter_by(subnet=field.data).first():
-            raise ValidationError(u'添加失败 这个子网不存在')
+            raise ValidationError(u'添加失败 子网 *** %s *** 不存在' % field.data)
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败 这个机房不存在')
+            raise ValidationError(u'添加失败 机房 *** %s *** 不存在' % field.data)
 
     def validate_sales(self, field):
         if field.data:
             if not Sales.query.filter_by(username=field.data).first():
-                raise ValidationError(u'添加失败 这个销售不存在')
+                raise ValidationError(u'添加失败 销售 *** %s *** 不存在' % field.data)
 
     def validate_client(self, field):
         if field.data:
             if not Client.query.filter_by(username=field.data).first():
-                raise ValidationError(u'添加失败 这个客户不存在')
+                raise ValidationError(u'添加失败 客户 *** %s *** 不存在' % field.data)

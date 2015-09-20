@@ -1,9 +1,10 @@
 #coding=utf-8
 
 import functools
+
 from flask import abort
-from ..models import User
 from flask.ext.login import current_user
+from app.models import User
 
 class Permission:
     '''定义用户权限
@@ -18,9 +19,11 @@ class Permission:
     # 管理员权限
     ADMIN = 99
 
-def permission_validation(level, level1=99):
+def permission_validation(level, rests=[99]):
     '''权限验证装饰器
        level 是级别，int类型小于这个级别的将抛出403错误
+       rests 是一个特殊的允许权限，允许出小于level但是，属于rests的权限
+       访问，rests是个列表
        要求：
        这个装饰器一定要flask-login 的验证用户登录后在添加
        举例
@@ -35,7 +38,7 @@ def permission_validation(level, level1=99):
             user = User.query.filter_by(id=u_id).first()
             role_id = getattr(Permission, user.role)
             # 通过用户对应数字判断用户权限
-            if role_id >= level or role_id == level1 :
+            if role_id >= level or role_id in rests :
                 return func(*args, **kwargs)
             abort(403)
         return wrapper

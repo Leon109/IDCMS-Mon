@@ -3,8 +3,7 @@
 import time
 
 from flask.ext.wtf import Form
-from wtforms import StringField, SelectField
-from wtforms import ValidationError
+from wtforms import StringField, SelectField, ValidationError
 from wtforms.validators import Required, Length, Regexp
 
 from app.models import Site, Rack, Sales, Client
@@ -29,19 +28,20 @@ class RackForm(Form):
     
     def validate_rack(self, field):
         if Rack.query.filter_by(rack=field.data, site=self.site.data).first():
-            raise ValidationError(u'添加失败 这个机房已经有该机柜')
+            raise ValidationError(u'添加失败 *** %s *** 机房已经有 *** %s *** 机柜'
+                                  % (self.site.data, field.data))
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败 这个机房不存在')
+            raise ValidationError(u'添加失败 ***%s*** 机房不存在' % field.data)
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个销售不存在')
+            raise ValidationError(u'添加失败 销售 *** %s *** 不存在' % field.data)
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个客户不存在')
+            raise ValidationError(u'添加失败 这个客户 *** %s *** 不存在' % field.data)
 
     def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))

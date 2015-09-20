@@ -1,18 +1,15 @@
 #coding=utf-8
 
-import copy  
+import copy
 
 from flask import render_template, request, flash
 from flask.ext.login import login_required, current_user
 
 from . import cmdb
 
-from app import db
-from app.models import Sales, Client, Rack, IpSubnet, IpPool, Cabinet
 from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
-from app.utils.search_edit import edit
-
+from app.utils.utils import record_sql, init_sidebar, init_checkbox
+from app.utils.curd import edit, search
 
 start_sidebar = {
     "sidebar_for":[

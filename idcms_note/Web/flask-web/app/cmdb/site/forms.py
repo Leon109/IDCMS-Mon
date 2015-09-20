@@ -1,8 +1,7 @@
 #coding=utf-8
 
 from flask.ext.wtf import Form
-from wtforms import StringField
-from wtforms import ValidationError
+from wtforms import StringField, ValidationError
 from wtforms.validators import Required, Length
 
 from app.models import Site
@@ -24,5 +23,5 @@ class SiteForm(Form):
     def validate_site(self, field):
         '''如果这么写，wtf会自动监测这个问题'''
         if Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'机房已经添加,不能再次添加')
+            raise ValidationError(u'添加失败 *** %s *** 机房已添加' % field.data )
 

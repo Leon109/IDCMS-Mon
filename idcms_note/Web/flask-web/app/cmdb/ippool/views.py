@@ -1,21 +1,11 @@
 #coding=utf-8
 
-import copy
-
-from flask import render_template, request, flash
-from flask.ext.login import login_required, current_user
-
-from .. import cmdb
-from .forms import IpPoolForm
-from .customvalidator import CustomValidator
-from ..sidebar import start_sidebar
-
-from app import db
 from app.models import IpPool, Cabinet
-from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
 
-# 初始化参数
+from ..same import *
+from .forms import RackForm
+from .custom import CustomValidator
+
 sidebar_name = 'ippool'
 start_thead = [
     [0, u'IP','ip', False, False], [1,u'子网掩码', 'netmask', False, True], 
@@ -24,7 +14,6 @@ start_thead = [
     [6, u'使用用户' ,'client', False, True], [7, u'备注' ,'remark', False, True],
     [8, u'操作', 'setting', True], [9, u'批量处理', 'batch', True]
 ]
-# url分页地址函数
 endpoint = '.ippool'
 set_page = { 
     'del_page': '/cmdb/ippool/delete',
@@ -36,15 +25,14 @@ set_page = {
 @cmdb.route('/cmdb/ippool',  methods=['GET', 'POST'])
 @login_required
 def ippool():
-    '''IP池'''
-    role_Permission = getattr(Permission, current_user.role)
+    role_permission = getattr(Permission, current_user.role)
     ippool_form = IpPoolForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
     search = ''
     if request.method == "POST" and \
-            role_Permission >= Permission.ALTER:
+            role_permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name,'additem')
         if ippool_form.validate_on_submit():
             ip_list = ippool_form.start_ip.data.split('.')
@@ -64,15 +52,8 @@ def ippool():
                         client=ippool_form.client.data,
                         remark=ippool_form.remark.data
                     )
-                    db.session.add(ippool)
-                    db.session.commit()
-                    
-                    value = ("ip:%s netmask:%s gateway:%s subnet:%s site:%s "
-                            "sales:'%s" "client:%s remark:%s"
-                    ) % (ippool.ip, ippool.netmask, ippool.gateway, ippool.subnet,
-                         ippool.site, ippool.sales, ippool.client, ippool.remark)
-                    record_sql(current_user.username, u"创建", u"IP池",
-                               ippool.id, "ip", value)
+                    add_sql = edit(current_user.username, ippool, "ip" )
+                    add_sql.add()
                 else:
                     flash(u'添加失败 %s 已经添加, 在此IP之前的IP已经添加成功' % add_ip)
                     break
@@ -85,25 +66,25 @@ def ippool():
         search = request.args.get('search', '')
         # hiddens用于分页隐藏字段处理
         checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')
-        if search:
+        if search_value:
             # 搜索
             thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
-            res = search_res(IpPool, 'ip', search)
-            res = res.search_return()
-            if res:
-                pagination = res.paginate(page, 100, False)
+            result = search(IpPool, 'ip', search_value)
+            result = result.search_return()
+            if result:
+                pagination = result.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
                     'cmdb/item.html', thead=thead, endpoint=endpoint, set_page=set_page, 
-                    item_form=ippool_form, pagination=pagination, search_value=search,
+                    item_form=ippool_form, pagination=pagination, search_value=search_value,
                     sidebar=sidebar, sidebar_name=sidebar_name, items=items, checkbox=str(checkbox)
                 )
     
     return render_template(
         'cmdb/item.html', item_form=ippool_form, thead=thead, set_page=set_page,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search_value
     )
 
 @cmdb.route('/cmdb/ippool/delete',  methods=['GET', 'POST'])
@@ -114,11 +95,9 @@ def ippool_delete():
     ippool = IpPool.query.filter_by(id=del_id).first()
     if ippool:
         if Cabinet.query.filter_by(wan_ip=ippool.ip).first():
-            return "删除失败 这个IP有设备在使用"
-        record_sql(current_user.username, u"删除", u"IP池",
-                   ippool.id, "ip", ippool.ip)
-        db.session.delete(ippool)
-        db.session.commit()
+            return "删除失败 IP *** %s *** 有设备在使用" % ippool.ip
+        delete_sql = edit(current_user.username, ippool, "ip", ippool.ip)
+        delete_sql.delete()
         return "OK"
     return u"删除失败 没有找到这个IP"
 
@@ -132,14 +111,12 @@ def ippool_change():
     ippool = IpPool.query.filter_by(id=change_id).first()
     if ippool:
         verify = CustomValidator(item, change_id, value)
-        res = verify.validate_return()
-        if res == "OK":
-            record_sql(current_user.username, u"更改", u"IP池",
-                       ippool.id, item, value)
-            setattr(ippool, item, value) 
-            db.session.add(ippool)
+        result = verify.validate_return()
+        if result == "OK":
+            change_sql = edit(current_user.username, ippool, item, value)
+            change_sql.change()
             return "OK"
-        return res
+        return result
     return u"更改失败没有找到该IP"
 
 @cmdb.route('/cmdb/ippool/batchdelete',  methods=['POST'])
@@ -152,15 +129,14 @@ def ippool_batch_delete():
         ippool = IpPool.query.filter_by(id=id).first()
         if ippool:
             if Cabinet.query.filter_by(wan_ip=ippool.ip).first():
-                return u"删除失败 *** <b>%s</b> *** 有设备在使用" % ippool.ip
+                return u"删除失败  IP*** %s *** 有设备在使用" % ippool.ip
         else:
             return u"删除失败没有这些IP"
 
     for id in list_id:
         ippool = IpPool.query.filter_by(id=id).first()
-        record_sql(current_user.username, u"删除", u"IP池", ippool.id, "ip", ippool.ip)
-        db.session.delete(ippool)
-    db.session.commit()
+        delete_sql = edit(current_user.username, ippool, "ip", ippool.ip)
+        delete_sql.delete()
     return "OK"
 
 @cmdb.route('/cmdb/ippool/batchchange',  methods=['POST'])
@@ -175,15 +151,14 @@ def ippool_batch_change():
         ippool = IpPool.query.filter_by(id=id).first()
         if ippool:
             verify = CustomValidator(item, id, value)
-            res = verify.validate_return()
-            if not res == "OK":
-                return res
+            result = verify.validate_return()
+            if not result == "OK":
+                return result
         else:
             return u"更改失败没有找到这些IP"
 
     for id in list_id:
         ippool = IpPool.query.filter_by(id=id).first()
-        record_sql(current_user.username, u"更改", u"IP池", ippool.id, item, value)
-        setattr(ippool, item, value)
-        db.session.add(ippool)
+        change_sql = edit(current_user.username, ippool, item, value)
+        change_sql.change()
     return "OK"

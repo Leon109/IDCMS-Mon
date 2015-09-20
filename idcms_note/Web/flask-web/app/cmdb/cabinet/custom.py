@@ -10,10 +10,6 @@ from app.models import Rack, Site, IpPool, Cabinet, Sales, Client
 from app.utils.utils import re_date, re_ip, record_sql
 
 class CustomValidator():
-    '''自定义检测
-    如果检测正确返回 OK
-    如果失败返回提示信息
-    '''
     def __init__(self, item, item_id, value):
         self.item = item
         self.value = value
@@ -46,24 +42,24 @@ class CustomValidator():
 
     def validate_an(self,value):
         if Cabinet.query.filter_by(an=value).first():
-            return u'更改失败这个外网资产编号已经使用'
+            return u'更改失败 这个资产编号 *** %s *** 已经使用' % value
 
     def validate_wan_ip(self,value):
         if not re.match(re_ip, value):
-            return u'添加失败，外网IP应该是一个IP格式'
+            return u'更改失败 外网IP应该是一个IP格式'
         if Cabinet.query.filter_by(wan_ip=value).first():
-            return u'更改失败呢，这个外网IP已经使用'
+            return u'更改失败 这个外网IP *** %s *** 已经使用' % value
         ip = IpPool.query.filter_by(ip=value).first()
         if ip: 
             if ip.sales or ip.client:
-                return u'添加失败 这个外网IP已经使用'
+                return u'更改失败 外网IP *** %s *** 已经使用' % value
             return "OK"
         else:
-            return u'添加失败 这个外网IP还没有添加'
+            return u'更改失败 这个外网IP *** %s *** 还没有添加' % value
  
     def validate_lan_ip(self,value):
         if not re.match(re_ip, value):
-            return  u'添加失败 内网IP应该是一个IP格式'
+            return  u'更改失败 内网IP应该是一个IP格式'
         return "OK"
 
     def validate_site(self,value):
@@ -71,7 +67,7 @@ class CustomValidator():
 
     def validate_rack(self,value):
         if not Rack.query.filter_by(rack=value ,site=self.change_cabinet.site).first():
-            return u'更改失败 没有在该机房找到这个机柜'
+            return u'更改失败 没有在该机房找到这个 *** %s *** 机柜' value
         return "OK"
 
     def validate_bandwidth(self,value):
@@ -88,12 +84,12 @@ class CustomValidator():
 
     def validate_sales(self,value):
         if not Sales.query.filter_by(username=value).first():
-            return u'更改失败 这个销售不存在'
+            return u'更改失败 这个销售 *** %s *** 不存在' % value
         return "OK"
 
     def validate_client(self,value):
         if not Client.query.filter_by(username=value).first():
-            return u'更改失败 这个客户不存在'
+            return u'更改失败 这个客户 *** %s *** 不存在' % value
         return "OK"
 
     def validate_start_time(self, value):
@@ -117,7 +113,7 @@ class CustomValidator():
 
 class ChangeCheck():
     """根据不同的字段进行修改
-    主要是检查了ip是不是更改，如果更改了同事更改ip信息
+    主要是检查了ip是不是更改，如果更改了同时更改ip信息
     """
     def __init__(self,item, value, cabinet):
         self.item = item

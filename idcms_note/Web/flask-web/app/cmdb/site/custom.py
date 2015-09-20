@@ -3,10 +3,6 @@
 from app.models import Site, Rack, IpSubnet
 
 class CustomValidator():
-    '''自定义检测
-    如国检测正确返回 OK
-    如国失败返回提示信息
-    '''
     def __init__(self, item, item_id, value):
         self.item = item
         self.change_site = Site.query.filter_by(id=int(item_id)).first()
@@ -26,13 +22,13 @@ class CustomValidator():
             return u"这个项目不能为空"
 
     def validate_site(self, value):
+        check_item = [(Rack, u'机架'), (IpSubnet, u'IP子网')]
         if len(self.value) > 64:
             return u"更改失败 最大字符为64个字符"
         if Site.query.filter_by(site=value).first():
-            return u"更改失败 机房已经存在"
+            return u"更改失败 *** %s *** 已经存在" % value
         if Rack.query.filter_by(site=self.change_site.site).first():
-            return u"更改失败 这个机房有机架在使用"
+            return u"更改失败 *** %s *** 机房有机架在使用" % self.change_site.site
         if IpSubnet.query.filter_by(site=self.change_site.site).first():
-            return u"更改失败 这个机房有IP子网在使用"
-        else:
-            return "OK"
+            return u"更改失败 *** %s *** 机房有IP子网在使用" % self.change_site.site
+        return "OK"

@@ -25,7 +25,7 @@ def create_app(config_name):
     app.register_blueprint(auth)
     from .cmdb import cmdb
     app.register_blueprint(cmdb)
-    from .task import task
-    app.register_blueprint(task)
+    #from .task import task
+    #app.register_blueprint(task)
     
     return app

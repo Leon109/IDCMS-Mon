@@ -46,8 +46,8 @@ $(function(){
     });
 
     // 编辑删除
-    // det 返回确认
-    var det
+    // determine 返回确认
+    var determine
     // 定位删除项目
     $('div.setting button#delete').click(function(){
         var id = $(this).attr('data-id');
@@ -65,12 +65,12 @@ $(function(){
         e.preventDefault();
         var url = $(this).attr('action')
         var del_id = $('#subdelete').val()
-        $.post(url, {id:del_id}, function(res){
-            if (res=='OK'){
-                det = true
+        $.post(url, {id:del_id}, function(result){
+            if (result=='OK'){
+                determine = true
                 $('#tipModal').find('.modal-body').html('删除成功').end().modal('show')
             }else{
-                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+                $('#tipModal').find('.modal-body').html(result).end().modal('show')
             }
         });
     });
@@ -81,12 +81,12 @@ $(function(){
         var change_id = $('#subchange').val()
         var change_item = $('#subitem').val()
         var change_value = $('#subvalue').val()
-        $.post(url, {id:change_id, item:change_item, value:change_value}, function(res){
-            if (res=='OK'){
-                det = true
+        $.post(url, {id:change_id, item:change_item, value:change_value}, function(result){
+            if (result=='OK'){
+                determine = true
                 $('#tipModal').find('.modal-body').html('修改成功').end().modal('show')
             }else{
-                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+                $('#tipModal').find('.modal-body').html(result).end().modal('show')
             }   
         });  
     });
@@ -133,13 +133,13 @@ $(function(){
         var list_id = checkbox_list();
         var url = $(this).attr('action');
         var json_id = JSON.stringify(list_id)
-        $.post(url, {list_id:json_id}, function(res){
-            if (res=='OK'){
+        $.post(url, {list_id:json_id}, function(result){
+            if (result=='OK'){
                 //alert('删除成功')
-                det = true
+                determine = true
                 $('#tipModal').find('.modal-body').html('批量删除成功').end().modal('show')
             }else{
-                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+                $('#tipModal').find('.modal-body').html(result).end().modal('show')
             }
         });
     });
@@ -161,19 +161,19 @@ $(function(){
         var json_id = JSON.stringify(list_id)
         var change_item = $('#batch-subitem').val()
         var change_value = $('#batch-subvalue').val()
-        $.post(url, {list_id:json_id, item:change_item, value:change_value}, function(res){
-            if (res=='OK'){
-                det = true
+        $.post(url, {list_id:json_id, item:change_item, value:change_value}, function(result){
+            if (result=='OK'){
+                determine = true
                 $('#tipModal').find('.modal-body').html('批量修改成功').end().modal('show')
             }else{
-                $('#tipModal').find('.modal-body').html(res).end().modal('show')
+                $('#tipModal').find('.modal-body').html(result).end().modal('show')
             }
         });
     });
 
     //结果提示
     $('#tipModal button').click(function(){
-        if(det){
+        if(determine){
             $("form.seek").submit()
         }
     });

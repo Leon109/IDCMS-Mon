@@ -7,10 +7,6 @@ from app.models import IpSubnet, Site, IpPool, Sales, Client
 from app.utils.utils import re_date, re_ip
 
 class CustomValidator():
-    '''自定义检测
-    如果检测正确返回 OK
-    如果失败返回提示信息
-    '''
     def __init__(self, item, item_id, value):
         self.item = item
         self.value = value
@@ -46,17 +42,17 @@ class CustomValidator():
 
     def validate_site(self, value):
         if not Site.query.filter_by(site=value).first():
-            return u'更改失败 这个机房不存在'
+            return u'更改失败 *** %s *** 机房不存在' % value
         return "OK"
 
     def validate_sales(self,value):
         if not Sales.query.filter_by(username=value).first():
-            return u'更改失败 这个销售不存在'
+            return u'更改失败 销售 *** %s *** 不存在' % value
         return "OK"
 
     def validate_client(self,value):
         if not Client.query.filter_by(username=value).first():
-            return u'更改失败 这个客户不存在'
+            return u'更改失败 客户 *** %s *** 不存在' % value
         return "OK"
 
     def validate_start_time(self, value):
@@ -64,15 +60,15 @@ class CustomValidator():
             start_time = time.mktime(time.strptime(value,'%Y-%m-%d'))
             expire_time = time.mktime(time.strptime(str(self.change_ipsubnet.expire_time),'%Y-%m-%d'))
             if start_time > expire_time:
-                return u"添加失败，开通时间大于到期时间"
+                return u"更改失败 开通时间大于到期时间"
             return "OK"
-        return u"更改失败，时间格式不正确"
+        return u"更改失败 时间格式不正确"
 
     def validate_expire_time(self, value):
         if re.match(re_date, value):
             start_time = time.mktime(time.strptime(str(self.change_ipsubnet.start_time),'%Y-%m-%d'))
             expire_time = time.mktime(time.strptime(value,'%Y-%m-%d'))
             if expire_time < start_time:
-                return u"添加失败，到期时间小于开通时间"
+                return u"更改失败 到期时间小于开通时间"
             return "OK"
-        return u'更改失败，时间格式不正确'
+        return u'更改失败 时间格式不正确'

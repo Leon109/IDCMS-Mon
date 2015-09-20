@@ -3,8 +3,7 @@
 import time
 
 from flask.ext.wtf import Form
-from wtforms import StringField
-from wtforms import ValidationError
+from wtforms import StringField, ValidationError
 from wtforms.validators import Required, Length, IPAddress, Regexp
 
 from app.models import Site, IpSubnet, Sales, Client
@@ -31,22 +30,22 @@ class IpSubnetForm(Form):
 
     def validate_subnet(self,field):
         if IpSubnet.query.filter_by(subnet=field.data).first():
-             raise ValidationError(u'添加失败，这个IP子网已经存在')
+             raise ValidationError(u'添加失败 IP子网 *** %s *** 已经存在' % field.data)
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败，这个机房不存在')
+            raise ValidationError(u'添加失败 机房 *** %s***不存在' % field.data)
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个销售不存在')
+            raise ValidationError(u'添加失败 销售 *** %s***不存在' % field.data)
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个客户不存在')
+            raise ValidationError(u'添加失败 客户 *** %s***不存在' % field.data)
 
     def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))
         expire_time = time.mktime(time.strptime(self.expire_time.data,'%Y-%m-%d'))
         if expire_time < start_time:
-            raise ValidationError(u'添加失败，到期时间小于开通时间')
+            raise ValidationError(u'添加失败 到期时间小于开通时间')

@@ -6,10 +6,6 @@ from app.models import Sales, Client, Site, IpSubnet, IpPool, Cabinet
 from app.utils.utils import re_ip
 
 class CustomValidator():
-    '''自定义检测
-    如国检测正确返回 OK
-    如国失败返回提示信息
-    '''
     def __init__(self, item, item_id,value):
         self.item = item
         self.value = value
@@ -40,31 +36,33 @@ class CustomValidator():
     def validate_subnet(self, value):
         if not re.match(re_ip, value):
             return u"更改失败，请输入一个正确的IP格式"
-        if not IpSubnet.query.filter_by(subnet=value).first():
-            return u'更改失败，没有找到这个IP子网'
+        elif not IpSubnet.query.filter_by(subnet=value).first():
+            return u'更改失败，没有找到 *** %s ***IP子网' % value
         return "OK"
-    
+ 
     def validate_site(self, value):
         if not Site.query.filter_by(site=value).first():
-            return u'更改失败，这个机房不存在'
+            return u'更改失败，*** %s *** 机房不存在' % value
         return "OK"
 
     def validate_sales(self,value):
         """只要符合这两个规定就可以成功"""
         if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
-            return u'更改失败，这个IP有设备在使用 只能通过更改设备来更改'
+            return u'更改失败，IP *** %s **** 有设备在使用 只能通过更改设备来更改' \
+                    self.change_ippool.ip
         if value:
             if not Sales.query.filter_by(username=value).first():
-                return u'更改失败 这个销售不存在'
+                return u'更改失败 销售 *** %s *** 不存在' % value
         return "OK"
 
     def validate_client(self,value):
         """只要符合这两个规定就可以成功"""
         if Cabinet.query.filter_by(wan_ip=self.change_ippool.ip).first():
-            return u'更改失败 这个IP有设备在使用 只能通过更改设备来更改'
+            return u'更改失败 IP *** %s **** 有设备在使用 只能通过更改设备来更改' \
+                    self.change_ippool.ip
         if value:
             if not Client.query.filter_by(username=value).first():
-                return u'更改失败 这个客户不存在'
+                return u'更改失败 客户 *** %s *** 不存在' % value
         return "OK"
 
     def validate_ipvali(self, value):

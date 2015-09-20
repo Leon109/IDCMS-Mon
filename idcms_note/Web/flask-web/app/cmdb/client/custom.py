@@ -3,10 +3,6 @@
 from app.models import Client, Rack, IpSubnet, IpPool, Cabinet
 
 class CustomValidator():
-    '''自定义检测
-    如国检测正确返回 OK
-    如国失败返回提示信息
-    '''
     def __init__(self, item, item_id, value):
         self.item = item
         self.change_client = Client.query.filter_by(id=int(item_id)).first()
@@ -26,17 +22,15 @@ class CustomValidator():
             return u"这个项目不能为空"
 
     def validate_username(self, value):
+        check_item = [(Rack, u'机架'), (IpSubnet,u'IP子网'), (IpPool, u'IP'), (Cabinet, u'设备')]
         if len(self.value) > 64:
             return "更改失败 最大不能超过64个字符"
         if Client.query.filter_by(username=value).first():
-            return u"更改失败 这个客户已经存在"
-        if Rack.query.filter_by(client=self.change_client.username).first():
-            return u"更改失败 这个客户有机架在使用"
-        if IpSubnet.query.filter_by(client=self.change_client.username).first():
-            return u"更改失败 这个客户有IP子网在使用"
-        if IpPool.query.filter_by(client=self.change_client.username).first():
-            return u"更改失败 这个客户有IP在使用"
-        if Cabinet.query.filter_by(client=self.change_client.username).first():
-            return u"更改失败 这个客户有设备在使用"
+            return u"更改失败 *** %s ***  已经存在" % value
+        for item in check_item:
+            print item[0]
+            if getattr(item[0],'query').filter_by(sales=self.change_sales.username).first():
+                return u"更改失败 *** %s *** 有%s在使用" \
+                        % (change_sales.username, item[1])
         else:
             return "OK"

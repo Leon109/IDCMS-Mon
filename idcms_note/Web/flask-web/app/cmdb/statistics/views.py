@@ -1,18 +1,10 @@
 #coding=utf-8
 
-import copy
-import json
+from flask import jsonify
 
-from flask import render_template
-from flask.ext.login import login_required
-
-from .. import cmdb
-from ..sidebar import start_sidebar
-
-from app import db
 from app.models import Site, Rack, Client, Sales, Cabinet
-from app.utils.permission import Permission, permission_validation
-from app.utils.utils import init_sidebar
+
+from ..same import *
 
 # 初始化函数
 sidebar_name = "statistics"
@@ -25,7 +17,7 @@ def ehart_init():
             'toolbox': {
                 'show': True,
                 'feature': {
-                    'mark': {'show': True}, 'restore': {'show': True},
+                    'mark': {'show': True}, 'resulttore': {'show': True},
                     'saveAsImage': {'show': True}
                     }
             },
@@ -33,7 +25,6 @@ def ehart_init():
         }  
     }
     return echart
-
 
 @cmdb.route('/cmdb/statistics',  methods=['GET', 'POST'])
 @login_required
@@ -48,9 +39,9 @@ def statistics():
 @login_required
 @permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def base_info():
-    res = ehart_init()
-    res["graph"] = 'echarts/chart/bar'
-    option = res["option"]
+    result = ehart_init()
+    result["graph"] = 'echarts/chart/bar'
+    option = result["option"]
     option['title']['text'] = u'基础资源统计'
     option['xAxis'] = {"type": 'value', "boundaryGap": [0, 0.01]}
     option["yAxis"] = {'type': 'category', 
@@ -59,15 +50,15 @@ def base_info():
     for item in [Site, Rack, Cabinet, Client, Sales]:
         data.append(item.query.count())
     option['series'].append({"type": "bar", "data": data})
-    return json.dumps(res)
+    return json.dumps(result)
 
 @cmdb.route('/cmdb/statistics/site_info/<sitename>',  methods=['GET'])
 @login_required
 @permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def site_info(sitename):
-    res = ehart_init()
-    res["graph"] = 'echarts/chart/bar'
-    option = res["option"]
+    result = ehart_init()
+    result["graph"] = 'echarts/chart/bar'
+    option = result["option"]
     option['title']['text'] =  u'机房资源统计'
     option['xAxis'] = {"type": 'value', "boundaryGap": [0, 0.01]}
     option["yAxis"] = {'type': 'category', 'data': [u'机柜', u'设备']}
@@ -75,15 +66,15 @@ def site_info(sitename):
     for item in [Rack, Cabinet]:
         data.append(item.query.filter_by(site=sitename).count())
     option['series'].append({"type": "bar", "data": data})
-    return json.dumps(res)
+    return jsonify(result)
 
 @cmdb.route('/cmdb/statistics/sales_info',  methods=['GET'])
 @login_required
 @permission_validation(Permission.ADMIN, Permission.ADVANCED_QUERY)
 def sales_info():
-    res = ehart_init()
-    res["graph"] = 'echarts/chart/pie'
-    option = res["option"]
+    result = ehart_init()
+    result["graph"] = 'echarts/chart/pie'
+    option = result["option"]
     option['title'] = {'text': u'销售设备统计', 'x': 'center'}
     option['tooltip'] =  {'trigger':'item', 'formatter': "{a}<br/>{b} : {c} ({d}%)"}
     sales_all = Sales.query.all()
@@ -97,4 +88,4 @@ def sales_info():
         sdata.append(data)
     option['legend'] = {'orient':'vertical', 'x': 'left', 'data': ydata}
     option['series'].append({'name': u'销售',"type": "pie",  'radius': '55%', 'center': ['50%', '60%'], "data": sdata})
-    return json.dumps(res)
+    return jsonify.dumps(result)
