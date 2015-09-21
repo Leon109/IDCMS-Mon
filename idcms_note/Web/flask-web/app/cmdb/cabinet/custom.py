@@ -67,7 +67,7 @@ class CustomValidator():
 
     def validate_rack(self,value):
         if not Rack.query.filter_by(rack=value ,site=self.change_cabinet.site).first():
-            return u'更改失败 没有在该机房找到这个 *** %s *** 机柜' value
+            return u'更改失败 没有在该机房找到这个 *** %s *** 机柜' % value
         return "OK"
 
     def validate_bandwidth(self,value):
@@ -128,39 +128,28 @@ class ChangeCheck():
     def change_run(self):
         if self.sm.get(self.item, None):
             self.sm[self.item]()
-            record_sql(current_user.username, u"更改", u"机柜表",
-                    self.cabinet.id, self.item, self.value)
-            setattr(self.cabinet, self.item, self.value)
-            db.session.add(self.cabinet)
-        else:
-            record_sql(current_user.username, u"更改", u"机柜表",
-                    self.cabinet.id, self.item, self.value)
-            setattr(self.cabinet, self.item, self.value)
-            db.session.add(self.cabinet)
+        ange_sql = edit(current_user.username, self.cabinet, self.item,
+                        self.value)
+        change_sql.change()
 
     def sales_and_clinet(self):
         if self.cabinet.wan_ip:
             ip = IpPool.query.filter_by(ip=self.cabinet.wan_ip).first()
-            record_sql(current_user.username, u"更改", u"IP池", ip.id,
-                    self.item, self.value)
-            setattr(ip, self.item, self.value)
-            db.session.add(ip)
+            change_sql = edit(current_user.username, ip,self.item,
+                            self.value)
+            change_sql.change()
 
     def wan_ip(self):
+        # 如果有旧IP 要先清空就IP主机信息
         if self.cabinet.wan_ip:
             old_ip = IpPool.query.filter_by(ip=self.cabinet.wan_ip).first()
-            record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                       'sales', '')
-            record_sql(current_user.username, u"更改", u"IP池", old_ip.id,
-                       'client', '')
-            old_ip.sales = ''
-            old_ip.client = ''
-            db.session.add(old_ip)
+            change_sql = edit(current_user.username, old_ip, 'sales', '')
+            change_sql.change()
+            change_sql = edit(current_user.username, old_ip, 'client', '')
+            change_sql.change()
+        # 给新IP 添加主机信息
         add_ip = IpPool.query.filter_by(ip=self.value).first()
-        record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                   'sales', self.cabinet.sales)
-        record_sql(current_user.username, u"更改", u"IP池", add_ip.id,
-                   'client', self.cabinet.client)
-        add_ip.sales = self.cabinet.sales
-        add_ip.client = self.cabinet.client
-        db.session.add(add_ip)
+        change_sql = edit(current_user.username, ip, 'sales', self.cabinet.sales)
+        change_sql.change()
+        change_sql = edit(current_user.username, ip, 'client', self.cabinet.client)
+        change_sql.change()

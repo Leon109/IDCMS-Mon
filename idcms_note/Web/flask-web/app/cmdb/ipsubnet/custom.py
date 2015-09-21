@@ -5,6 +5,7 @@ import time
 
 from app.models import IpSubnet, Site, IpPool, Sales, Client
 from app.utils.utils import re_date, re_ip
+from IPy import IP
 
 class CustomValidator():
     def __init__(self, item, item_id, value):
@@ -13,6 +14,7 @@ class CustomValidator():
         self.change_ipsubnet = IpSubnet.query.filter_by(id=int(item_id)).first()
         self.sm =  {
             "subnet": self.validate_subnet,
+            "netmask": self.validate_netmask,
             "start_ip": self.validate_ip,
             "end_ip": self.validate_ip,
             "site": self.validate_site,
@@ -33,9 +35,28 @@ class CustomValidator():
             return u"这个项目不能为空"
 
     def validate_subnet(self, value):
-        return u"不能更改IP子网 更改IP子网要先执行删除 然后从新添加"
+        return u"更改失败 不能直接更改IP子网"
 
-    def validate_ip(self, value):
+    def validata_netmask(self, value):
+        return u"更改失败 不能直接更改IP子网子网掩码"
+
+    def validate_start_ip(self, value):
+        if not re.match(re_ip, value):
+            return u"更改失败 起始掩码应该是IP格式"
+        if value not in IP(self.change_ipsubnet.subnet  + '/' + self.change_ipsubnet.netmask):
+            return u'更改失败 起始IP *** %s *** 不属于该子网' % value 
+        if not IP(value) <= IP(self.change_ipsubnet.end_ip):
+            raise ValidationError(u'更改失败 起始IP应等于小于结束IP')
+
+    def validate_end_ip(self, value):
+        if not re.match(re_ip, value):
+            return u"更改失败 起始掩码应该是IP格式"
+        if value not in IP(self.change_ipsubnet.subnet  + '/' + self.change_ipsubnet.netmask):
+            return u'更改失败 结束IP *** %s *** 不属于该子网' % value
+        if not IP(value) >= IP(self.change_ipsubnet.start_ip):
+            raise ValidationError(u'更改失败 结束IP应大于等于起始IP')
+
+    def validate_start(self, value):
         if re.match(re_ip, value):
             return "OK"
         return u"更改失败 IP格式不正确"

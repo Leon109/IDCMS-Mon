@@ -1,5 +1,7 @@
 #coding=utf-8
 
+from ..same import *
+
 sidebar_name = 'help'
 
 @cmdb.route('/cmdb/help',  methods=['GET'])

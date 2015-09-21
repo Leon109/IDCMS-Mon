@@ -45,9 +45,11 @@ def client():
             add_sql.add()
             flash(u'客户添加成功')
         else:
-            for key in client_form.errors.keys():
-                flash(client_form.errors[key][0])
-        
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
     if request.method == "GET":
         search_value = request.args.get('search', '')
         # hiddens用于分页隐藏字段处理
@@ -81,9 +83,9 @@ def client_delete():
     client = Client.query.filter_by(id=del_id).first()
     if client:
         for item in check_item:
-            if getattr(item[0],'query').filter_by(sales=sales.username).first():
-                return u"删除失败 *** %s *** 有%s在使用" % (sales.username, item[1])
-        delete_sql = edit(current_user.username, clinet, "client", clinet.username)
+            if getattr(item[0],'query').filter_by(client=client.username).first():
+                return u"删除失败 *** %s *** 有%s在使用" % (client.username, item[1])
+        delete_sql = edit(current_user.username, client, "client", client.username)
         delete_sql.delete()
         return "OK"
     return u"删除失败 没有找到这个客户"
@@ -117,14 +119,14 @@ def client_batch_delete():
         client = Client.query.filter_by(id=id).first()
         if client:
             for item in check_item:
-                if getattr(item[0],'query').filter_by(sales=sales.username).first():
-                    return u"删除失败 *** %s *** 有%s在使用" % (sales.username, item[1])
+                if getattr(item[0],'query').filter_by(client=client.username).first():
+                    return u"删除失败 *** %s *** 有%s在使用" % (client.username, item[1])
         else:
             return u"删除失败没有这些客户"
 
     for id in list_id:
         client = Client.query.filter_by(id=id).first()
-        delete_sql = edit(current_user.username, clinet, "client", clinet.username)
+        delete_sql = edit(current_user.username, client, "client", client.username)
         delete_sql.delete()
     return "OK"
 

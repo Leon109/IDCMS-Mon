@@ -1,19 +1,10 @@
 #coding=utf-8
 
-import copy
-
-from flask import render_template, request, flash
-from flask.ext.login import login_required, current_user
-
-from .. import cmdb
-from .forms import CabinetForm
-from .customvalidator import CustomValidator, ChangeCheck
-from ..sidebar import start_sidebar
-
-from app import db
 from app.models import Cabinet, IpPool
-from app.utils.permission import Permission, permission_validation
-from app.utils.utils import search_res, record_sql, init_sidebar, init_checkbox
+
+from ..same import *
+from .forms import CabinetForm
+from .custom import CustomValidator
 
 # 初始化参数
 sidebar_name = "cabinet"
@@ -42,14 +33,13 @@ set_page = {
 @login_required
 def cabinet():
     '''机柜表'''
-    role_Permission = getattr(Permission, current_user.role)
+    role_permission = getattr(Permission, current_user.role)
     cabinet_form = CabinetForm()
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
-    search = ''
-    if request.method == "POST" and \
-            role_Permission >= Permission.ALTER:
+    search_value = ''
+    if request.method == "POST" and role_permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name, "additem")
         if cabinet_form.validate_on_submit():
             cabinet = Cabinet(
@@ -71,56 +61,44 @@ def cabinet():
                  expire_time=cabinet_form.expire_time.data,
                  remark=cabinet_form.remark.data
             )
-            db.session.add(cabinet)
-            db.session.commit()
             if cabinet_form.wan_ip.data:
                 ip = IpPool.query.filter_by(ip=cabinet_form.wan_ip.data).first()
-                record_sql(current_user.username, u"更改", u"IP池", ip.id, 
-                           'sales', cabinet_form.sales.data)
-                record_sql(current_user.username, u"更改", u"IP池", ip.id, 
-                           'client', cabinet_form.client.data)
-                ip.sales = cabinet_form.sales.data
-                ip.client = cabinet_form.client.data
-                db.session.add(ip)
-
-            value = ("an:%s wan_ip:%s lan_ip:%s site:%s rack:%s seat:%s "
-                    "bandwidth:%s up_link:%s height:%s brand:%s model:%s "
-                    "sn:%s sales:%s client:%s start_time:%s expire_time:%s remark:%s"
-            ) % (cabinet.an, cabinet.wan_ip, cabinet.lan_ip, cabinet.site, 
-                 cabinet.rack, cabinet.seat, cabinet.bandwidth, cabinet.up_link,
-                 cabinet.height, cabinet.brand, cabinet.model, cabinet.sn,
-                 cabinet.sales, cabinet.client, cabinet.start_time, cabinet.expire_time,
-                 cabinet.remark)
-            record_sql(current_user.username, u"创建", u"机柜表", cabinet.id, "an", value)
-
+                change_sql = edit(current_user.username, ip, 'sales', cabinet_form.sales.data)
+                change_sql.change()
+                change_sql = edit(current_user.username, ip, 'client', cabinet_form.client.data)
+                change_sql.change() 
+            add_sql = edit(current_user.username, cabinet, "an" )
+            add_sql.add()
             flash(u'设备添加成功')
         else:
-            for key in cabinet_form.errors.keys():
-                flash(cabinet_form.errors[key][0])
-
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
     if request.method == "GET":
-        search = request.args.get('search', '')
+        search_value = request.args.get('search', '')
         # hiddens用于分页隐藏字段处理
         checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '') 
-        if search:
+        if search_value:
             # 搜索
             thead = init_checkbox(thead, checkbox)
             sidebar = init_sidebar(sidebar, sidebar_name, "edititem")
             page = int(request.args.get('page', 1))
-            res = search_res(Cabinet, 'an', search)
-            res = res.search_return()
-            if res:
-                pagination = res.paginate(page, 100, False)
+            result = search(Cabinet, 'an', search_value)
+            result = result.search_return()
+            if result:
+                pagination = result.paginate(page, 100, False)
                 items = pagination.items
                 return render_template(
                     'cmdb/item.html', thead=thead, endpoint=endpoint, set_page=set_page,
                     item_form=cabinet_form, pagination=pagination, sidebar=sidebar, 
-                    sidebar_name=sidebar_name, search_value=search, items=items, checkbox=str(checkbox)
+                    sidebar_name=sidebar_name, search_value=search_value, items=items, checkbox=str(checkbox)
                 )
     
     return render_template(
         'cmdb/item.html', item_form=cabinet_form,thead=thead, set_page=set_page,
-        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search
+        sidebar=sidebar, sidebar_name=sidebar_name, search_value=search_value
     )
 
 @cmdb.route('/cmdb/cabinet/delete',  methods=['GET', 'POST'])
@@ -132,16 +110,12 @@ def cabinet_delete():
     if cabinet:
         if cabinet.wan_ip:
             change_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
-            record_sql(current_user.username, u"更改", u"IP池", change_ip.id, 
-                       'sales', '')
-            record_sql(current_user.username, u"更改", u"IP池", change_ip.id,
-                       'client', '')
-            change_ip.sales = ''
-            change_ip.client = ''
-            db.session.add(change_ip)
-        record_sql(current_user.username, u"删除", u"机柜表", cabinet.id, "an", cabinet.an)
-        db.session.delete(cabinet)
-        db.session.commit()
+            change_sql = edit(current_user.username, ip, 'sales', '')
+            change_sql.change()
+            change_sql = edit(current_user.username, ip, 'client', '')
+            change_sql.change()
+        delete_sql = edit(current_user.username, cabinet, "an", cabinet.an)
+        delete_sql.delete()
         return "OK"
     return u"删除失败没有找到这个设备"
 
@@ -156,12 +130,12 @@ def cabinet_change():
     cabinet = Cabinet.query.filter_by(id=change_id).first()
     if cabinet:
         verify = CustomValidator(item, change_id, value)
-        res = verify.validate_return()
-        if res == "OK":
+        result = verify.validate_return()
+        if result == "OK":
            change = ChangeCheck(item, value, cabinet)
            change.change_run()
            return "OK"
-        return res
+        return result
     return u"更改失败没有找到该设备"
 
 @cmdb.route('/cmdb/cabinet/batchdelete',  methods=['POST'])
@@ -179,16 +153,12 @@ def cabinet_batch_delete():
         cabinet = Cabinet.query.filter_by(id=id).first()
         if cabinet.wan_ip:
             change_ip = IpPool.query.filter_by(ip=cabinet.wan_ip).first()
-            record_sql(current_user.username, u"更改", u"IP池", change_ip.id,
-                       'sales', '')
-            record_sql(current_user.username, u"更改", u"IP池", change_ip.id,
-                       'client', '')
-            change_ip.sales = ''
-            change_ip.client = ''
-            db.session.add(change_ip)
-        record_sql(current_user.username, u"删除", u"机柜表", cabinet.id, "an", cabinet.an)
-        db.session.delete(cabinet)
-    db.session.commit()
+            change_sql = edit(current_user.username, ip, 'sales', '') 
+            change_sql.change()
+            change_sql = edit(current_user.username, ip, 'client', '') 
+            change_sql.change()
+        delete_sql = edit(current_user.username, cabinet, "an", cabinet.an)
+        delete_sql.delete()
     return "OK"
 
 @cmdb.route('/cmdb/cabinet/batchchange',  methods=['POST'])
@@ -203,9 +173,9 @@ def cabinet_batch_change():
         cabinet = Cabinet.query.filter_by(id=id).first()
         if cabinet:
             verify = CustomValidator(item, id, value)
-            res = verify.validate_return()
-            if not res == "OK":
-                return res
+            result = verify.validate_return()
+            if not result == "OK":
+                return result
         else:
             return u"更改失败没有找到这些设备"
 

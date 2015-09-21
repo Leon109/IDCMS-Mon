@@ -4,14 +4,14 @@
 from app.models import IpSubnet, IpPool
 
 from ..same import *
-from .forms import RackForm
+from .forms import IpSubnetForm
 from .custom import CustomValidator
 
 # 初始化参数
 sidebar_name = "ipsubnet"
 start_thead = [
-    [0, u'IP子网','subnet', False, False], [1,u'起始IP', 'start_ip', False, False], 
-    [2,u'结束IP', 'end_ip', False, False],[3, u'子网掩码','netmask', False, False], 
+    [0, u'IP子网','subnet', False, False], [1, u'子网掩码','netmask', False, False],
+    [2,u'起始IP', 'start_ip', False, False], [4,u'结束IP', 'end_ip', False, False],
     [4, u'所属机房', 'site', False, True], [5, u'销售代表', 'sales', False, True], 
     [6, u'使用用户', 'client', False, True], [7, u'开通时间' ,'start_time', False, True], 
     [8, u'到期时间' ,'expire_time', False, True], [9, u'备注' ,'remark', False],
@@ -35,16 +35,16 @@ def ipsubnet():
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
-    search_vlaue = ''
+    search_value = ''
     if request.method == "POST" and \
             role_permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name,'additem')
         if ipsubnet_form.validate_on_submit():
             ipsubnet=IpSubnet(
                  subnet=ipsubnet_form.subnet.data,
+                 netmask=ipsubnet_form.netmask.data,
                  start_ip=ipsubnet_form.start_ip.data,
                  end_ip=ipsubnet_form.end_ip.data,
-                 netmask=ipsubnet_form.netmask.data,
                  site=ipsubnet_form.site.data,
                  sales=ipsubnet_form.sales.data,
                  client=ipsubnet_form.client.data,
@@ -56,8 +56,11 @@ def ipsubnet():
             add_sql.add()
             flash(u'IP子网添加成功')
         else:
-            for key in ipsubnet_form.errors.keys():
-                flash(ipsubnet_form.errors[key][0])
+            for key in start_thead:
+                key = key[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
 
     if request.method == "GET":
         search = request.args.get('search', '')

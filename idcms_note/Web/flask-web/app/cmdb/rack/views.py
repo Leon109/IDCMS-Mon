@@ -52,9 +52,11 @@ def rack():
             add_sql.add()
             flash(u'机柜添加成功')
         else:
-            for key in rack_form.errors.keys():
-                flash(rack_form.errors[key][0])
-
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
     if request.method == "GET":
         search_value = request.args.get('search', '')
         checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')         

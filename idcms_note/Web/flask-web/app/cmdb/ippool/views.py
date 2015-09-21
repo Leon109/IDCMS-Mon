@@ -3,16 +3,16 @@
 from app.models import IpPool, Cabinet
 
 from ..same import *
-from .forms import RackForm
+from .forms import IpPoolForm
 from .custom import CustomValidator
 
 sidebar_name = 'ippool'
 start_thead = [
-    [0, u'IP','ip', False, False], [1,u'子网掩码', 'netmask', False, True], 
-    [2,u'网关地址', 'gateway', False, True], [3, u'所属子网','subnet', False, True], 
-    [4, u'所属机房', 'site', False, True], [5, u'销售代表', 'sales', False, True],
-    [6, u'使用用户' ,'client', False, True], [7, u'备注' ,'remark', False, True],
-    [8, u'操作', 'setting', True], [9, u'批量处理', 'batch', True]
+    [0, u'IP','ip', False, False], [1,u'网关地址', 'gateway', False, True], 
+    [2, u'所属子网','subnet', False, True], [3, u'所属机房', 'site', False, True], 
+    [4, u'销售代表', 'sales', False, True], [5, u'使用用户' ,'client', False, True], 
+    [6, u'备注' ,'remark', False, True], [7, u'操作', 'setting', True], 
+    [8, u'批量处理', 'batch', True]
 ]
 endpoint = '.ippool'
 set_page = { 
@@ -30,9 +30,8 @@ def ippool():
     sidebar = copy.deepcopy(start_sidebar)
     thead = copy.deepcopy(start_thead)
     sidebar = init_sidebar(sidebar, sidebar_name,'edititem')
-    search = ''
-    if request.method == "POST" and \
-            role_permission >= Permission.ALTER:
+    search_value = ''
+    if request.method == "POST" and role_permission >= Permission.ALTER:
         sidebar = init_sidebar(sidebar, sidebar_name,'additem')
         if ippool_form.validate_on_submit():
             ip_list = ippool_form.start_ip.data.split('.')
@@ -44,7 +43,6 @@ def ippool():
                 if not IpPool.query.filter_by(ip=add_ip).first():
                     ippool = IpPool(
                         ip = add_ip,
-                        netmask=ippool_form.netmask.data,
                         gateway=ippool_form.gateway.data,
                         subnet=ippool_form.subnet.data,
                         site=ippool_form.site.data,
@@ -59,9 +57,11 @@ def ippool():
                     break
             flash(u'IP添加成功')    
         else:
-            for key in ippool_form.errors.keys():
-                flash(ippool_form.errors[key][0])
-
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
     if request.method == "GET":
         search = request.args.get('search', '')
         # hiddens用于分页隐藏字段处理

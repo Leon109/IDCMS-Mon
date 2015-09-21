@@ -44,20 +44,20 @@ class CabinetForm(Form):
 
     def validate_an(self, field):
         if Cabinet.query.filter_by(an=field.data).first():
-            raise ValidationError(u'添加失败 这个资产编号已经存在')
+            raise ValidationError(u'添加失败 资产编号 *** %s *** 已经存在' % field.data)
 
     def validate_wan_ip(self, field):
         if field.data:
             if not  re.match(re_ip, field.data):
                 raise ValidationError(u'添加失败 外网IP应该是一个IP格式')
             if Cabinet.query.filter_by(wan_ip=field.data).first():
-                raise ValidationError(u'添加失败 这个外网IP已经添加')
+                raise ValidationError(u'添加失败 这个外网IP *** %s *** 已经添加' % field.data)
             ip = IpPool.query.filter_by(ip=field.data).first()
             if ip:
                 if ip.sales or ip.client:
-                    raise ValidationError(u'添加失败 这个外网IP已经使用')
+                    raise ValidationError(u'添加失败 这个外网IP *** %s *** 已经使用' % field.data)
             else:
-                raise ValidationError(u'添加失败 这个外网IP还没有添加')
+                raise ValidationError(u'添加失败 这个外网IP *** %s *** 还没有添加' % field.data)
     
     def validate_lan_ip(self, field):
         if field.data:
@@ -66,19 +66,19 @@ class CabinetForm(Form):
 
     def validate_site(self, field):
         if not Site.query.filter_by(site=field.data).first():
-            raise ValidationError(u'添加失败 这个机房不存在')
+            raise ValidationError(u'添加失败 机房 *** %s *** 不存在' % field.data)
 
     def validate_rack(self, field):
         if not Rack.query.filter_by(rack=field.data, site=self.site.data).first():
-            raise ValidationError(u'添加失败 这个机架不存在')
+            raise ValidationError(u'添加失败 机架 *** %s *** 不存在' % field.data)
 
     def validate_sales(self, field):
         if not Sales.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个销售不存在')
+            raise ValidationError(u'添加失败 销售 *** %s *** 不存在' % field.data)
 
     def validate_client(self, field):
         if not Client.query.filter_by(username=field.data).first():
-            raise ValidationError(u'添加失败 这个客户不存在')
+            raise ValidationError(u'添加失败 客户 *** %s *** 不存在' % field.data)
 
     def validate_expire_time(self, field):
         start_time = time.mktime(time.strptime(self.start_time.data,'%Y-%m-%d'))

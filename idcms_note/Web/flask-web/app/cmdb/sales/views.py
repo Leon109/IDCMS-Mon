@@ -62,8 +62,12 @@ def sales():
             add_sql.add()
             flash(u'销售 *** %s *** 添加成功' % sales_form.username.data)
         else:
-            for key in sales_form.errors.keys():
-                flash(sales_form.errors[key][0])
+            # 提示错误信息
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break
     # 查询    
     if request.method == "GET":
         search_value = request.args.get('search', '')

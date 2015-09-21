@@ -143,7 +143,6 @@ class IpPool(db.Model):
     __tablename__ = 'ippool'
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(64), unique=True, index=True)
-    netmask = db.Column(db.String(64))
     gateway = db.Column(db.String(64))
     subnet = db.Column(db.String(64))
     site = db.Column(db.String(64))

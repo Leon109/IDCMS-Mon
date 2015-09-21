@@ -28,9 +28,7 @@ class CustomValidator():
         if Client.query.filter_by(username=value).first():
             return u"更改失败 *** %s ***  已经存在" % value
         for item in check_item:
-            print item[0]
-            if getattr(item[0],'query').filter_by(sales=self.change_sales.username).first():
-                return u"更改失败 *** %s *** 有%s在使用" \
-                        % (change_sales.username, item[1])
+            if getattr(item[0],'query').filter_by(sales=self.change_client.username).first():
+                return u"更改失败 *** %s *** 有%s在使用" % (change_client.username, item[1])
         else:
             return "OK"

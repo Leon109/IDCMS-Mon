@@ -44,7 +44,7 @@ def site():
                 site=site_form.site.data,
                 isp=site_form.isp.data,
                 location=site_form.location.data,
-                addresults=site_form.address.data,
+                address=site_form.address.data,
                 contact=site_form.contact.data,
                 dns=site_form.dns.data,
                 remark=site_form.remark.data
@@ -53,9 +53,11 @@ def site():
             add_sql.add()
             flash(u'机房添加成功')
         else:
-            for key in site_form.errors.keys():
-                flash(site_form.errors[key][0])
-        
+            for thead in start_thead:
+                key = thead[2]
+                if ipsubnet_form.errors.get(key, None):
+                    flash(ipsubnet_form.errors[key][0])
+                    break 
     if request.method == "GET":
         search_value = request.args.get('search', '')
         # hiddens用于分页隐藏字段处理

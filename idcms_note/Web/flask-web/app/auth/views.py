@@ -90,17 +90,21 @@ def users_setting():
         if request.form['action'] == 'register' and role_permission >= Permission.ADMIN:
             sidebar = init_sidebar(sidebar, sidebar_name,'register')
             if register_form.validate_on_submit():
-                user = User(username=register_form.username.data,
+                user = User(
+                    username=register_form.username.data,
                     password=register_form.password.data,
                     alias=register_form.alias.data,
-                    role=register_form.role.data)
+                    role=register_form.role.data
+                )
                 add_sql = edit(current_user.username, user, "username")
                 add_sql.add()
                 flash(u'用户添加成功')
             else:
-                for key in register_form.errors.keys():
-                    flash(register_form.errors[key][0])
-    
+                for thead in start_thead:
+                    key = thead[2]
+                    if ipsubnet_form.errors.get(key, None):
+                        flash(ipsubnet_form.errors[key][0])
+                        break    
     if request.method == "GET":
         search_value = request.args.get('search', '')
         checkbox = request.args.getlist('hidden') or request.args.get('hiddens', '')

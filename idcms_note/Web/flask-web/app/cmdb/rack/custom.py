@@ -3,7 +3,7 @@
 import re
 import time
 
-from app.models import Rack, Site, Sales, Client
+from app.models import Rack, Site, Sales, Client, Cabinet
 from app.utils.utils import re_date
 
 
