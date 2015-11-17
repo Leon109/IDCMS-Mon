@@ -5,7 +5,7 @@ import time
 # 两个参数，一个是处理内容，一个是发送次数
 
 HOST = '127.0.0.1'
-PORT = 9000
+PORT = 10000
 CNT = int(sys.argv[2])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,4 +19,4 @@ s.send(data * CNT)
 
 for i in xrange(CNT):
     buf = s.recv(len(data))
-    print json.loads(buf)
+    print buf

@@ -1,12 +1,9 @@
 #coding=utf-8
 
-import os
 import ConfigParser
 
-# 当前工作目录的绝对路径
-work_path = os.path.dirname(os.path.realpath(__file__))
 # 配置文件目录
-conf_path = "%s/%s" % (work_path, '../config')
+conf_path = '../config'
 
 def config(conf_file, conf_name=None):
     '''confg_file 配置文件的名称
@@ -22,14 +19,21 @@ def config(conf_file, conf_name=None):
     # cls表示自身类这里也就是config
     cf.read(conf_file)
     if conf_name:
-    # 获取数据的项目的数据
+    # 获取数据的项目的数据（字典）注意这样ini和bool值等类型，会默认认为是字符串
         conf = cf.items(conf_name)
         return dict(conf)
-    # 获取配置文件中有哪些项目
-    return cf.sections()
+    # 获取原始配置文件
+    return cf
 
 if __name__ == "__main__":
-    # 使用方法
-    f = config('nbnet', 'trans')
-    print f
-    print f['ff_l'].split(';')
+    # 使用方法举例
+    all_conf = config('mon.conf')
+    # 获取所有项目
+    print all_conf.sections()
+    # get方法总是返回字符串，类似的有getint，getfloat，getboolean分别返回整型，浮点值和布尔值
+    # 获取log项目的debug 布尔值
+    print all_conf.getboolean('nbnet', 'debug')
+    # 获取特定项目所有参数
+    trans = config('mon.conf', 'trans')
+    print trans
+
