@@ -7,12 +7,12 @@ import sys
 workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../")
 
-from utils.config import config
-from simpleNet.nbNetFramework import bind_socket, nbNet
-from simpleNet.nbNetUtils import sendData_mh
+from utils.monconf import config
+#from utils.senddata import sendData_mh
+from nbnet.nbnet_framework import bind_socket, nbNet
 
 # 导入配置文件
-trans_conf = config('nbnet', 'trans')
+trans_conf = config('mon.conf', 'trans')
 # 监控服务器列表
 ff_l = trans_conf['ff_l'].split(';')
 # 服务器主机列表
