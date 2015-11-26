@@ -31,7 +31,7 @@ if debug:
     from utils.monlog import Logger
     logs = Logger.getLogger(debug=True)
     
-class STATE(object):
+class State(object):
     """状态机状态"""
     def __init__(self):
         # 默认状态
@@ -116,7 +116,7 @@ class nbNetBase(object):
         conn_state 是一个自定义的字典，用于存取每个fd的状态
         '''
         # 创建初始化状态
-        tmp_state = STATE()
+        tmp_state = State()
         tmp_state.sock_obj = sock
         tmp_state.sock_addr = addr
         # conn_states是这字典使用soket连接符(这个fileno获取socket连接符，是个整数)做key链接状态机
@@ -245,6 +245,9 @@ class nbNetBase(object):
             response = self.custom_logic(sock_state.buff_read)
         else:
             response = self.logic(sock_state.buff_read, sock_state=sock_state)
+        # 如果获取的是active返回验证线路是活的
+        if response == "active":
+            return "process_verify"
         # 将获取的输入的字符串获取到后进行拼接写入buff_send
         sock_state.buff_send = "%010d%s" % (len(response), response)
         # 统计发送字节数

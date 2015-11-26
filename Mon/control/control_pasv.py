@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+'''直接运行在客户端上，将命令发送到客户端直接执行'''
 
 import os
 import sys
@@ -9,9 +10,9 @@ workdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, workdir + "/../")
 
 from utils.config import config
-from utils.crypt import encrypt,decrypt
+from utils.crypt import encrypt, decrypt
 from utils.syscmd import Command, get_iphostname
-from simpleNet.nbNetFramework import bind_socket, nbNet
+from nbnet.nbNetFramework import bind_socket, nbNet
 
 ctrl_conf = config('nbnet', 'controller')
 
@@ -31,18 +32,16 @@ def logic(data):
         command = Command(cmd)
         recode, output, error = command.run(int(timeout))
         if not recode:
-            print recode
-            # 如国命令执行成功
+            # 命令执行成功
             send_data['result'] = output
         else:
-            print recode
-            # 如国命令执行失败
+            # 命令执行失败
             send_data['result'] = error
         send_data['cmd'] = cmd
         enc_data = json.dumps(send_data)
         return encrypt(enc_data)
     else:
-        return encrypt("input error")
+        return encrypt("error_data")
     
 sock = bind_socket(addr, port)
 saverD = nbNet(sock, logic)
