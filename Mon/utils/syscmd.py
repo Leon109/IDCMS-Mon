@@ -14,7 +14,7 @@ class Command(object):
     def __init__(self, cmd):
         self.cmd = cmd
         # 初始化信号处理方法 因为subprocess使用信号处理
-        # 方式被引入的的时候别的包邮类似信号监听引起错误
+        # 方式被引入的的时候别的包有类似信号监听引起错误
         # SIGCHLD是程序执行完发出的信号 SIG_DFL是恢复默认行为
         signal.signal(signal.SIGCHLD, signal.SIG_DFL)
     def run(self, timeout):
@@ -36,8 +36,7 @@ def get_iphostname():
     '''获取linux主机名和第一个网卡IP地址'''
     def get_ip(ifname):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-        ipaddr = socket.inet_ntoa(fcntl.ioctl(
-                            sock.fileno(), 
+        ipaddr = socket.inet_ntoa(fcntl.ioctl(sock.fileno(), 
                             0x8915,  # SIOCGIFADDR 
                             struct.pack('256s', ifname[:15]) 
                             )[20:24]
@@ -57,5 +56,5 @@ if __name__ == "__main__":
     outdata = command.run(timeout=1)
     print outdata
     # ip_hostname
-    #host_info  = get_iphostname()
-    #print host_inf
+    host_info  = get_iphostname()
+    print host_info

@@ -13,10 +13,15 @@
   PORT下命令个是
 
 ｛'host': 接受命令主机ip cmd': 执行命令 'timeout': 命令执行超时时间｝
+ 
+ "query" 获取所有连接的主机 
 
 4 返回
 
 timeout : 超时
+
 error_data : 发送数据格式错误
+
 not_find_host: 没有找到主机
+
 cmd_send_end : 成功发送命令

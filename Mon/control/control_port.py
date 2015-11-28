@@ -10,7 +10,14 @@ sys.path.insert(0, workdir + "/../")
 
 from nbnet.nbnet_base import *
 from utils.utils import run_linenumber
+from utils.monconf import config 
 
+control_conf = config('mon.conf', 'control')
+
+addr = control_conf['addr']
+port = int(control_conf['port'])
+check_time = int(control_conf['check_time'])
+check_count = int(control_conf['check_count'])
 
 class AddrState(object):
     '''地址状态状态类'''
@@ -145,6 +152,8 @@ class nbNetPORT(nbNetBase):
         '''处理方式'''
         if data == "pong":
             return "active"
+        elif data == "query":
+            return json.dumps(self.addr_fd.keys())
         else:
             cmd_data = {}
             data = json.loads(data)
@@ -172,7 +181,7 @@ class nbNetPORT(nbNetBase):
         sock_state = self.conn_state[fd]
         sock_state.need_send = 0 
         sock_state.have_send = 0
-        self.buff_send = ''
+        sock_state.buff_send = ''
         self.conn_state[sock.fileno()].state_log(run_linenumber() + "set_send_fd: init socket send fd %s" % fd)
         
     def check_fd(self):
@@ -193,8 +202,9 @@ class nbNetPORT(nbNetBase):
                     addr_state.buff_send = sock_state.buff_send
                 # 如果没发生变化择发送ping请求
                 else:
-                    if addr_state.count > 2:
+                    if addr_state.count > check_count:
                         sock_state.state = "closing"
+                        sock_state.state_log(run_linenumber() + "check_fd: fd %s no active closing" % addr_state.fd)
                         self.state_machine(addr_state.fd)
                         continue
                     heartbeat = "%010d%s" % (len('ping'), 'ping')
@@ -205,12 +215,12 @@ class nbNetPORT(nbNetBase):
                         sock_state.state = "send"
                         self.epoll_sock.modify(addr_state.fd, select.EPOLLOUT)
             # 超时检查时间
-            time.sleep(5)
+            time.sleep(check_time)
 
 
 if __name__ == "__main__":
     '''单进程启动'''
-    sock = bind_socket("0.0.0.0", 10000)
+    sock = bind_socket(addr, port)
     control = nbNetPORT(sock)
     
     import threading

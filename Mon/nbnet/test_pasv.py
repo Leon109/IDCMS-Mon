@@ -15,9 +15,7 @@ sock.connect((HOST, PORT))
 
 for x in range(10):
     count = sock.recv(10)
-    print 123
     print count
-    print 456
     # 统计需要接收数据大小
     count = int(count)
     # 接受数据
