@@ -25,7 +25,6 @@ class Command(object):
         thread = threading.Thread(target=target)
         thread.start()
         thread.join(timeout)
-
         if thread.is_alive():
             self.process.kill()
             return (False, "timeout", self.process.pid)

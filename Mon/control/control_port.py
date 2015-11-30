@@ -156,12 +156,17 @@ class nbNetPORT(nbNetBase):
             return json.dumps(self.addr_fd.keys())
         else:
             cmd_data = {}
-            data = json.loads(data)
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return "error_data"
             if isinstance(data, dict) and "host" in data and "cmd" in data:
                 if data['host']  not in self.addr_fd:
                     return "not_find_host"
                 cmd_data['host'] = sock_state.sock_addr
                 cmd_data['cmd'] = data['cmd']
+                if data.get('timeout', None):
+                    cmd_data['timeout'] = data['timeout']
                 response = json.dumps(cmd_data)
                 addr_state = self.addr_fd[data['host']]
                 cmd_sock_state = self.conn_state[addr_state.fd]

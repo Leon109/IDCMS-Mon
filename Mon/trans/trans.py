@@ -43,7 +43,7 @@ if __name__ == '__main__':
         #saver_ret = sendsaver(saver_l, data, saver_sock_l)
         # 一般情况只判断监控收到就可以了
         #if ff_ret:
-        return("OK")
+        return "OK"
         #else:
         #    return("ER")
     
